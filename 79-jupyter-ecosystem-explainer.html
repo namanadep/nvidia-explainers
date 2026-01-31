@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>79. Jupyter Ecosystem: Notebooks, Hub, Lab, Enterprise Gateway</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #AD1457;
+    --secondary-color: #C2185B;
+    --accent-color: #E91E63;
+    --bg-color: #FCE4EC;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #F8BBD0;
+    --shadow: 0 2px 8px rgba(173, 20, 87, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #AD1457, #C2185B);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.component-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.component-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FCE4EC, #F8BBD0);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #F8BBD0;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>79. Jupyter Ecosystem</h1>
+        <p class="subtitle">Notebooks, Hub, Lab, Enterprise Gateway for AI Development</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#notebooks" class="nav-link">Jupyter Notebooks</a>
+        <a href="#hub" class="nav-link">JupyterHub</a>
+        <a href="#lab" class="nav-link">JupyterLab</a>
+        <a href="#gateway" class="nav-link">Enterprise Gateway</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Jupyter Ecosystem Overview</h2>
+            <p>
+                The Jupyter ecosystem provides interactive computing environments for AI development, data science, 
+                and research. Jupyter Notebooks enable interactive code execution with rich outputs, JupyterHub provides 
+                multi-user server capabilities, JupyterLab offers an advanced IDE-like interface, and Enterprise Gateway 
+                enables distributed kernel management. Together, these components provide a comprehensive platform for 
+                interactive AI development, enabling data scientists and researchers to develop, experiment, and collaborate 
+                effectively. The Jupyter ecosystem is widely used in AI clusters for interactive development and experimentation.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Jupyter Ecosystem] --> B[Jupyter Notebooks<br/>Interactive Computing]
+                    A --> C[JupyterHub<br/>Multi-User Server]
+                    A --> D[JupyterLab<br/>Advanced IDE]
+                    A --> E[Enterprise Gateway<br/>Distributed Kernels]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+                    style D fill:#F06292
+                    style E fill:#F48FB1
+            </div>
+
+            <div class="example-box">
+                <strong>Interactive Computing:</strong>
+                The Jupyter ecosystem provides an interactive computing environment for AI development. Jupyter Notebooks 
+                combine code, text, and visualizations in interactive documents. JupyterHub enables multi-user notebook 
+                environments. JupyterLab provides an advanced IDE-like interface. Enterprise Gateway enables distributed 
+                execution on remote compute resources. Together, they provide a complete interactive computing platform 
+                for AI development and experimentation.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Jupyter Ecosystem))
+                    Jupyter Notebooks
+                      Interactive Computing
+                      Code & Visualizations
+                      Rich Outputs
+                    JupyterHub
+                      Multi-User Server
+                      User Management
+                      Resource Allocation
+                    JupyterLab
+                      Advanced IDE
+                      Extensible Interface
+                    Enterprise Gateway
+                      Distributed Kernels
+                      Remote Execution
+            </div>
+        </section>
+
+        <section id="notebooks" class="section">
+            <h2>Jupyter Notebooks</h2>
+            <p>
+                Jupyter Notebooks provide an interactive computing environment combining code, text, and visualizations 
+                in a single document. Notebooks enable iterative development and experimentation.
+            </p>
+
+            <div class="component-card">
+                <h3>Notebook Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Interactive Execution:</strong> Execute code cells interactively</li>
+                    <li><strong>Rich Outputs:</strong> Display rich outputs (text, images, plots)</li>
+                    <li><strong>Markdown:</strong> Include markdown documentation</li>
+                    <li><strong>Kernels:</strong> Support multiple programming languages</li>
+                    <li><strong>Sharing:</strong> Easy sharing and collaboration</li>
+                </ul>
+            </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Notebook Use Cases] --> B[Data Exploration<br/>Explore & Analyze]
+                    A --> C[Prototyping<br/>Prototype AI Models]
+                    A --> D[Experimentation<br/>Experiment Algorithms]
+                    A --> E[Documentation<br/>Document Research]
+                    A --> F[Education<br/>Teaching & Learning]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+                    style D fill:#F06292
+                    style E fill:#F8BBD0
+                    style F fill:#FCE4EC
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Notebook Advantages] --> B[Interactive<br/>Interactive Development]
+                    A --> C[Visual<br/>Visual Outputs & Plots]
+                    A --> D[Documented<br/>Code & Docs Together]
+                    A --> E[Reproducible<br/>Reproducible Research]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+                    style D fill:#F06292
+                    style E fill:#F8BBD0
+                </div>
+        </section>
+
+        <section id="hub" class="section">
+            <h2>JupyterHub</h2>
+            <p>
+                JupyterHub provides multi-user server capabilities, enabling multiple users to access Jupyter Notebooks 
+                through a web interface. JupyterHub manages user authentication, spawns user notebook servers, and 
+                provides resource isolation.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[JupyterHub] --> B[User 1<br/>Notebook Server]
+                    A --> C[User 2<br/>Notebook Server]
+                    A --> D[User 3<br/>Notebook Server]
+                    
+                    B --> E[User 1 Resources]
+                    C --> F[User 2 Resources]
+                    D --> G[User 3 Resources]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+            </div>
+
+            <div class="component-card">
+                <h3>JupyterHub Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Multi-User:</strong> Support multiple users</li>
+                    <li><strong>Authentication:</strong> User authentication</li>
+                    <li><strong>Resource Isolation:</strong> Isolate user resources</li>
+                    <li><strong>Spawning:</strong> Spawn notebook servers per user</li>
+                    <li><strong>Management:</strong> Centralized management</li>
+                </ul>
+            </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[JupyterHub Use Cases] --> B[Multi-User Environments<br/>AI Development]
+                    A --> C[Classroom<br/>Educational]
+                    A --> D[Team Collaboration<br/>Team Collaboration]
+                    A --> E[Resource Sharing<br/>Shared Resources]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+                    style D fill:#F06292
+                    style E fill:#F8BBD0
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[JupyterHub Benefits] --> B[Centralized<br/>User Management]
+                    A --> C[Isolated<br/>Resource Isolation]
+                    A --> D[Scalable<br/>Scales to Many Users]
+                    A --> E[Secure<br/>Secure Multi-User]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+                    style D fill:#F06292
+                    style E fill:#F8BBD0
+                </div>
+        </section>
+
+        <section id="lab" class="section">
+            <h2>JupyterLab</h2>
+            <p>
+                JupyterLab is the next-generation web-based user interface for Jupyter, providing an IDE-like experience 
+                with advanced features and extensibility.
+            </p>
+
+            <div class="component-card">
+                <h3>JupyterLab Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Advanced UI:</strong> Advanced user interface</li>
+                    <li><strong>File Browser:</strong> Integrated file browser</li>
+                    <li><strong>Terminal:</strong> Integrated terminal</li>
+                    <li><strong>Extensions:</strong> Extensible with extensions</li>
+                    <li><strong>Multi-Panel:</strong> Multi-panel layout</li>
+                </ul>
+            </div>
+
+            <div class="component-card">
+                <h3>JupyterLab Advantages</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>IDE-Like:</strong> IDE-like experience</li>
+                    <li><strong>Productivity:</strong> Improved productivity</li>
+                    <li><strong>Flexibility:</strong> Flexible layout</li>
+                    <li><strong>Extensible:</strong> Extensible architecture</li>
+                </ul>
+            </div>
+
+            <div class="component-card">
+                <h3>JupyterLab Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Advanced Development:</strong> Advanced AI development</li>
+                    <li><strong>Productivity:</strong> Improved productivity needs</li>
+                    <li><strong>Complex Workflows:</strong> Complex development workflows</li>
+                    <li><strong>Professional Use:</strong> Professional development</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="gateway" class="section">
+            <h2>Enterprise Gateway</h2>
+            <p>
+                Jupyter Enterprise Gateway enables distributed kernel management, allowing Jupyter kernels to run on 
+                remote cluster nodes while providing centralized management and resource allocation.
+            </p>
+
+            <div class="component-card">
+                <h3>Enterprise Gateway Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Distributed Kernels:</strong> Kernels run on remote nodes</li>
+                    <li><strong>Resource Management:</strong> Integrate with workload managers</li>
+                    <li><strong>Scalability:</strong> Scale kernels across cluster</li>
+                    <li><strong>GPU Access:</strong> Access to GPU resources</li>
+                    <li><strong>Enterprise Features:</strong> Enterprise-grade features</li>
+                </ul>
+            </div>
+
+            <div class="component-card">
+                <h3>Enterprise Gateway Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Cluster Integration:</strong> Integrate with cluster resources</li>
+                    <li><strong>GPU Access:</strong> Access GPU resources</li>
+                    <li><strong>Scalability:</strong> Scale to cluster resources</li>
+                    <li><strong>Resource Management:</strong> Efficient resource management</li>
+                </ul>
+            </div>
+
+            <div class="component-card">
+                <h3>Enterprise Gateway Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GPU Development:</strong> GPU-accelerated development</li>
+                    <li><strong>Large Scale:</strong> Large-scale interactive computing</li>
+                    <li><strong>Cluster Integration:</strong> Integration with cluster resources</li>
+                    <li><strong>Enterprise:</strong> Enterprise AI development</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Jupyter Ecosystem Strategy:</strong>
+                Use Jupyter Notebooks for interactive development and experimentation. Deploy JupyterHub for multi-user 
+                environments requiring user management and isolation. Use JupyterLab for advanced development requiring 
+                IDE-like features. Deploy Enterprise Gateway for distributed kernel management and cluster integration. 
+                The Jupyter ecosystem provides comprehensive interactive computing capabilities for AI development and 
+                research.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Jupyter Ecosystem Guide | Notebooks, Hub, Lab, Enterprise Gateway</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

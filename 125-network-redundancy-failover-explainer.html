@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>125. Network Redundancy and Failover: High Availability Networking</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #2E7D32;
+    --secondary-color: #388E3C;
+    --accent-color: #43A047;
+    --bg-color: #E8F5E9;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #A5D6A7;
+    --shadow: 0 2px 8px rgba(46, 125, 50, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #2E7D32, #388E3C);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.redundancy-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.redundancy-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E8F5E9, #A5D6A7);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #43A047;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #A5D6A7;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>125. Network Redundancy and Failover</h1>
+        <p class="subtitle">High Availability Networking Design</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#redundancy-design" class="nav-link">Redundancy Design</a>
+        <a href="#link-aggregation" class="nav-link">Link Aggregation</a>
+        <a href="#failover-mechanisms" class="nav-link">Failover Mechanisms</a>
+        <a href="#high-availability" class="nav-link">High Availability</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Network Redundancy and Failover Overview</h2>
+            <p>
+                Network redundancy and failover ensure continuous network connectivity despite component failures. 
+                Redundancy includes multiple paths, redundant switches, and link aggregation. Failover mechanisms 
+                automatically switch to backup paths when primary paths fail. Understanding redundancy and failover 
+                enables design of highly available network infrastructure that maintains connectivity during failures.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Network Redundancy] --> B[Multiple Paths]
+                    A --> C[Redundant Switches]
+                    A --> D[Link Aggregation]
+                    A --> E[Failover Mechanisms]
+                    B --> F[Path Diversity]
+                    B --> G[Load Balancing]
+                    C --> H[Switch Redundancy]
+                    C --> I[Stacking/Clustering]
+                    D --> J[LACP]
+                    D --> K[Port Channels]
+                    E --> L[Automatic Failover]
+                    E --> M[Fast Convergence]
+                    
+                    style A fill:#2E7D32
+                    style B fill:#388E3C
+                    style E fill:#43A047
+            </div>
+
+            <div class="example-box">
+                <strong>Redundancy Impact:</strong>
+                Proper network redundancy and failover can reduce network downtime from hours to seconds. Redundant 
+                paths ensure connectivity continues even when switches or links fail. Fast failover mechanisms 
+                minimize service disruption and maintain high availability.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Network Redundancy))
+                    Redundancy Design
+                      Multiple Paths
+                      Redundant Switches
+                      Link Diversity
+                    Link Aggregation
+                      LACP Configuration
+                      Port Channels
+                      Load Balancing
+                    Failover Mechanisms
+                      Automatic Failover
+                      Fast Convergence
+                      Path Selection
+                    High Availability
+                      Zero Downtime
+                      Fast Recovery
+                      Continuous Operation
+            </div>
+        </section>
+
+        <section id="redundancy-design" class="section">
+            <h2>Redundancy Design</h2>
+            <p>
+                Design network redundancy to ensure multiple paths between nodes and redundant network components. 
+                Redundancy design includes path diversity, switch redundancy, and link diversity.
+            </p>
+
+            <div class="redundancy-card">
+                <h3>Multiple Paths</h3>
+                <p>Design multiple paths between nodes:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Path Diversity:</strong> Use different physical paths</li>
+                    <li><strong>Switch Diversity:</strong> Use different switches for paths</li>
+                    <li><strong>Link Diversity:</strong> Use different links/cables</li>
+                    <li><strong>Topology Design:</strong> Design topology for redundancy</li>
+                </ul>
+
+                <div class="mermaid">
+                    flowchart LR
+                        A[Node A] -->|Path 1| B[Switch 1]
+                        A -->|Path 2| C[Switch 2]
+                        B --> D[Node B]
+                        C --> D
+                        B --> E[Switch 3]
+                        C --> E
+                        E --> D
+                        
+                        style A fill:#2E7D32
+                        style D fill:#388E3C
+                        style B fill:#43A047
+                        style C fill:#43A047
+                    </div>
+            </div>
+
+            <div class="redundancy-card">
+                <h3>Switch Redundancy</h3>
+                <p>Implement redundant switches:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Redundant Leaf Switches:</strong> Multiple leaf switches per rack</li>
+                    <li><strong>Redundant Spine Switches:</strong> Multiple spine switches</li>
+                    <li><strong>Switch Stacking:</strong> Stack switches for redundancy</li>
+                    <li><strong>Virtual Chassis:</strong> Use virtual chassis for redundancy</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="link-aggregation" class="section">
+            <h2>Link Aggregation (LACP)</h2>
+            <p>
+                Link aggregation combines multiple physical links into a single logical link, providing redundancy 
+                and increased bandwidth. LACP (Link Aggregation Control Protocol) manages link aggregation.
+            </p>
+
+            <div class="concept-card">
+                <h3>LACP Configuration</h3>
+                <p>Configure LACP for link aggregation:</p>
+                
+                <p style="margin-top: 20px;"><strong>Linux Bond Configuration:</strong></p>
+                <div class="command-box">
+# Create bond interface
+ip link add bond0 type bond mode 802.3ad
+
+# Set LACP mode
+echo 4 > /sys/class/net/bond0/bonding/mode
+
+# Add interfaces to bond
+ip link set eth0 master bond0
+ip link set eth1 master bond0
+
+# Configure bond IP
+ip addr add 192.168.1.10/24 dev bond0
+ip link set bond0 up
+                </div>
+
+                <p style="margin-top: 20px;"><strong>NetworkManager Configuration:</strong></p>
+                <div class="command-box">
+# /etc/NetworkManager/system-connections/bond0.nmconnection
+[connection]
+id=bond0
+type=bond
+interface-name=bond0
+
+[bond]
+mode=802.3ad
+miimon=100
+
+[ipv4]
+method=manual
+addresses=192.168.1.10/24
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>LACP Benefits</h3>
+                <p>Link aggregation provides several benefits:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Redundancy:</strong> Automatic failover if link fails</li>
+                    <li><strong>Increased Bandwidth:</strong> Combined bandwidth of all links</li>
+                    <li><strong>Load Balancing:</strong> Traffic distributed across links</li>
+                    <li><strong>Transparency:</strong> Applications see single logical link</li>
+                </ul>
+            </div>
+
+            <div class="mermaid">
+                sequenceDiagram
+                    participant Node
+                    participant Bond
+                    participant Link1
+                    participant Link2
+                    participant Switch
+
+                    Node->>Bond: Send Traffic
+                    Bond->>Link1: Distribute Traffic
+                    Bond->>Link2: Distribute Traffic
+                    Link1->>Switch: Forward Traffic
+                    Link2->>Switch: Forward Traffic
+                    Link1->>Link1: Link Failure
+                    Bond->>Link2: Failover to Link2
+                    Link2->>Switch: Continue Traffic
+            </div>
+        </section>
+
+        <section id="failover-mechanisms" class="section">
+            <h2>Failover Mechanisms</h2>
+            <p>
+                Failover mechanisms automatically switch to backup paths when primary paths fail. Fast failover 
+                minimizes service disruption and maintains connectivity.
+            </p>
+
+            <div class="redundancy-card">
+                <h3>Automatic Failover</h3>
+                <p>Configure automatic failover:</p>
+                
+                <p style="margin-top: 20px;"><strong>Bond Failover Configuration:</strong></p>
+                <div class="command-box">
+# Configure bond with failover
+ip link add bond0 type bond mode active-backup
+
+# Set primary interface
+echo eth0 > /sys/class/net/bond0/bonding/primary
+
+# Add interfaces
+ip link set eth0 master bond0
+ip link set eth1 master bond0
+
+# Set failover parameters
+echo 100 > /sys/class/net/bond0/bonding/miimon
+echo 1 > /sys/class/net/bond0/bonding/fail_over_mac
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Failover Monitoring:</strong></p>
+                <div class="command-box">
+# Check bond status
+cat /proc/net/bonding/bond0
+
+# Monitor bond interface
+watch -n 1 'cat /proc/net/bonding/bond0 | grep -A 5 "Slave Interface"'
+                </div>
+            </div>
+
+            <div class="redundancy-card">
+                <h3>Fast Convergence</h3>
+                <p>Optimize failover for fast convergence:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Rapid Detection:</strong> Fast link failure detection</li>
+                    <li><strong>Quick Switching:</strong> Rapid switch to backup path</li>
+                    <li><strong>Minimal Disruption:</strong> Reduce packet loss during failover</li>
+                    <li><strong>Bidirectional Forwarding Detection (BFD):</strong> Fast failure detection</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>BFD Configuration:</strong></p>
+                <div class="command-box">
+# Configure BFD for fast failure detection
+# (implementation depends on network stack)
+
+# Example: BFD session configuration
+# bfd session between nodes for fast failure detection
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Primary Path Active] --> B{Link Failure?}
+                    B -->|No| A
+                    B -->|Yes| C[Detect Failure]
+                    C --> D[Switch to Backup]
+                    D --> E[Update Routing]
+                    E --> F[Traffic Resumes]
+                    F --> G{Primary Restored?}
+                    G -->|Yes| H[Switch Back]
+                    G -->|No| F
+                    H --> A
+                    
+                    style A fill:#2E7D32
+                    style F fill:#4CAF50
+                    style B fill:#FF9800
+                    style G fill:#FF9800
+            </div>
+        </section>
+
+        <section id="high-availability" class="section">
+            <h2>High Availability Design</h2>
+            <p>
+                Design networks for high availability with zero downtime and fast recovery. High availability 
+                includes redundant components, automatic failover, and continuous monitoring.
+            </p>
+
+            <div class="concept-card">
+                <h3>High Availability Principles</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>No Single Point of Failure:</strong> Eliminate single points of failure</li>
+                    <li><strong>Automatic Failover:</strong> Automatic switch to backup</li>
+                    <li><strong>Fast Recovery:</strong> Minimize recovery time</li>
+                    <li><strong>Continuous Monitoring:</strong> Monitor component health</li>
+                    <li><strong>Load Distribution:</strong> Distribute load across redundant components</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Redundancy Levels</h3>
+                <p>Design redundancy at multiple levels:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Link Level:</strong> Multiple links per connection</li>
+                    <li><strong>Switch Level:</strong> Redundant switches</li>
+                    <li><strong>Path Level:</strong> Multiple paths between nodes</li>
+                    <li><strong>Topology Level:</strong> Redundant topology design</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Redundancy and Failover Best Practices</h2>
+            <p>
+                Follow best practices for effective network redundancy and failover.
+            </p>
+
+            <div class="concept-card">
+                <h3>Design Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Design for no single point of failure</li>
+                    <li>Use multiple physical paths</li>
+                    <li>Implement link aggregation for redundancy</li>
+                    <li>Configure automatic failover</li>
+                    <li>Test failover mechanisms regularly</li>
+                    <li>Monitor redundancy status</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Testing Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Test failover scenarios regularly</li>
+                    <li>Measure failover time</li>
+                    <li>Verify no packet loss during failover</li>
+                    <li>Test under load conditions</li>
+                    <li>Document test results</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Redundancy and Failover Checklist:</strong>
+                1. Design redundant paths<br>
+                2. Implement redundant switches<br>
+                3. Configure link aggregation<br>
+                4. Set up automatic failover<br>
+                5. Configure fast convergence<br>
+                6. Monitor redundancy status<br>
+                7. Test failover mechanisms<br>
+                8. Document redundancy design<br>
+                9. Review and optimize<br>
+                10. Maintain redundancy
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Network Redundancy and Failover | High Availability Networking Design</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

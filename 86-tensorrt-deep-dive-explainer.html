@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>86. TensorRT: Inference Optimization Deep Dive</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #00695C;
+    --secondary-color: #00897B;
+    --accent-color: #26A69A;
+    --bg-color: #E0F2F1;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #80CBC4;
+    --shadow: 0 2px 8px rgba(0, 105, 92, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #00695C, #00897B);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E0F2F1, #B2DFDB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #80CBC4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>86. TensorRT Deep Dive</h1>
+        <p class="subtitle">Advanced Inference Optimization Techniques</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#features" class="nav-link">Advanced Features</a>
+        <a href="#precision" class="nav-link">Precision Calibration</a>
+        <a href="#dynamic-shapes" class="nav-link">Dynamic Shapes</a>
+        <a href="#optimization" class="nav-link">Optimization Techniques</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>TensorRT Deep Dive Overview</h2>
+            <p>
+                TensorRT is NVIDIA's high-performance deep learning inference optimizer and runtime engine. It optimizes 
+                trained neural networks for inference by applying graph optimizations, layer fusion, precision calibration, 
+                and kernel auto-tuning. Advanced TensorRT features include dynamic shape support, precision calibration 
+                for INT8 inference, multi-stream execution, and plugin development for custom layers. Understanding 
+                TensorRT's optimization techniques enables achieving maximum inference performance and efficiency for 
+                production deployments.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Model] --> B[TensorRT Builder]
+                    B --> C[Optimization]
+                    C --> D[Calibration]
+                    C --> E[Kernel Selection]
+                    D --> F[Optimized Engine]
+                    E --> F
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style F fill:#26A69A
+            </div>
+
+            <div class="example-box">
+                <strong>Inference Optimization:</strong>
+                TensorRT optimizes trained neural networks specifically for inference on NVIDIA GPUs. It applies 
+                graph optimizations (layer fusion, kernel auto-tuning), precision calibration (FP16, INT8), and 
+                memory optimizations to maximize inference performance. TensorRT transforms models into highly 
+                optimized inference engines that deliver 10-100x performance improvements compared to unoptimized models.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((TensorRT Deep Dive))
+                    Optimization Techniques
+                      Graph Optimizations
+                      Layer Fusion
+                      Precision Calibration
+                      Kernel Auto-Tuning
+                    Features
+                      Dynamic Shapes
+                      INT8 Inference
+                      Multi-Stream Execution
+                    Benefits
+                      Performance Improvements
+                      Production Deployment
+                      Maximum Efficiency
+            </div>
+        </section>
+
+        <section id="features" class="section">
+            <h2>Advanced TensorRT Features</h2>
+            <p>
+                TensorRT provides advanced features for optimizing and deploying neural networks, including precision 
+                optimization, dynamic shape support, and custom layer plugins.
+            </p>
+
+            <div class="concept-card">
+                <h3>Graph Optimizations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Layer Fusion:</strong> Fuse multiple layers into single kernels</li>
+                    <li><strong>Kernel Auto-Tuning:</strong> Select optimal kernels for operations</li>
+                    <li><strong>Precision Reduction:</strong> Reduce precision for speed</li>
+                    <li><strong>Memory Optimization:</strong> Optimize memory usage</li>
+                    <li><strong>Graph Simplification:</strong> Simplify graph structure</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Advanced Capabilities</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Dynamic Shapes:</strong> Support for variable input shapes</strong>
+                    <li><strong>Multi-Stream:</strong> Execute multiple inference streams</li>
+                    <li><strong>Custom Plugins:</strong> Plugin development for custom layers</li>
+                    <li><strong>ONNX Support:</strong> Import ONNX models</li>
+                    <li><strong>TensorFlow/PyTorch:</strong> Framework integration</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Performance Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Tensor Cores:</strong> Leverage Tensor Cores for mixed precision</li>
+                    <li><strong>Batch Processing:</strong> Optimize batch inference</li>
+                    <li><strong>Async Execution:</strong> Asynchronous inference execution</li>
+                    <li><strong>Stream Processing:</strong> CUDA stream management</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="precision" class="section">
+            <h2>Precision Calibration</h2>
+            <p>
+                TensorRT precision calibration enables INT8 inference by calibrating the model using representative data, 
+                providing significant speedup while maintaining accuracy.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[FP32 Model] --> B[Calibration Data]
+                    B --> C[Calibration Process]
+                    C --> D[INT8 Engine]
+                    
+                    style A fill:#00695C
+                    style C fill:#00897B
+                    style D fill:#26A69A
+            </div>
+
+            <div class="concept-card">
+                <h3>Calibration Process</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Representative Data:</strong> Use calibration dataset</li>
+                    <li><strong>Activation Statistics:</strong> Collect activation statistics</li>
+                    <li><strong>Quantization:</strong> Quantize weights and activations</li>
+                    <li><strong>Calibration Table:</strong> Generate calibration table</li>
+                    <li><strong>Engine Generation:</strong> Build INT8 engine</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Calibration Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Speedup:</strong> 2-4x inference speedup</li>
+                    <li><strong>Memory:</strong> Reduced memory usage</li>
+                    <li><strong>Accuracy:</strong> Maintain accuracy with calibration</li>
+                    <li><strong>Efficiency:</strong> Improved power efficiency</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Representative Data:</strong> Use representative calibration data</li>
+                    <li><strong>Validation:</strong> Validate INT8 accuracy</li>
+                    <li><strong>Fine-Tuning:</strong> Fine-tune calibration parameters</li>
+                    <li><strong>Monitoring:</strong> Monitor accuracy degradation</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="dynamic-shapes" class="section">
+            <h2>Dynamic Shapes</h2>
+            <p>
+                TensorRT dynamic shape support enables inference with variable input shapes, providing flexibility for 
+                models that handle inputs of different sizes.
+            </p>
+
+            <div class="concept-card">
+                <h3>Dynamic Shape Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Variable Inputs:</strong> Handle variable input dimensions</li>
+                    <li><strong>Shape Ranges:</strong> Define shape ranges</li>
+                    <li><strong>Profile Management:</strong> Manage shape profiles</li>
+                    <li><strong>Optimization:</strong> Optimize for shape ranges</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Variable Batch:</strong> Variable batch sizes</li>
+                    <li><strong>Image Resizing:</strong> Different image sizes</li>
+                    <li><strong>Sequence Length:</strong> Variable sequence lengths</li>
+                    <li><strong>Flexible Inputs:</strong> Models with flexible inputs</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Dynamic Shape Configuration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Min/Max/Optimal:</strong> Define shape dimensions</li>
+                    <li><strong>Shape Profile:</strong> Create shape profiles</li>
+                    <li><strong>Optimization:</strong> Optimize for shape ranges</li>
+                    <li><strong>Runtime:</strong> Handle shapes at runtime</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="optimization" class="section">
+            <h2>Optimization Techniques</h2>
+            <p>
+                Advanced TensorRT optimization techniques maximize inference performance through layer fusion, kernel 
+                selection, and memory optimization.
+            </p>
+
+            <div class="concept-card">
+                <h3>Layer Fusion</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Conv+Bias+ReLU:</strong> Fuse convolution, bias, and activation</li>
+                    <li><strong>Linear Operations:</strong> Fuse linear layers</li>
+                    <li><strong>Normalization:</strong> Fuse normalization layers</li>
+                    <li><strong>Memory Reduction:</strong> Reduce memory transfers</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Kernel Optimization</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Auto-Tuning:</strong> Automatic kernel selection</li>
+                    <li><strong>Tensor Cores:</strong> Leverage Tensor Cores</li>
+                    <li><strong>Tile Sizes:</strong> Optimize tile sizes</li>
+                    <li><strong>Workload Distribution:</strong> Optimize workload distribution</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Memory Optimization</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Workspace Management:</strong> Optimize workspace memory</li>
+                    <li><strong>Memory Reuse:</strong> Reuse intermediate buffers</li>
+                    <li><strong>In-Place Operations:</strong> Use in-place operations</li>
+                    <li><strong>Memory Pools:</strong> Memory pool management</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>TensorRT Optimization:</strong>
+                Optimize models with TensorRT by leveraging layer fusion, precision calibration, dynamic shapes, and 
+                kernel optimization. Use INT8 calibration for maximum performance, configure dynamic shapes for flexible 
+                inputs, and tune optimization settings for your specific workload. TensorRT provides advanced optimization 
+                techniques that can significantly improve inference performance and efficiency.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>TensorRT Deep Dive Guide | Advanced Inference Optimization</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

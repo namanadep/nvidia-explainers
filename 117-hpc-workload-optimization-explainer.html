@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>117. HPC Workload Optimization: Optimizing High-Performance Computing Workloads</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #0277BD;
+    --secondary-color: #0288D1;
+    --accent-color: #03A9F4;
+    --bg-color: #E1F5FE;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #81D4FA;
+    --shadow: 0 2px 8px rgba(2, 119, 189, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0277BD, #0288D1);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.optimization-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.optimization-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E1F5FE, #81D4FA);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #03A9F4;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #81D4FA;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>117. HPC Workload Optimization</h1>
+        <p class="subtitle">Optimizing High-Performance Computing Workloads</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#mpi-optimization" class="nav-link">MPI Optimization</a>
+        <a href="#communication" class="nav-link">Communication</a>
+        <a href="#memory-optimization" class="nav-link">Memory</a>
+        <a href="#io-optimization" class="nav-link">I/O Optimization</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>HPC Workload Optimization Overview</h2>
+            <p>
+                HPC workload optimization maximizes performance of high-performance computing applications running on 
+                GPU clusters. HPC workloads typically involve parallel computing, message passing, and large-scale 
+                simulations. Optimization focuses on MPI communication, memory management, I/O performance, and 
+                GPU utilization. Understanding HPC optimization enables efficient execution of scientific computing 
+                workloads.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[HPC Workload] --> B[MPI Optimization]
+                    A --> C[Communication Optimization]
+                    A --> D[Memory Optimization]
+                    A --> E[I/O Optimization]
+                    B --> F[Process Mapping]
+                    B --> G[Collective Operations]
+                    C --> H[Network Topology]
+                    C --> I[RDMA Optimization]
+                    D --> J[Memory Layout]
+                    D --> K[NUMA Awareness]
+                    E --> L[Parallel I/O]
+                    E --> M[File System Tuning]
+                    
+                    style A fill:#0277BD
+                    style B fill:#0288D1
+                    style E fill:#03A9F4
+            </div>
+
+            <div class="example-box">
+                <strong>HPC Optimization Impact:</strong>
+                Effective HPC optimization can improve application performance by 2-5x or more. Proper optimization 
+                reduces communication overhead, improves memory access patterns, optimizes I/O operations, and 
+                maximizes GPU utilization. Systematic optimization ensures efficient execution of large-scale 
+                scientific workloads.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((HPC Optimization))
+                    MPI Optimization
+                      Process Mapping
+                      Collective Operations
+                      Point-to-Point Communication
+                    Communication
+                      Network Topology
+                      RDMA Optimization
+                      InfiniBand Tuning
+                    Memory
+                      Memory Layout
+                      NUMA Awareness
+                      Cache Optimization
+                    I/O
+                      Parallel I/O
+                      File System Tuning
+                      Data Layout
+            </div>
+        </section>
+
+        <section id="mpi-optimization" class="section">
+            <h2>MPI Optimization</h2>
+            <p>
+                Optimize MPI (Message Passing Interface) communication for better HPC performance. MPI optimization 
+                involves process mapping, collective operations, and communication patterns.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[HPC Workload Optimization] --> B[Profile Application]
+                    B --> C{Identify Bottleneck?}
+                    C -->|MPI Communication| D[MPI Optimization]
+                    C -->|Memory Access| E[Memory Optimization]
+                    C -->|I/O| F[I/O Optimization]
+                    D --> G[Process Mapping]
+                    D --> H[Collective Operations]
+                    D --> I[RDMA Optimization]
+                    E --> J[NUMA Awareness]
+                    E --> K[Memory Layout]
+                    F --> L[Parallel I/O]
+                    F --> M[File System Tuning]
+                    G --> N[Measure Improvement]
+                    H --> N
+                    I --> N
+                    J --> N
+                    K --> N
+                    L --> N
+                    M --> N
+                    N --> O{Target Met?}
+                    O -->|No| B
+                    O -->|Yes| P[Optimization Complete]
+                    
+                    style A fill:#0277BD
+                    style P fill:#4CAF50
+                    style C fill:#FF9800
+                    style O fill:#FF9800
+            </div>
+
+            <div class="optimization-card">
+                <h3>Process Mapping</h3>
+                <p>Map MPI processes to optimize communication:</p>
+                
+                <p style="margin-top: 20px;"><strong>Rank Mapping:</strong></p>
+                <div class="command-box">
+# Map MPI ranks to optimize locality
+# Example: Bind ranks to NUMA nodes
+mpirun \
+    --bind-to numa \
+    --map-by numa \
+    -np 64 \
+    ./application
+
+# Map by socket for better memory access
+mpirun \
+    --bind-to socket \
+    --map-by socket \
+    -np 64 \
+    ./application
+                </div>
+
+                <p style="margin-top: 20px;"><strong>GPU Mapping:</strong></p>
+                <div class="command-box">
+# Map MPI ranks to specific GPUs
+mpirun \
+    --bind-to none \
+    --map-by slot \
+    --mca pml ob1 \
+    --mca btl self,vader \
+    -np 8 \
+    ./application
+                </div>
+            </div>
+
+            <div class="optimization-card">
+                <h3>Collective Operations</h3>
+                <p>Optimize MPI collective operations:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Allreduce:</strong> Use optimized algorithms (ring, tree)</li>
+                    <li><strong>Allgather:</strong> Optimize for network topology</li>
+                    <li><strong>Broadcast:</strong> Use tree-based algorithms</li>
+                    <li><strong>Reduce:</strong> Optimize reduction operations</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>MPI Tuning:</strong></p>
+                <div class="command-box">
+# Set MPI collective algorithm
+export OMPI_MCA_coll_tuned_use_dynamic_rules=1
+export OMPI_MCA_coll_tuned_allreduce_algorithm=4
+
+# Optimize for InfiniBand
+export OMPI_MCA_pml=ob1
+export OMPI_MCA_btl=openib,self,vader
+                </div>
+            </div>
+        </section>
+
+        <section id="communication" class="section">
+            <h2>Communication Optimization</h2>
+            <p>
+                Optimize inter-process communication for HPC workloads. Communication optimization involves network 
+                topology awareness, RDMA optimization, and InfiniBand tuning.
+            </p>
+
+            <div class="concept-card">
+                <h3>Network Topology Awareness</h3>
+                <p>Optimize communication based on network topology:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Topology Mapping:</strong> Map processes to network topology</li>
+                    <li><strong>Locality:</strong> Minimize inter-node communication</li>
+                    <li><strong>Routing:</strong> Optimize routing paths</li>
+                    <li><strong>Load Balancing:</strong> Balance communication load</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>RDMA Optimization</h3>
+                <p>Optimize RDMA communication:</p>
+                
+                <p style="margin-top: 20px;"><strong>InfiniBand Tuning:</strong></p>
+                <div class="command-box">
+# Optimize InfiniBand parameters
+ib_write_bw \
+    --ib-dev=mlx5_0 \
+    --ib-port=1 \
+    --size=8388608 \
+    --qp=1 \
+    --post-cnt=16
+
+# Check InfiniBand performance
+ibstat
+ibstatus
+                </div>
+
+                <p style="margin-top: 20px;"><strong>MPI RDMA Settings:</strong></p>
+                <div class="command-box">
+# Enable RDMA for MPI
+export OMPI_MCA_btl_openib_allow_ib=1
+export OMPI_MCA_btl_openib_if_include=mlx5_0
+export OMPI_MCA_pml_ob1_accelerator=rdma
+                </div>
+            </div>
+        </section>
+
+        <section id="memory-optimization" class="section">
+            <h2>Memory Optimization</h2>
+            <p>
+                Optimize memory access patterns and layout for HPC workloads. Memory optimization involves NUMA 
+                awareness, memory layout, and cache optimization.
+            </p>
+
+            <div class="optimization-card">
+                <h3>NUMA Awareness</h3>
+                <p>Optimize for NUMA (Non-Uniform Memory Access):</p>
+                
+                <p style="margin-top: 20px;"><strong>NUMA Binding:</strong></p>
+                <div class="command-box">
+# Bind processes to NUMA nodes
+numactl \
+    --membind=0 \
+    --cpunodebind=0 \
+    ./application
+
+# Check NUMA topology
+numactl --hardware
+lstopo
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Memory Allocation:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Allocate memory on local NUMA node</li>
+                    <li>Use first-touch policy</li>
+                    <li>Avoid cross-NUMA memory access</li>
+                    <li>Use NUMA-aware memory allocators</li>
+                </ul>
+            </div>
+
+            <div class="optimization-card">
+                <h3>Memory Layout Optimization</h3>
+                <p>Optimize data structure layout:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Structure of Arrays:</strong> Use SoA instead of AoS</li>
+                    <li><strong>Cache Alignment:</strong> Align data to cache lines</li>
+                    <li><strong>Prefetching:</strong> Use hardware prefetching</li>
+                    <li><strong>Memory Pooling:</strong> Reuse memory allocations</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="io-optimization" class="section">
+            <h2>I/O Optimization</h2>
+            <p>
+                Optimize I/O operations for HPC workloads. I/O optimization involves parallel I/O, file system 
+                tuning, and data layout optimization.
+            </p>
+
+            <div class="concept-card">
+                <h3>Parallel I/O</h3>
+                <p>Use parallel I/O libraries:</p>
+                
+                <p style="margin-top: 20px;"><strong>MPI-IO:</strong></p>
+                <div class="command-box">
+# Use MPI-IO for parallel file access
+# Example: Collective I/O
+MPI_File_open(MPI_COMM_WORLD, filename, 
+              MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+MPI_File_set_view(fh, 0, MPI_INT, filetype, 
+                  "native", MPI_INFO_NULL);
+MPI_File_read_all(fh, buffer, count, 
+                  MPI_INT, &status);
+MPI_File_close(&fh);
+                </div>
+
+                <p style="margin-top: 20px;"><strong>HDF5 Parallel I/O:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Use HDF5 with MPI-IO backend</li>
+                    <li>Enable collective metadata operations</li>
+                    <li>Optimize chunk size</li>
+                    <li>Use appropriate I/O patterns</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>File System Tuning</h3>
+                <p>Optimize file system for HPC workloads:</p>
+                
+                <p style="margin-top: 20px;"><strong>Lustre Optimization:</strong></p>
+                <div class="command-box">
+# Optimize Lustre stripe count
+lfs setstripe \
+    -c 4 \
+    -S 1m \
+    /path/to/file
+
+# Check stripe configuration
+lfs getstripe /path/to/file
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Mount Options:</strong></p>
+                <div class="command-box">
+# Optimize NFS mount options
+mount -t nfs \
+    -o rsize=1048576 \
+    -o wsize=1048576 \
+    -o hard \
+    -o intr \
+    -o noatime \
+    -o nodiratime \
+    -o vers=4.2 \
+    [server]:/export /mnt/nfs
+                </div>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>HPC Optimization Best Practices</h2>
+            <p>
+                Follow best practices for HPC workload optimization.
+            </p>
+
+            <div class="concept-card">
+                <h3>Optimization Methodology</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Profile application to identify bottlenecks</li>
+                    <li>Optimize communication patterns</li>
+                    <li>Optimize memory access patterns</li>
+                    <li>Use parallel I/O libraries</li>
+                    <li>Test optimizations systematically</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Common Optimizations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Map MPI processes to optimize locality</li>
+                    <li>Use NUMA-aware memory allocation</li>
+                    <li>Optimize MPI collective operations</li>
+                    <li>Use RDMA for inter-node communication</li>
+                    <li>Optimize file system access patterns</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>HPC Optimization Checklist:</strong>
+                1. Profile application performance<br>
+                2. Optimize MPI process mapping<br>
+                3. Tune MPI collective operations<br>
+                4. Optimize network communication<br>
+                5. Optimize memory access patterns<br>
+                6. Use NUMA-aware allocation<br>
+                7. Optimize I/O operations<br>
+                8. Tune file system settings<br>
+                9. Measure and validate improvements<br>
+                10. Document optimizations
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>HPC Workload Optimization | Optimizing High-Performance Computing Workloads</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

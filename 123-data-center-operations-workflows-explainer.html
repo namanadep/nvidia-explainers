@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>123. Data Center Operations Workflows: Day-to-Day Operational Procedures</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #6A1B9A;
+    --secondary-color: #7B1FA2;
+    --accent-color: #8E24AA;
+    --bg-color: #F3E5F5;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #CE93D8;
+    --shadow: 0 2px 8px rgba(106, 27, 154, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #6A1B9A, #7B1FA2);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.workflow-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.workflow-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #F3E5F5, #CE93D8);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #8E24AA;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #CE93D8;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>123. Data Center Operations Workflows</h1>
+        <p class="subtitle">Day-to-Day Operational Procedures and Runbooks</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#daily-operations" class="nav-link">Daily Operations</a>
+        <a href="#change-management" class="nav-link">Change Management</a>
+        <a href="#incident-response" class="nav-link">Incident Response</a>
+        <a href="#runbooks" class="nav-link">Runbooks</a>
+        <a href="#monitoring" class="nav-link">Monitoring</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Data Center Operations Overview</h2>
+            <p>
+                Data center operations workflows define standard procedures for day-to-day operations, change management, 
+                incident response, and maintenance. Well-defined workflows ensure consistent operations, reduce errors, 
+                and enable efficient problem resolution. Operations include monitoring, maintenance, capacity management, 
+                and incident handling. Understanding operational workflows enables reliable data center operations and 
+                efficient problem resolution.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Data Center Operations] --> B[Daily Operations]
+                    A --> C[Change Management]
+                    A --> D[Incident Response]
+                    A --> E[Maintenance]
+                    B --> F[Monitoring]
+                    B --> G[Health Checks]
+                    C --> H[Change Request]
+                    C --> I[Change Approval]
+                    D --> J[Incident Detection]
+                    D --> K[Incident Resolution]
+                    E --> L[Scheduled Maintenance]
+                    E --> M[Emergency Maintenance]
+                    
+                    style A fill:#6A1B9A
+                    style B fill:#7B1FA2
+                    style C fill:#8E24AA
+            </div>
+
+            <div class="example-box">
+                <strong>Operations Workflow Impact:</strong>
+                Well-defined operational workflows reduce mean time to resolution (MTTR) by 40-60%, prevent configuration 
+                errors, ensure compliance, and improve overall data center reliability. Standardized procedures enable 
+                consistent operations and faster problem resolution.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Data Center Operations))
+                    Daily Operations
+                      Health Monitoring
+                      Performance Checks
+                      Capacity Monitoring
+                    Change Management
+                      Change Request
+                      Change Approval
+                      Change Implementation
+                    Incident Response
+                      Incident Detection
+                      Incident Triage
+                      Incident Resolution
+                    Runbooks
+                      Standard Procedures
+                      Troubleshooting Guides
+                      Emergency Procedures
+            </div>
+        </section>
+
+        <section id="daily-operations" class="section">
+            <h2>Daily Operations Workflows</h2>
+            <p>
+                Daily operations workflows include routine monitoring, health checks, and capacity management. These 
+                workflows ensure continuous operation and early problem detection.
+            </p>
+
+            <div class="workflow-card">
+                <h3>Morning Health Check</h3>
+                <p>Perform daily morning health checks:</p>
+                
+                <p style="margin-top: 20px;"><strong>Health Check Checklist:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check cluster status and node availability</li>
+                    <li>Review overnight alerts and errors</li>
+                    <li>Verify GPU availability and health</li>
+                    <li>Check network connectivity</li>
+                    <li>Verify storage availability</li>
+                    <li>Review job queue status</li>
+                    <li>Check system resource utilization</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Automated Health Check Script:</strong></p>
+                <div class="command-box">
+#!/bin/bash
+# Daily health check script
+
+echo "=== Cluster Health Check ==="
+echo "Date: $(date)"
+
+# Check node status
+echo -e "\n=== Node Status ==="
+sinfo -N -l
+
+# Check GPU status
+echo -e "\n=== GPU Status ==="
+squeue -o "%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R %b"
+
+# Check for errors
+echo -e "\n=== Recent Errors ==="
+journalctl --since "24 hours ago" | grep -i error | tail -20
+
+# Check disk space
+echo -e "\n=== Disk Space ==="
+df -h | grep -E "/$|/var|/home|/scratch"
+                </div>
+            </div>
+
+            <div class="workflow-card">
+                <h3>Capacity Monitoring</h3>
+                <p>Monitor cluster capacity and utilization:</p>
+                
+                <p style="margin-top: 20px;"><strong>Capacity Monitoring Tasks:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Monitor GPU utilization</li>
+                    <li>Track storage usage</li>
+                    <li>Monitor network bandwidth</li>
+                    <li>Track power consumption</li>
+                    <li>Monitor job queue length</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Capacity Check Commands:</strong></p>
+                <div class="command-box">
+# Check GPU utilization
+nvidia-smi --query-gpu=index,name,utilization.gpu,memory.used,memory.total \
+    --format=csv
+
+# Check cluster utilization
+sinfo -o "%.10P %.5a %.10l %.6D %.6t %.8z %.8m %.8d %.6w %.8f %.20G"
+
+# Check storage usage
+df -h
+du -sh /scratch/* | sort -h | tail -10
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Start of Day] --> B[Health Check]
+                    B --> C{All Systems OK?}
+                    C -->|Yes| D[Review Alerts]
+                    C -->|No| E[Investigate Issues]
+                    E --> F[Resolve Issues]
+                    F --> D
+                    D --> G[Capacity Check]
+                    G --> H{Capacity OK?}
+                    H -->|Yes| I[Continue Operations]
+                    H -->|No| J[Plan Capacity Expansion]
+                    I --> K[Monitor Throughout Day]
+                    J --> K
+                    K --> L[End of Day Review]
+                    
+                    style A fill:#6A1B9A
+                    style I fill:#4CAF50
+                    style C fill:#FF9800
+                    style H fill:#FF9800
+            </div>
+        </section>
+
+        <section id="change-management" class="section">
+            <h2>Change Management Workflows</h2>
+            <p>
+                Change management workflows ensure controlled implementation of changes to production systems. Proper 
+                change management prevents outages and ensures changes are documented and reversible.
+            </p>
+
+            <div class="concept-card">
+                <h3>Change Request Process</h3>
+                <p>Follow structured change request process:</p>
+                
+                <div class="mermaid">
+                    flowchart TD
+                        A[Change Request] --> B[Document Change]
+                        B --> C[Risk Assessment]
+                        C --> D{Low Risk?}
+                        D -->|Yes| E[Standard Approval]
+                        D -->|No| F[Change Review Board]
+                        E --> G[Schedule Change]
+                        F --> H{Approved?}
+                        H -->|Yes| G
+                        H -->|No| I[Change Rejected]
+                        G --> J[Implement Change]
+                        J --> K[Verify Change]
+                        K --> L{Change Successful?}
+                        L -->|Yes| M[Close Change]
+                        L -->|No| N[Rollback]
+                        N --> O[Document Issue]
+                        O --> M
+                        
+                        style A fill:#6A1B9A
+                        style M fill:#4CAF50
+                        style D fill:#FF9800
+                        style H fill:#FF9800
+                        style L fill:#FF9800
+                    </div>
+                </div>
+
+                <div class="workflow-card">
+                    <h3>Change Request Template</h3>
+                    <p>Standard change request should include:</p>
+                    
+                    <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                        <li><strong>Change Description:</strong> What is being changed and why</li>
+                        <li><strong>Impact Assessment:</strong> What systems/services are affected</li>
+                        <li><strong>Risk Level:</strong> Low, Medium, High</li>
+                        <li><strong>Rollback Plan:</strong> How to revert if change fails</li>
+                        <li><strong>Testing Plan:</strong> How change will be tested</li>
+                        <li><strong>Schedule:</strong> When change will be implemented</li>
+                        <li><strong>Approval:</strong> Required approvals</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="workflow-card">
+                <h3>Change Implementation</h3>
+                <p>Follow standard change implementation process:</p>
+                
+                <p style="margin-top: 20px;"><strong>Implementation Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Backup current configuration</li>
+                    <li>Notify stakeholders of change window</li>
+                    <li>Implement change in controlled manner</li>
+                    <li>Verify change success</li>
+                    <li>Monitor for issues</li>
+                    <li>Document change completion</li>
+                </ol>
+            </div>
+        </section>
+
+        <section id="incident-response" class="section">
+            <h2>Incident Response Workflows</h2>
+            <p>
+                Incident response workflows provide structured approach to handling incidents. Effective incident response 
+                minimizes impact and ensures rapid resolution.
+            </p>
+
+            <div class="concept-card">
+                <h3>Incident Response Process</h3>
+                <p>Follow structured incident response process:</p>
+                
+                <div class="mermaid">
+                    flowchart TD
+                        A[Incident Detected] --> B[Classify Severity]
+                        B --> C{Severity Level?}
+                        C -->|Critical| D[Immediate Response]
+                        C -->|High| E[Urgent Response]
+                        C -->|Medium| F[Standard Response]
+                        C -->|Low| G[Low Priority]
+                        D --> H[Assemble Team]
+                        E --> H
+                        F --> I[Assign to Engineer]
+                        G --> I
+                        H --> J[Investigate Issue]
+                        I --> J
+                        J --> K[Identify Root Cause]
+                        K --> L[Implement Fix]
+                        L --> M[Verify Resolution]
+                        M --> N{Issue Resolved?}
+                        N -->|Yes| O[Document Incident]
+                        N -->|No| J
+                        O --> P[Post-Incident Review]
+                        
+                        style A fill:#D32F2F
+                        style O fill:#4CAF50
+                        style C fill:#FF9800
+                        style N fill:#FF9800
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-card">
+                <h3>Incident Severity Levels</h3>
+                <p>Classify incidents by severity:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Critical:</strong> Complete cluster outage, data loss, security breach</li>
+                    <li><strong>High:</strong> Significant service degradation, multiple users affected</li>
+                    <li><strong>Medium:</strong> Limited service impact, single user/workload affected</li>
+                    <li><strong>Low:</strong> Minor issues, workarounds available</li>
+                </ul>
+            </div>
+
+            <div class="workflow-card">
+                <h3>Incident Documentation</h3>
+                <p>Document incidents for future reference:</p>
+                
+                <p style="margin-top: 20px;"><strong>Incident Report Template:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Incident ID and timestamp</li>
+                    <li>Severity level</li>
+                    <li>Description of issue</li>
+                    <li>Affected systems</li>
+                    <li>Root cause analysis</li>
+                    <li>Resolution steps</li>
+                    <li>Prevention measures</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="runbooks" class="section">
+            <h2>Operational Runbooks</h2>
+            <p>
+                Runbooks provide step-by-step procedures for common operational tasks. Well-maintained runbooks enable 
+                consistent operations and faster problem resolution.
+            </p>
+
+            <div class="concept-card">
+                <h3>Runbook Structure</h3>
+                <p>Standard runbook should include:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Purpose:</strong> What the runbook addresses</li>
+                    <li><strong>Prerequisites:</strong> Required access, tools, knowledge</li>
+                    <li><strong>Procedure:</strong> Step-by-step instructions</li>
+                    <li><strong>Verification:</strong> How to verify success</li>
+                    <li><strong>Troubleshooting:</strong> Common issues and solutions</li>
+                    <li><strong>Rollback:</strong> How to undo changes</li>
+                </ul>
+            </div>
+
+            <div class="workflow-card">
+                <h3>Example Runbook: Node Maintenance</h3>
+                <p><strong>Purpose:</strong> Safely take node offline for maintenance</p>
+                
+                <p style="margin-top: 20px;"><strong>Procedure:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Drain node to prevent new jobs</li>
+                    <li>Wait for running jobs to complete</li>
+                    <li>Cancel remaining jobs if needed</li>
+                    <li>Set node to DRAIN state</li>
+                    <li>Verify no jobs running</li>
+                    <li>Perform maintenance</li>
+                    <li>Verify node health</li>
+                    <li>Set node to IDLE state</li>
+                    <li>Verify node accepts jobs</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Commands:</strong></p>
+                <div class="command-box">
+# Drain node
+scontrol update nodename=[node-name] state=drain reason="Maintenance"
+
+# Check node status
+sinfo -N -n [node-name]
+
+# After maintenance, set to idle
+scontrol update nodename=[node-name] state=idle
+                </div>
+            </div>
+        </section>
+
+        <section id="monitoring" class="section">
+            <h2>Operations Monitoring</h2>
+            <p>
+                Continuous monitoring enables proactive problem detection and capacity planning. Monitoring includes 
+                system health, performance metrics, and alerting.
+            </p>
+
+            <div class="concept-card">
+                <h3>Key Metrics to Monitor</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Cluster Health:</strong> Node availability, service status</li>
+                    <li><strong>Resource Utilization:</strong> GPU, CPU, memory, storage usage</li>
+                    <li><strong>Job Metrics:</strong> Queue length, wait times, completion rates</li>
+                    <li><strong>Performance:</strong> Network bandwidth, I/O performance</li>
+                    <li><strong>Errors:</strong> System errors, job failures</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Alerting Configuration</h3>
+                <p>Configure alerts for critical conditions:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Critical Alerts:</strong> Cluster outage, data loss</li>
+                    <li><strong>Warning Alerts:</strong> High utilization, errors</li>
+                    <li><strong>Info Alerts:</strong> Capacity thresholds, maintenance windows</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Operations Best Practices</h2>
+            <p>
+                Follow best practices for effective data center operations.
+            </p>
+
+            <div class="concept-card">
+                <h3>Operations Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Document all procedures in runbooks</li>
+                    <li>Follow change management process</li>
+                    <li>Maintain incident response procedures</li>
+                    <li>Monitor systems continuously</li>
+                    <li>Review and update runbooks regularly</li>
+                    <li>Conduct regular training</li>
+                    <li>Perform post-incident reviews</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Operations Workflow Checklist:</strong>
+                1. Establish daily operations procedures<br>
+                2. Implement change management process<br>
+                3. Create incident response procedures<br>
+                4. Develop operational runbooks<br>
+                5. Set up monitoring and alerting<br>
+                6. Document all procedures<br>
+                7. Train operations staff<br>
+                8. Review and improve workflows<br>
+                9. Conduct regular audits<br>
+                10. Maintain documentation
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Data Center Operations Workflows | Day-to-Day Operational Procedures</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

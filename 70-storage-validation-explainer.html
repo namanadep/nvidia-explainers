@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>70. Storage Validation: Partner Ecosystem</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #0288D1;
+    --secondary-color: #03A9F4;
+    --accent-color: #4FC3F7;
+    --bg-color: #E1F5FE;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #81D4FA;
+    --shadow: 0 2px 8px rgba(2, 136, 209, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0288D1, #03A9F4);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #81D4FA;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>70. Storage Validation</h1>
+        <p class="subtitle">NVIDIA Validated Storage Partners and Solutions</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#validation-process" class="nav-link">Validation Process</a>
+        <a href="#benefits" class="nav-link">Benefits</a>
+        <a href="#partner-ecosystem" class="nav-link">Partner Ecosystem</a>
+        <a href="#selection" class="nav-link">Selection</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Storage Validation Overview</h2>
+            <p>
+                NVIDIA storage validation ensures storage solutions are tested and verified to work optimally with 
+                NVIDIA AI infrastructure, including DGX systems, GPUs, and software stack. Validated storage solutions 
+                have been tested for performance, compatibility, and reliability with NVIDIA AI workloads. The validation 
+                process involves comprehensive testing with real AI workloads, ensuring storage solutions meet performance 
+                and reliability requirements. Choosing validated storage solutions provides confidence in compatibility and 
+                performance for AI infrastructure deployments.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Storage Solution] --> B[NVIDIA Validation]
+                    B --> C[Performance Testing]
+                    B --> D[Compatibility Testing]
+                    B --> E[Reliability Testing]
+                    
+                    C --> F[Validated Solution]
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#0288D1
+                    style B fill:#03A9F4
+                    style F fill:#4FC3F7
+            </div>
+
+            <div class="example-box">
+                <strong>Partner Ecosystem:</strong>
+                NVIDIA storage validation is a testing and verification program that ensures storage solutions work 
+                optimally with NVIDIA AI infrastructure. Validated storage solutions are tested for performance, 
+                compatibility, and reliability with NVIDIA GPUs, software stack, and infrastructure. This validation 
+                provides confidence that storage will integrate well and perform effectively in NVIDIA AI environments.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Storage Validation))
+                    Validation Program
+                      Testing & Verification
+                      Performance Testing
+                      Compatibility Testing
+                      Reliability Testing
+                    Benefits
+                      Confidence in Integration
+                      Optimal Performance
+                      Partner Support
+                    Selection
+                      Review Validated Options
+                      Match Requirements
+                      Consider Performance
+                      Consider Scale & Cost
+            </div>
+        </section>
+
+        <section id="validation-process" class="section">
+            <h2>Validation Process</h2>
+            <p>
+                The NVIDIA storage validation process involves comprehensive testing to ensure storage solutions meet 
+                performance, compatibility, and reliability requirements for AI workloads.
+            </p>
+
+            <div class="concept-card">
+                <h3>Validation Testing</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Performance Testing:</strong> Test storage performance with AI workloads</li>
+                    <li><strong>Compatibility Testing:</strong> Test compatibility with NVIDIA stack</li>
+                    <li><strong>Reliability Testing:</strong> Test reliability and fault tolerance</li>
+                    <li><strong>Scalability Testing:</strong> Test scalability characteristics</li>
+                </ul>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Test Workloads] --> B[AI Training<br/>Real Training Workloads]
+                    A --> C[Data Loading<br/>Loading Performance]
+                    A --> D[Checkpointing<br/>Checkpoint Operations]
+                    A --> E[Concurrent Access<br/>Concurrent Patterns]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Validation Criteria] --> B[Performance<br/>Meet Requirements]
+                    A --> C[Compatibility<br/>NVIDIA Stack]
+                    A --> D[Reliability<br/>Meet Requirements]
+                    A --> E[Documentation<br/>Adequate Docs]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+        </section>
+
+        <section id="benefits" class="section">
+            <h2>Validation Benefits</h2>
+            <p>
+                Using NVIDIA validated storage solutions provides several benefits, including confidence in compatibility, 
+                performance, and support.
+            </p>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Compatibility Assurance] --> B[Tested Compatibility<br/>NVIDIA Infrastructure]
+                    A --> C[Reduced Risk<br/>Lower Compatibility Risk]
+                    A --> D[Confidence<br/>Compatibility Confidence]
+                    A --> E[Support<br/>Joint Support]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Performance Assurance] --> B[Validated Performance<br/>Validated Characteristics]
+                    A --> C[Optimization<br/>Optimized for AI]
+                    A --> D[Benchmarks<br/>Published Benchmarks]
+                    A --> E[Best Practices<br/>Documented]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Support Benefits] --> B[Joint Support<br/>NVIDIA & Partner]
+                    A --> C[Documentation<br/>Comprehensive]
+                    A --> D[Best Practices<br/>Validated]
+                    A --> E[Updates<br/>Regular Updates]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+        </section>
+
+        <section id="partner-ecosystem" class="section">
+            <h2>Partner Ecosystem</h2>
+            <p>
+                NVIDIA works with multiple storage partners to validate storage solutions for AI infrastructure. 
+                The partner ecosystem includes various storage vendors offering validated solutions.
+            </p>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Storage Partner Types] --> B[Enterprise Storage<br/>Enterprise Vendors]
+                    A --> C[HPC Storage<br/>HPC Vendors]
+                    A --> D[Cloud Storage<br/>Cloud Providers]
+                    A --> E[Software-Defined<br/>SDS Vendors]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Validated Solutions] --> B[Various Types<br/>Different Storage Types]
+                    A --> C[Different Scales<br/>Various Scales]
+                    A --> D[Use Cases<br/>Different Use Cases]
+                    A --> E[Options<br/>Multiple Options]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Partner Resources] --> B[Documentation<br/>Partner Docs]
+                    A --> C[Best Practices<br/>Validated Practices]
+                    A --> D[Support<br/>Partner Support]
+                    A --> E[Updates<br/>Regular Updates]
+                </ul>
+            </div>
+        </section>
+
+        <section id="selection" class="section">
+            <h2>Selecting Validated Storage</h2>
+            <p>
+                Selecting validated storage solutions involves considering requirements, validated options, and partner 
+                capabilities to choose the best solution for specific needs.
+            </p>
+
+            <div class="concept-card">
+                <h3>Selection Criteria</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Requirements:</strong> Define storage requirements</li>
+                    <li><strong>Validated Options:</strong> Review validated storage options</li>
+                    <li><strong>Performance:</strong> Consider performance characteristics</li>
+                    <li><strong>Scale:</strong> Consider scale requirements</li>
+                    <li><strong>Cost:</strong> Consider cost and budget</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Evaluation Process</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Review Documentation:</strong> Review validation documentation</li>
+                    <li><strong>Benchmarks:</strong> Review performance benchmarks</li>
+                    <li><strong>Use Cases:</strong> Review use case examples</li>
+                    <li><strong>Pilot Testing:</strong> Conduct pilot testing if possible</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Choose Validated:</strong> Prefer validated solutions</li>
+                    <li><strong>Match Requirements:</strong> Match solution to requirements</li>
+                    <li><strong>Consider Support:</strong> Consider support capabilities</li>
+                    <li><strong>Plan for Growth:</strong> Plan for future growth</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Storage Selection:</strong>
+                When selecting storage for AI infrastructure, prefer NVIDIA validated storage solutions for confidence 
+                in compatibility and performance. Review validated options, match solutions to requirements, consider 
+                performance characteristics, scale needs, and cost. Use validation documentation and benchmarks to inform 
+                decisions, and consider partner support capabilities. Validated storage solutions provide a solid foundation 
+                for AI infrastructure deployments.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Storage Validation Guide | Partner Ecosystem</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

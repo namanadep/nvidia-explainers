@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>118. Physical Layer Management: Managing Network Physical Infrastructure</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #5E35B1;
+    --secondary-color: #673AB7;
+    --accent-color: #7E57C2;
+    --bg-color: #EDE7F6;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #B39DDB;
+    --shadow: 0 2px 8px rgba(94, 53, 177, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #5E35B1, #673AB7);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.management-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.management-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #EDE7F6, #B39DDB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #7E57C2;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #B39DDB;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>118. Physical Layer Management</h1>
+        <p class="subtitle">Managing Network Physical Infrastructure</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#cabling" class="nav-link">Cabling</a>
+        <a href="#transceivers" class="nav-link">Transceivers</a>
+        <a href="#ports" class="nav-link">Port Management</a>
+        <a href="#monitoring" class="nav-link">Monitoring</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Physical Layer Management Overview</h2>
+            <p>
+                Physical layer management involves managing the physical network infrastructure including cables, 
+                transceivers, ports, and connectors. Proper physical layer management ensures reliable network 
+                connectivity, optimal performance, and easy troubleshooting. Management includes cable organization, 
+                transceiver monitoring, port configuration, and physical infrastructure documentation. Understanding 
+                physical layer management enables effective network infrastructure management.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Physical Layer] --> B[Cabling]
+                    A --> C[Transceivers]
+                    A --> D[Ports]
+                    A --> E[Connectors]
+                    B --> F[Cable Types]
+                    B --> G[Cable Management]
+                    C --> H[Transceiver Types]
+                    C --> I[Transceiver Monitoring]
+                    D --> J[Port Configuration]
+                    D --> K[Port Monitoring]
+                    
+                    style A fill:#5E35B1
+                    style B fill:#673AB7
+                    style C fill:#7E57C2
+            </div>
+
+            <div class="example-box">
+                <strong>Physical Layer Impact:</strong>
+                Proper physical layer management ensures reliable network connectivity and optimal performance. 
+                Poor cable management, incorrect transceiver selection, or port misconfiguration can cause network 
+                failures, performance degradation, and difficult troubleshooting. Effective management prevents 
+                physical layer issues and enables rapid problem resolution.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Physical Layer Management))
+                    Cabling
+                      Cable Types
+                      Cable Management
+                      Cable Testing
+                    Transceivers
+                      Transceiver Types
+                      Transceiver Monitoring
+                      Transceiver Configuration
+                    Ports
+                      Port Configuration
+                      Port Monitoring
+                      Port Security
+                    Documentation
+                      Cable Mapping
+                      Port Mapping
+                      Change Management
+            </div>
+        </section>
+
+        <section id="cabling" class="section">
+            <h2>Cable Management</h2>
+            <p>
+                Manage network cables for optimal performance and reliability. Cable management includes cable 
+                selection, organization, testing, and documentation.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Physical Layer Management] --> B[Cable Management]
+                    A --> C[Transceiver Management]
+                    A --> D[Port Management]
+                    A --> E[Monitoring]
+                    B --> F[Cable Selection]
+                    B --> G[Cable Organization]
+                    B --> H[Cable Testing]
+                    C --> I[Transceiver Selection]
+                    C --> J[Transceiver Monitoring]
+                    D --> K[Port Configuration]
+                    D --> L[Port Monitoring]
+                    E --> M[Link Status]
+                    E --> N[Error Monitoring]
+                    F --> O[Documentation]
+                    G --> O
+                    H --> O
+                    I --> O
+                    J --> O
+                    K --> O
+                    L --> O
+                    M --> O
+                    N --> O
+                    
+                    style A fill:#5E35B1
+                    style B fill:#673AB7
+                    style C fill:#7E57C2
+                    style D fill:#9575CD
+                    style E fill:#B39DDB
+            </div>
+
+            <div class="management-card">
+                <h3>Cable Types</h3>
+                <p>Select appropriate cable types for network infrastructure:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>InfiniBand:</strong> QSFP28, QSFP56, QSFP-DD cables</li>
+                    <li><strong>Ethernet:</strong> Cat6, Cat6A, Cat7 cables</li>
+                    <li><strong>Fiber Optic:</strong> Single-mode, multi-mode fiber</li>
+                    <li><strong>Direct Attach:</strong> DAC (Direct Attach Copper) cables</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Cable Selection:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Match cable type to port speed</li>
+                    <li>Consider distance requirements</li>
+                    <li>Use appropriate cable grade</li>
+                    <li>Verify cable compatibility</li>
+                </ul>
+            </div>
+
+            <div class="management-card">
+                <h3>Cable Organization</h3>
+                <p>Organize cables for easy management:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Cable Trays:</strong> Use cable trays for organization</li>
+                    <li><strong>Labels:</strong> Label cables clearly</li>
+                    <li><strong>Documentation:</strong> Document cable connections</li>
+                    <li><strong>Bend Radius:</strong> Maintain proper bend radius</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Cable Testing:</strong></p>
+                <div class="command-box">
+# Test cable connectivity
+# InfiniBand cable test
+iblinkinfo
+
+# Ethernet cable test
+ethtool [interface]
+mii-tool [interface]
+
+# Check cable status
+ip link show [interface]
+                </div>
+            </div>
+        </section>
+
+        <section id="transceivers" class="section">
+            <h2>Transceiver Management</h2>
+            <p>
+                Manage network transceivers for optimal performance. Transceiver management includes selection, 
+                monitoring, and configuration.
+            </p>
+
+            <div class="concept-card">
+                <h3>Transceiver Types</h3>
+                <p>Select appropriate transceivers:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>QSFP28:</strong> 100 Gbps transceivers</li>
+                    <li><strong>QSFP56:</strong> 200 Gbps transceivers</li>
+                    <li><strong>QSFP-DD:</strong> 400 Gbps transceivers</li>
+                    <li><strong>SFP+:</strong> 10 Gbps transceivers</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Transceiver Selection:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Match transceiver to port speed</li>
+                    <li>Verify vendor compatibility</li>
+                    <li>Consider distance requirements</li>
+                    <li>Check power consumption</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Transceiver Monitoring</h3>
+                <p>Monitor transceiver health and status:</p>
+                
+                <p style="margin-top: 20px;"><strong>InfiniBand Transceiver Info:</strong></p>
+                <div class="command-box">
+# Check InfiniBand transceiver information
+ibstat [device]
+
+# Check transceiver details
+ibqueryerrors
+
+# Monitor transceiver errors
+ibqueryerrors -r
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Ethernet Transceiver Info:</strong></p>
+                <div class="command-box">
+# Check Ethernet transceiver information
+ethtool -m [interface]
+
+# Check transceiver diagnostics
+ethtool --show-module [interface]
+
+# Monitor transceiver statistics
+ethtool -S [interface] | grep -i module
+                </div>
+            </div>
+        </section>
+
+        <section id="ports" class="section">
+            <h2>Port Management</h2>
+            <p>
+                Manage network ports for optimal configuration and monitoring. Port management includes configuration, 
+                monitoring, and security.
+            </p>
+
+            <div class="management-card">
+                <h3>Port Configuration</h3>
+                <p>Configure network ports appropriately:</p>
+                
+                <p style="margin-top: 20px;"><strong>InfiniBand Port Configuration:</strong></p>
+                <div class="command-box">
+# Configure InfiniBand port
+ibportstate \
+    -L [lid] \
+    -P [port] \
+    [command]
+
+# Set port state
+ibportstate \
+    -L [lid] \
+    -P [port] \
+    enable
+
+# Check port configuration
+ibportstate \
+    -L [lid] \
+    -P [port] \
+    query
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Ethernet Port Configuration:</strong></p>
+                <div class="command-box">
+# Configure Ethernet port speed
+ethtool -s [interface] \
+    speed 100000 \
+    duplex full \
+    autoneg off
+
+# Set port MTU
+ip link set [interface] mtu 9000
+
+# Check port configuration
+ethtool [interface]
+                </div>
+            </div>
+
+            <div class="management-card">
+                <h3>Port Monitoring</h3>
+                <p>Monitor port status and performance:</p>
+                
+                <p style="margin-top: 20px;"><strong>Port Status:</strong></p>
+                <div class="command-box">
+# Check InfiniBand port status
+ibstat [device]
+
+# Check Ethernet port status
+ip link show [interface]
+ethtool [interface]
+
+# Monitor port statistics
+ethtool -S [interface]
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Port Errors:</strong></p>
+                <div class="command-box">
+# Check InfiniBand port errors
+ibqueryerrors
+
+# Check Ethernet port errors
+ethtool -S [interface] | grep -i error
+                </div>
+            </div>
+        </section>
+
+        <section id="monitoring" class="section">
+            <h2>Physical Layer Monitoring</h2>
+            <p>
+                Monitor physical layer components for health and performance. Monitoring enables proactive issue 
+                detection and troubleshooting.
+            </p>
+
+            <div class="concept-card">
+                <h3>Monitoring Tools</h3>
+                <p>Use tools to monitor physical layer:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>InfiniBand:</strong> ibstat, ibqueryerrors, iblinkinfo</li>
+                    <li><strong>Ethernet:</strong> ethtool, ip, mii-tool</li>
+                    <li><strong>SNMP:</strong> Monitor via SNMP</li>
+                    <li><strong>Switch Management:</strong> Use switch management interfaces</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Key Metrics</h3>
+                <p>Monitor key physical layer metrics:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Link Status:</strong> Up/down status</li>
+                    <li><strong>Link Speed:</strong> Actual link speed</li>
+                    <li><strong>Errors:</strong> CRC errors, frame errors</li>
+                    <li><strong>Temperature:</strong> Transceiver temperature</li>
+                    <li><strong>Power:</strong> Transceiver power levels</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Physical Layer Management Best Practices</h2>
+            <p>
+                Follow best practices for physical layer management.
+            </p>
+
+            <div class="concept-card">
+                <h3>Management Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Document all cable connections</li>
+                    <li>Label cables clearly</li>
+                    <li>Maintain proper cable organization</li>
+                    <li>Test cables before deployment</li>
+                    <li>Monitor transceiver health</li>
+                    <li>Verify port configurations</li>
+                    <li>Maintain change documentation</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Troubleshooting Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Check physical connections first</li>
+                    <li>Verify cable compatibility</li>
+                    <li>Check transceiver status</li>
+                    <li>Verify port configuration</li>
+                    <li>Review error logs</li>
+                    <li>Test with known good cables</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Physical Layer Management Checklist:</strong>
+                1. Document cable connections<br>
+                2. Label all cables<br>
+                3. Organize cables properly<br>
+                4. Test cables before use<br>
+                5. Select appropriate transceivers<br>
+                6. Monitor transceiver health<br>
+                7. Configure ports correctly<br>
+                8. Monitor port status<br>
+                9. Document changes<br>
+                10. Maintain documentation
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Physical Layer Management | Managing Network Physical Infrastructure</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

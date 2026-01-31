@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>88. NeMo: Building Conversational AI</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #00695C;
+    --secondary-color: #00897B;
+    --accent-color: #26A69A;
+    --bg-color: #E0F2F1;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #80CBC4;
+    --shadow: 0 2px 8px rgba(0, 105, 92, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #00695C, #00897B);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E0F2F1, #B2DFDB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #80CBC4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>88. NeMo</h1>
+        <p class="subtitle">Building Conversational AI Applications</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#framework" class="nav-link">Framework</a>
+        <a href="#llms" class="nav-link">Large Language Models</a>
+        <a href="#training" class="nav-link">Training & Fine-Tuning</a>
+        <a href="#deployment" class="nav-link">Deployment</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>NeMo Overview</h2>
+            <p>
+                NVIDIA NeMo is a framework for building, training, and deploying conversational AI applications. NeMo 
+                provides pre-trained models, training tools, and deployment capabilities for speech recognition, text-to-speech, 
+                natural language understanding, and large language models. NeMo simplifies the development of conversational 
+                AI by providing optimized models, distributed training support, and production-ready deployment tools. The 
+                framework enables developers to build, customize, and deploy state-of-the-art conversational AI applications 
+                with ease.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[NeMo Framework] --> B[Pre-trained Models]
+                    A --> C[Training Tools]
+                    A --> D[Deployment]
+                    
+                    B --> E[Speech Models]
+                    B --> F[Language Models]
+                    B --> G[NLU Models]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style D fill:#26A69A
+            </div>
+
+            <div class="example-box">
+                <strong>Conversational AI:</strong>
+                NeMo is a comprehensive framework for building conversational AI applications. It provides pre-trained 
+                models (speech recognition, text-to-speech, NLU, LLMs), training tools for fine-tuning and customization, 
+                and deployment capabilities for production. NeMo enables developers to build conversational AI applications 
+                by leveraging pre-trained models and customizing them for specific use cases.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((NeMo))
+                    Components
+                      Pre-trained Models
+                        Speech Recognition
+                        Text-to-Speech
+                        NLU
+                        LLMs
+                      Training Tools
+                        Fine-Tuning
+                        Customization
+                      Deployment
+                        Production Deployment
+                    Use Cases
+                      Conversational AI
+                      Speech Applications
+                      Language Models
+            </div>
+        </section>
+
+        <section id="framework" class="section">
+            <h2>NeMo Framework</h2>
+            <p>
+                NeMo provides a comprehensive framework with components for building conversational AI applications, 
+                including model architectures, training utilities, and deployment tools.
+            </p>
+
+            <div class="concept-card">
+                <h3>Core Components</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Model Zoo:</strong> Pre-trained model collection</li>
+                    <li><strong>Training Tools:</strong> Distributed training utilities</li>
+                    <li><strong>Optimization:</strong> Model optimization tools</li>
+                    <li><strong>Deployment:</strong> Production deployment tools</li>
+                    <li><strong>APIs:</strong> Python APIs for development</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Application Areas</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Speech Recognition:</strong> ASR models and tools</li>
+                    <li><strong>Text-to-Speech:</strong> TTS models and synthesis</li>
+                    <li><strong>Natural Language Understanding:</strong> NLU models</li>
+                    <li><strong>Language Models:</strong> Large language models</li>
+                    <li><strong>Dialogue Systems:</strong> Conversational agents</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Key Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Modular:</strong> Modular architecture</li>
+                    <li><strong>Scalable:</strong> Scalable training and inference</li>
+                    <li><strong>Optimized:</strong> GPU-optimized components</li>
+                    <li><strong>Production-Ready:</strong> Production deployment support</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="llms" class="section">
+            <h2>Large Language Models</h2>
+            <p>
+                NeMo provides tools and models for working with large language models, including pre-trained models, 
+                fine-tuning capabilities, and inference optimization.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Pre-trained LLM] --> B[Fine-Tuning]
+                    B --> C[Custom Model]
+                    C --> D[Deployment]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style D fill:#26A69A
+            </div>
+
+            <div class="concept-card">
+                <h3>Pre-trained Models</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Megatron-GPT:</strong> GPT-style language models</li>
+                    <li><strong>BERT:</strong> BERT models</li>
+                    <li><strong>T5:</strong> T5 models</li>
+                    <li><strong>Custom Architectures:</strong> Custom model support</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Model Capabilities</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Text Generation:</strong> Generate text</li>
+                    <li><strong>Question Answering:</strong> Answer questions</li>
+                    <li><strong>Summarization:</strong> Text summarization</li>
+                    <li><strong>Translation:</strong> Language translation</li>
+                    <li><strong>Conversation:</strong> Conversational abilities</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Model Sizes</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Small:</strong> Small models for faster inference</li>
+                    <li><strong>Medium:</strong> Medium-sized models</li>
+                    <li><strong>Large:</strong> Large models for best performance</li>
+                    <li><strong>Distributed:</strong> Distributed model support</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="training" class="section">
+            <h2>Training and Fine-Tuning</h2>
+            <p>
+                NeMo provides distributed training capabilities and fine-tuning tools for customizing pre-trained models 
+                for specific applications.
+            </p>
+
+            <div class="concept-card">
+                <h3>Training Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Distributed Training:</strong> Multi-GPU, multi-node training</li>
+                    <li><strong>Mixed Precision:</strong> Mixed precision training</li>
+                    <li><strong>Gradient Accumulation:</strong> Accumulate gradients</li>
+                    <li><strong>Checkpointing:</strong> Training checkpoint management</li>
+                    <li><strong>Monitoring:</strong> Training monitoring tools</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Fine-Tuning</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Parameter-Efficient:</strong> Parameter-efficient fine-tuning</li>
+                    <li><strong>Full Fine-Tuning:</strong> Full model fine-tuning</li>
+                    <li><strong>Domain Adaptation:</strong> Domain-specific fine-tuning</li>
+                    <li><strong>Task Adaptation:</strong> Task-specific fine-tuning</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Training Optimization</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Optimizers:</strong> Advanced optimizers</li>
+                    <li><strong>Learning Rate:</strong> Learning rate schedules</li>
+                    <li><strong>Regularization:</strong> Regularization techniques</li>
+                    <li><strong>Performance:</strong> Training performance optimization</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="deployment" class="section">
+            <h2>Deployment</h2>
+            <p>
+                NeMo provides deployment tools and capabilities for production deployment of conversational AI models, 
+                including optimization, serving, and integration options.
+            </p>
+
+            <div class="concept-card">
+                <h3>Deployment Options</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Triton:</strong> Triton Inference Server deployment</li>
+                    <li><strong>Riva:</strong> Riva deployment for speech</li>
+                    <li><strong>Custom:</strong> Custom deployment solutions</li>
+                    <li><strong>Cloud:</strong> Cloud deployment</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Optimization</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>TensorRT:</strong> TensorRT optimization</li>
+                    <li><strong>Quantization:</strong> Model quantization</li>
+                    <li><strong>Pruning:</strong> Model pruning</li>
+                    <li><strong>Inference:</strong> Inference optimization</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Integration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>APIs:</strong> REST/gRPC APIs</li>
+                    <li><strong>Frameworks:</strong> Framework integration</li>
+                    <li><strong>Applications:</strong> Application integration</li>
+                    <li><strong>Cloud Services:</strong> Cloud service integration</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>NeMo Usage:</strong>
+                Build conversational AI applications with NeMo by leveraging pre-trained models, fine-tuning for specific 
+                domains or tasks, optimizing with TensorRT, and deploying with Triton or Riva. Use distributed training 
+                for large models, fine-tune for domain-specific applications, and deploy optimized models for production. 
+                NeMo provides a complete framework for building, training, and deploying conversational AI applications.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>NeMo Guide | Building Conversational AI</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

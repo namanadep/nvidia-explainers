@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>105. BIOS/UEFI Configuration for GPU Servers: Server BIOS Settings</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #5C6BC0;
+    --secondary-color: #7986CB;
+    --accent-color: #9FA8DA;
+    --bg-color: #E8EAF6;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #C5CAE9;
+    --shadow: 0 2px 8px rgba(92, 107, 192, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #5C6BC0, #7986CB);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.config-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.config-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #9FA8DA;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #C5CAE9;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>105. BIOS/UEFI Configuration for GPU Servers</h1>
+        <p class="subtitle">Essential Server BIOS Settings for GPU Initialization and Performance</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#uefi-vs-bios" class="nav-link">UEFI vs BIOS</a>
+        <a href="#pcie-settings" class="nav-link">PCIe Settings</a>
+        <a href="#gpu-settings" class="nav-link">GPU Settings</a>
+        <a href="#boot-settings" class="nav-link">Boot Settings</a>
+        <a href="#power-settings" class="nav-link">Power Settings</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>BIOS/UEFI Configuration Overview</h2>
+            <p>
+                BIOS (Basic Input/Output System) and UEFI (Unified Extensible Firmware Interface) firmware settings 
+                are critical for proper GPU initialization, performance optimization, and system stability. Correct 
+                BIOS/UEFI configuration ensures GPUs are detected during POST, initialized with optimal settings, 
+                and function correctly in the operating system. Incorrect settings can prevent GPU detection, limit 
+                performance, or cause system instability.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[BIOS/UEFI Configuration] --> B[PCIe Settings]
+                    A --> C[GPU Initialization]
+                    A --> D[Boot Configuration]
+                    A --> E[Power Management]
+                    B --> F[Above 4G Decoding]
+                    B --> G[PCIe Link Speed]
+                    C --> H[GPU Detection]
+                    C --> I[Memory Mapping]
+                    D --> J[Boot Mode]
+                    D --> K[Secure Boot]
+                    E --> L[Power Limits]
+                    E --> M[Thermal Management]
+                    
+                    style A fill:#5C6BC0
+                    style B fill:#7986CB
+                    style C fill:#9FA8DA
+            </div>
+
+            <div class="example-box">
+                <strong>Configuration Impact:</strong>
+                Incorrect BIOS/UEFI settings are a common cause of GPU detection failures. Settings like "Above 4G 
+                Decoding" must be enabled for systems with multiple GPUs. PCIe link speed settings can limit GPU 
+                performance. Proper configuration ensures reliable GPU operation and optimal performance.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((BIOS/UEFI Configuration))
+                    UEFI vs BIOS
+                      Legacy BIOS
+                      UEFI Firmware
+                      Compatibility
+                    PCIe Settings
+                      Above 4G Decoding
+                      PCIe Link Speed
+                      PCIe Slot Configuration
+                    GPU Settings
+                      GPU Detection
+                      Memory Mapping
+                      Initialization
+                    Boot Settings
+                      Boot Mode
+                      Secure Boot
+                      Boot Order
+                    Power Settings
+                      Power Management
+                      Thermal Limits
+                      Power Limits
+            </div>
+        </section>
+
+        <section id="uefi-vs-bios" class="section">
+            <h2>UEFI vs Legacy BIOS</h2>
+            <p>
+                Modern servers use UEFI firmware, which replaced legacy BIOS. Understanding the differences helps 
+                configure systems correctly for GPU operation.
+            </p>
+
+            <div class="concept-card">
+                <h3>Legacy BIOS</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Limitations:</strong> 16-bit code, limited to 2.2TB disk support, slower boot</li>
+                    <li><strong>GPU Support:</strong> Basic GPU initialization, limited multi-GPU support</li>
+                    <li><strong>Configuration:</strong> Text-based interface, limited options</li>
+                    <li><strong>Use Cases:</strong> Legacy systems, older hardware</li>
+                </ul>
+            </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[System Boot] --> B{UEFI or BIOS?}
+                    B -->|UEFI| C[UEFI Firmware]
+                    B -->|Legacy| D[BIOS Firmware]
+                    C --> E[64-bit Code]
+                    C --> F[GPT Disk Support]
+                    C --> G[Secure Boot]
+                    C --> H[Better GPU Support]
+                    D --> I[16-bit Code]
+                    D --> J[MBR Disk]
+                    D --> K[No Secure Boot]
+                    D --> L[Limited GPU Support]
+                    H --> M[Multi-GPU Ready]
+                    L --> N[Single GPU Preferred]
+                    
+                    style C fill:#4CAF50
+                    style D fill:#FF9800
+                    style M fill:#81C784
+                    style N fill:#FFB74D
+            </div>
+
+            <div class="concept-card">
+                <h3>UEFI Firmware</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Advantages:</strong> 32/64-bit code, GPT disk support, faster boot, secure boot</li>
+                    <li><strong>GPU Support:</strong> Better multi-GPU support, improved initialization</li>
+                    <li><strong>Configuration:</strong> Graphical interface, extensive options, mouse support</li>
+                    <li><strong>Use Cases:</strong> Modern servers, recommended for GPU servers</li>
+                </ul>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Legacy BIOS</th>
+                        <th>UEFI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Code Architecture</strong></td>
+                        <td>16-bit</td>
+                        <td>32/64-bit</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Disk Support</strong></td>
+                        <td>MBR (2.2TB limit)</td>
+                        <td>GPT (unlimited)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Boot Speed</strong></td>
+                        <td>Slower</td>
+                        <td>Faster</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Multi-GPU Support</strong></td>
+                        <td>Limited</td>
+                        <td>Excellent</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Secure Boot</strong></td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interface</strong></td>
+                        <td>Text-based</td>
+                        <td>Graphical</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="pcie-settings" class="section">
+            <h2>PCIe Configuration Settings</h2>
+            <p>
+                PCIe settings in BIOS/UEFI control how PCIe devices (including GPUs) are detected, initialized, 
+                and configured. These settings are critical for multi-GPU systems.
+            </p>
+
+            <div class="config-card">
+                <h3>Above 4G Decoding / Above 4GB MMIO</h3>
+                <p>
+                    <strong>Purpose:</strong> Enables memory-mapped I/O (MMIO) above 4GB address space, required 
+                    for systems with multiple GPUs or large GPU memory.
+                </p>
+                <p><strong>Location:</strong> Advanced → PCIe/PCI Subsystem Settings</p>
+                <p><strong>Setting:</strong> Enable / Enabled</p>
+                <p><strong>Critical for:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Systems with 2+ GPUs</li>
+                    <li>GPUs with large memory (40GB+)</li>
+                    <li>Multi-GPU training workloads</li>
+                </ul>
+                <div class="example-box">
+                    <strong>Why It Matters:</strong>
+                    Without Above 4G Decoding enabled, systems with multiple GPUs may only detect the first GPU. 
+                    This setting allows the system to map GPU memory above the 4GB boundary, enabling support for 
+                    multiple high-memory GPUs.
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>PCIe Link Speed</h3>
+                <p>
+                    <strong>Purpose:</strong> Sets the PCIe generation (Gen1, Gen2, Gen3, Gen4, Gen5) for PCIe slots.
+                </p>
+                <p><strong>Location:</strong> Advanced → PCIe/PCI Subsystem Settings</p>
+                <p><strong>Setting:</strong> Auto (recommended) or specific generation</p>
+                <p><strong>Considerations:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Auto allows negotiation to highest supported speed</li>
+                    <li>Forcing lower speed can limit GPU performance</li>
+                    <li>Gen4/Gen5 recommended for modern GPUs (A100, H100)</li>
+                </ul>
+            </div>
+
+            <div class="config-card">
+                <h3>PCIe Slot Configuration</h3>
+                <p>
+                    <strong>Purpose:</strong> Configures individual PCIe slots (enable/disable, link width, bifurcation).
+                </p>
+                <p><strong>Location:</strong> Advanced → PCIe/PCI Subsystem Settings → Slot Configuration</p>
+                <p><strong>Settings:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Enable/disable specific slots</li>
+                    <li>Configure link width (x16, x8, x4)</li>
+                    <li>Set bifurcation mode (x16, x8x8, x4x4x4x4)</li>
+                </ul>
+            </div>
+
+            <div class="config-card">
+                <h3>PCIe ASPM (Active State Power Management)</h3>
+                <p>
+                    <strong>Purpose:</strong> Enables power management for PCIe devices when idle.
+                </p>
+                <p><strong>Location:</strong> Advanced → PCIe/PCI Subsystem Settings</p>
+                <p><strong>Setting:</strong> Disabled (recommended for GPUs)</p>
+                <p><strong>Why Disable:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>ASPM can cause GPU initialization delays</li>
+                    <li>May cause GPU detection issues</li>
+                    <li>GPUs have their own power management</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="gpu-settings" class="section">
+            <h2>GPU-Specific Settings</h2>
+            <p>
+                GPU-specific BIOS/UEFI settings control GPU detection, initialization, and memory mapping. These 
+                settings ensure GPUs are properly recognized and configured.
+            </p>
+
+            <div class="config-card">
+                <h3>GPU Detection and Initialization</h3>
+                <p><strong>Settings to Verify:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Primary Display:</strong> Set to PCIe/PCI (not onboard graphics)</li>
+                    <li><strong>GPU Initialization:</strong> Enable all GPU slots</li>
+                    <li><strong>GPU Memory Mapping:</strong> Ensure sufficient address space</li>
+                    <li><strong>VGA Priority:</strong> Set to PCIe for GPU-first boot</li>
+                </ul>
+            </div>
+
+            <div class="config-card">
+                <h3>Memory Remapping</h3>
+                <p>
+                    <strong>Purpose:</strong> Remaps memory above 4GB to enable large memory support and GPU memory mapping.
+                </p>
+                <p><strong>Location:</strong> Advanced → Memory Configuration</p>
+                <p><strong>Setting:</strong> Enable</p>
+                <p><strong>Required for:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Systems with 32GB+ system memory</li>
+                    <li>Multi-GPU configurations</li>
+                    <li>GPUs with large memory (40GB+)</li>
+                </ul>
+            </div>
+
+            <div class="config-card">
+                <h3>IOMMU / VT-d</h3>
+                <p>
+                    <strong>Purpose:</strong> Enables I/O Memory Management Unit for device passthrough and virtualization.
+                </p>
+                <p><strong>Location:</strong> Advanced → CPU Configuration → Intel VT-d / AMD-Vi</p>
+                <p><strong>Setting:</strong> Enable (if using GPU passthrough or virtualization)</p>
+                <p><strong>Use Cases:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>GPU passthrough to VMs</li>
+                    <li>vGPU configurations</li>
+                    <li>Container GPU access</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="boot-settings" class="section">
+            <h2>Boot Configuration</h2>
+            <p>
+                Boot settings control how the system starts and which devices are used for booting. Proper boot 
+                configuration ensures reliable system startup and GPU initialization.
+            </p>
+
+            <div class="config-card">
+                <h3>Boot Mode</h3>
+                <p>
+                    <strong>Options:</strong> Legacy BIOS, UEFI, or UEFI with CSM (Compatibility Support Module)
+                </p>
+                <p><strong>Recommendation:</strong> UEFI (pure UEFI, no CSM)</p>
+                <p><strong>Benefits:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Faster boot times</li>
+                    <li>Better GPU support</li>
+                    <li>Secure boot capability</li>
+                    <li>GPT disk support</li>
+                </ul>
+            </div>
+
+            <div class="config-card">
+                <h3>Secure Boot</h3>
+                <p>
+                    <strong>Purpose:</strong> Validates bootloader and driver signatures for security.
+                </p>
+                <p><strong>Location:</strong> Security → Secure Boot</p>
+                <p><strong>Setting:</strong> Disable (for GPU driver compatibility) or Enable with proper keys</p>
+                <p><strong>Considerations:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Secure Boot can prevent unsigned GPU drivers from loading</li>
+                    <li>May require driver signing or Secure Boot keys</li>
+                    <li>Disable if experiencing GPU driver loading issues</li>
+                </ul>
+            </div>
+
+            <div class="config-card">
+                <h3>Fast Boot / Quick Boot</h3>
+                <p>
+                    <strong>Purpose:</strong> Skips certain POST checks to speed up boot.
+                </p>
+                <p><strong>Setting:</strong> Disable (recommended for GPU servers)</p>
+                <p><strong>Why Disable:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Ensures full GPU detection during POST</li>
+                    <li>Prevents missed hardware initialization</li>
+                    <li>Allows proper error reporting</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="power-settings" class="section">
+            <h2>Power Management Settings</h2>
+            <p>
+                Power management settings in BIOS/UEFI control system power behavior, which affects GPU power 
+                delivery and thermal management.
+            </p>
+
+            <div class="config-card">
+                <h3>Power Management</h3>
+                <p><strong>Settings:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>ACPI Settings:</strong> Enable ACPI for proper power management</li>
+                    <li><strong>CPU Power Management:</strong> Enable C-states and P-states</li>
+                    <li><strong>PCIe Power Management:</strong> Disable for GPUs (use GPU power management)</li>
+                </ul>
+            </div>
+
+            <div class="config-card">
+                <h3>Power Limit Settings</h3>
+                <p>
+                    <strong>Purpose:</strong> Sets maximum power consumption limits for the system.
+                </p>
+                <p><strong>Considerations:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Ensure power limit accommodates all GPUs</li>
+                    <li>Account for peak power consumption</li>
+                    <li>Consider PSU capacity and efficiency</li>
+                    <li>Set appropriate limits to prevent overload</li>
+                </ul>
+            </div>
+
+            <div class="config-card">
+                <h3>Thermal Management</h3>
+                <p><strong>Settings:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Fan Control:</strong> Enable intelligent fan control</li>
+                    <li><strong>Thermal Throttling:</strong> Configure thermal limits</li>
+                    <li><strong>Temperature Monitoring:</strong> Enable temperature sensors</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Configuration Best Practices</h2>
+            <p>
+                Following best practices ensures reliable GPU operation and optimal performance. Document 
+                configurations for consistency and troubleshooting.
+            </p>
+
+            <div class="concept-card">
+                <h3>Essential Settings Checklist</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>✓ Enable UEFI boot mode (disable Legacy BIOS)</li>
+                    <li>✓ Enable Above 4G Decoding / Above 4GB MMIO</li>
+                    <li>✓ Set PCIe link speed to Auto</li>
+                    <li>✓ Disable PCIe ASPM</li>
+                    <li>✓ Set primary display to PCIe</li>
+                    <li>✓ Enable memory remapping</li>
+                    <li>✓ Disable Fast Boot</li>
+                    <li>✓ Configure secure boot appropriately</li>
+                    <li>✓ Verify all GPU slots are enabled</li>
+                    <li>✓ Set appropriate power limits</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Verification Steps</h3>
+                <p>After BIOS/UEFI configuration, verify GPU detection:</p>
+                <div class="command-box">
+# Check GPU detection in system
+lspci | grep -i nvidia
+
+# Verify GPU appears in BIOS/UEFI POST
+# Check POST messages during boot
+
+# Verify GPU in operating system
+nvidia-smi
+
+# Check PCIe link status
+nvidia-smi -q -d PCIE
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Common Issues and Solutions</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Issue</th>
+                            <th>Likely Cause</th>
+                            <th>Solution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>GPU not detected</td>
+                            <td>Above 4G Decoding disabled</td>
+                            <td>Enable Above 4G Decoding</td>
+                        </tr>
+                        <tr>
+                            <td>Only first GPU detected</td>
+                            <td>Memory remapping disabled</td>
+                            <td>Enable memory remapping</td>
+                        </tr>
+                        <tr>
+                            <td>Slow GPU performance</td>
+                            <td>PCIe link speed limited</td>
+                            <td>Set PCIe to Auto or Gen4/Gen5</td>
+                        </tr>
+                        <tr>
+                            <td>GPU driver won't load</td>
+                            <td>Secure Boot enabled</td>
+                            <td>Disable Secure Boot or sign drivers</td>
+                        </tr>
+                        <tr>
+                            <td>System instability</td>
+                            <td>Power limit too low</td>
+                            <td>Increase power limit or reduce GPUs</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example-box">
+                <strong>Configuration Documentation:</strong>
+                Document all BIOS/UEFI settings for each server model. This enables:
+                - Consistent configuration across servers
+                - Faster troubleshooting
+                - Easier deployment of new servers
+                - Knowledge transfer to team members
+                Create a configuration template for each server model with GPU configuration.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>BIOS/UEFI Configuration for GPU Servers | Essential Server BIOS Settings</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

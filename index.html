@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Infrastructure Explainers - Complete Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00BCD4;
+            --secondary-color: #26C6DA;
+            --accent-color: #4DD0E1;
+            --bg-color: #F5F5F5;
+            --card-bg: #FFFFFF;
+            --text-color: #1A1A1A;
+            --text-muted: #666;
+            --border-color: #E0E0E0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 4px 16px rgba(0, 188, 212, 0.2);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #00BCD4, #26C6DA);
+            color: white;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button:hover {
+            color: var(--primary-color);
+            background: rgba(0, 188, 212, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .explainers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .explainer-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .explainer-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
+        }
+
+        .explainer-number {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .explainer-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            line-height: 1.4;
+        }
+
+        .explainer-description {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .search-box {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            font-size: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        .category-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    .sidebar-wrapper {
+        flex-direction: column;
+    }
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    .section { padding: 25px 20px; }
+}
+
+            .explainers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+
+            .tab-button {
+                white-space: nowrap;
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+
+            .stats {
+                gap: 20px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🚀 AI Infrastructure Explainers</h1>
+        <p>Comprehensive guides to NVIDIA AI infrastructure, from fundamentals to advanced automation</p>
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-number">136</span>
+                <span class="stat-label">Explainers</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">10</span>
+                <span class="stat-label">Categories</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">Free & Open</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search explainers...">
+            <span class="search-icon">🔍</span>
+        </div>
+
+        <div class="tabs" id="tabs">
+            <button class="tab-button active" data-tab="all">All Explainers</button>
+            <button class="tab-button" data-tab="foundation">Foundation</button>
+            <button class="tab-button" data-tab="gpu">GPU & Compute</button>
+            <button class="tab-button" data-tab="networking">Networking</button>
+            <button class="tab-button" data-tab="storage">Storage</button>
+            <button class="tab-button" data-tab="dpu">DPU & BlueField</button>
+            <button class="tab-button" data-tab="management">Cluster Management</button>
+            <button class="tab-button" data-tab="containers">Containers & K8s</button>
+            <button class="tab-button" data-tab="software">AI Software Stack</button>
+            <button class="tab-button" data-tab="operations">Operations</button>
+            <button class="tab-button" data-tab="advanced">Advanced</button>
+        </div>
+
+        <div id="tabContents">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <footer>
+        <p>Built with ❤️ for the AI Infrastructure community</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">All explainers are free to use and share</p>
+    </footer>
+
+    <script>
+        const explainers = [
+            // Foundation & Fundamentals
+            {num: 1, file: '01-ai-infrastructure-dna-explainer.html', title: 'AI Infrastructure Architecture', desc: 'Complete system design powering modern AI workloads', category: 'foundation'},
+            {num: 2, file: '02-ai-trinity-explainer.html', title: 'The AI Trinity', desc: 'Understanding AI, Machine Learning, and Deep Learning', category: 'foundation'},
+            {num: 3, file: '03-ai-workload-lifecycle-explainer.html', title: 'AI Workload Lifecycle', desc: 'From conception to production deployment', category: 'foundation'},
+            {num: 9, file: '09-data-center-metamorphosis-explainer.html', title: 'Data Center Evolution', desc: 'Transforming traditional data centers for AI', category: 'foundation'},
+            {num: 15, file: '15-generative-ai-revolution-explainer.html', title: 'Generative AI Revolution', desc: 'Understanding generative AI and its infrastructure needs', category: 'foundation'},
+            {num: 102, file: '102-on-premises-vs-cloud-explainer.html', title: 'On-Premises vs Cloud', desc: 'Choosing the right infrastructure deployment model', category: 'foundation'},
+
+            // GPU & Compute
+            {num: 16, file: '16-gpu-galaxy-explainer.html', title: 'GPU Galaxy', desc: 'A comprehensive guide to NVIDIA GPUs', category: 'gpu'},
+            {num: 17, file: '17-gpu-memory-hierarchy-water-system-explainer.html', title: 'GPU Memory Hierarchy', desc: 'Understanding GPU memory architecture', category: 'gpu'},
+            {num: 22, file: '22-mig-origami-explainer.html', title: 'MIG Origami', desc: 'Multi-Instance GPU partitioning', category: 'gpu'},
+            {num: 25, file: '25-nvidia-smi-detective-explainer.html', title: 'nvidia-smi Detective', desc: 'GPU monitoring and management', category: 'gpu'},
+            {num: 31, file: '31-gpu-driver-installation-explainer.html', title: 'GPU Driver Installation', desc: 'Installing and configuring GPU drivers', category: 'gpu'},
+            {num: 32, file: '32-gpu-specifications-decoded-explainer.html', title: 'GPU Specifications Decoded', desc: 'Understanding GPU technical specifications', category: 'gpu'},
+            {num: 33, file: '33-nvidia-certified-systems-explainer.html', title: 'NVIDIA Certified Systems', desc: 'Validated hardware for optimal GPU performance', category: 'gpu'},
+            {num: 34, file: '34-nvlink-gpu-superhighway-explainer.html', title: 'NVLink GPU Superhighway', desc: 'High-speed GPU interconnect technology', category: 'gpu'},
+            {num: 35, file: '35-nvswitch-traffic-director-explainer.html', title: 'NVSwitch Traffic Director', desc: 'GPU interconnect switch for multi-GPU systems', category: 'gpu'},
+            {num: 36, file: '36-dgx-a100-vs-h100-explainer.html', title: 'DGX A100 vs H100', desc: 'Comparing NVIDIA flagship GPU systems', category: 'gpu'},
+            {num: 37, file: '37-vgpu-time-sharing-explainer.html', title: 'vGPU Time-Sharing', desc: 'Virtual GPU for multiple workloads', category: 'gpu'},
+            {num: 38, file: '38-gpu-instance-compute-instance-explainer.html', title: 'GPU Instance vs Compute Instance', desc: 'Understanding MIG partitioning levels', category: 'gpu'},
+            {num: 39, file: '39-nvidia-mig-parted-explainer.html', title: 'NVIDIA MIG Parted', desc: 'Tool for configuring MIG instances', category: 'gpu'},
+            {num: 40, file: '40-gpu-monitoring-deep-dive-explainer.html', title: 'GPU Monitoring Deep Dive', desc: 'Comprehensive GPU performance monitoring', category: 'gpu'},
+            {num: 119, file: '119-gpu-virtualization-comparison-explainer.html', title: 'GPU Virtualization Comparison', desc: 'MIG vs vGPU vs Time-Slicing', category: 'gpu'},
+
+            // Networking
+            {num: 14, file: '14-east-west-north-south-traffic-explainer.html', title: 'East-West vs North-South Traffic', desc: 'Understanding network traffic patterns', category: 'networking'},
+            {num: 19, file: '19-infiniband-autobahn-explainer.html', title: 'InfiniBand Autobahn', desc: 'High-speed networking for AI workloads', category: 'networking'},
+            {num: 20, file: '20-infiniband-command-zoo-explainer.html', title: 'InfiniBand Command Zoo', desc: 'Essential InfiniBand commands', category: 'networking'},
+            {num: 27, file: '27-roce-old-dog-new-tricks-explainer.html', title: 'RoCE', desc: 'RDMA over Converged Ethernet', category: 'networking'},
+            {num: 30, file: '30-ufm-crystal-ball-explainer.html', title: 'UFM Crystal Ball', desc: 'InfiniBand fabric management', category: 'networking'},
+            {num: 41, file: '41-infiniband-generations-explainer.html', title: 'InfiniBand Generations', desc: 'From SDR to NDR evolution', category: 'networking'},
+            {num: 42, file: '42-rdma-explained-explainer.html', title: 'RDMA Explained', desc: 'Remote Direct Memory Access fundamentals', category: 'networking'},
+            {num: 43, file: '43-gpu-direct-rdma-explainer.html', title: 'GPU Direct RDMA', desc: 'Direct GPU-to-network communication', category: 'networking'},
+            {num: 44, file: '44-infiniband-subnet-manager-explainer.html', title: 'InfiniBand Subnet Manager', desc: 'Fabric discovery and management', category: 'networking'},
+            {num: 45, file: '45-sharp-network-accelerator-explainer.html', title: 'SHARP Network Accelerator', desc: 'In-network computing for collective operations', category: 'networking'},
+            {num: 46, file: '46-credit-based-flow-control-explainer.html', title: 'Credit-Based Flow Control', desc: 'Preventing network congestion', category: 'networking'},
+            {num: 47, file: '47-adaptive-routing-explainer.html', title: 'Adaptive Routing', desc: 'Dynamic path selection for optimal performance', category: 'networking'},
+            {num: 48, file: '48-dcqcn-ethernet-congestion-control-explainer.html', title: 'DCQCN', desc: 'Data center congestion control for Ethernet', category: 'networking'},
+            {num: 49, file: '49-qos-ai-networks-explainer.html', title: 'QoS for AI Networks', desc: 'Quality of Service for traffic prioritization', category: 'networking'},
+            {num: 50, file: '50-direct-data-placement-ddp-explainer.html', title: 'Direct Data Placement', desc: 'Zero-copy network data placement', category: 'networking'},
+            {num: 51, file: '51-network-topologies-explainer.html', title: 'Network Topologies', desc: 'Designing network layouts for AI', category: 'networking'},
+            {num: 52, file: '52-nvidia-spectrum-switches-explainer.html', title: 'NVIDIA Spectrum Switches', desc: 'Ethernet switches optimized for AI', category: 'networking'},
+            {num: 108, file: '108-network-troubleshooting-methodologies-explainer.html', title: 'Network Troubleshooting Methodologies', desc: 'Systematic network problem diagnosis', category: 'networking'},
+            {num: 115, file: '115-network-capacity-planning-explainer.html', title: 'Network Capacity Planning', desc: 'Planning network capacity for AI workloads', category: 'networking'},
+            {num: 118, file: '118-physical-layer-management-explainer.html', title: 'Physical Layer Management', desc: 'Managing network physical infrastructure', category: 'networking'},
+            {num: 124, file: '124-bluefield-networking-troubleshooting-explainer.html', title: 'BlueField Networking Troubleshooting', desc: 'Diagnosing DPU network issues', category: 'networking'},
+            {num: 125, file: '125-network-redundancy-failover-explainer.html', title: 'Network Redundancy and Failover', desc: 'High availability networking', category: 'networking'},
+            {num: 126, file: '126-infiniband-fabric-design-explainer.html', title: 'InfiniBand Fabric Design', desc: 'Designing high-performance InfiniBand networks', category: 'networking'},
+            {num: 127, file: '127-infiniband-performance-optimization-explainer.html', title: 'InfiniBand Performance Optimization', desc: 'Optimizing InfiniBand fabrics', category: 'networking'},
+            {num: 128, file: '128-spectrum-switch-configuration-explainer.html', title: 'Spectrum Switch Configuration', desc: 'Configuring NVIDIA Spectrum switches', category: 'networking'},
+            {num: 129, file: '129-spectrum-switch-troubleshooting-explainer.html', title: 'Spectrum Switch Troubleshooting', desc: 'Diagnosing Spectrum switch issues', category: 'networking'},
+            {num: 130, file: '130-kubernetes-networking-plugins-explainer.html', title: 'Kubernetes Networking Plugins', desc: 'CNI plugins for Kubernetes', category: 'networking'},
+            {num: 131, file: '131-kubernetes-network-policies-explainer.html', title: 'Kubernetes Network Policies', desc: 'Network security in Kubernetes', category: 'networking'},
+            {num: 132, file: '132-network-performance-analysis-explainer.html', title: 'Network Performance Analysis', desc: 'Analyzing network performance metrics', category: 'networking'},
+            {num: 134, file: '134-network-automation-explainer.html', title: 'Network Automation', desc: 'Automating network configuration', category: 'networking'},
+
+            // Storage
+            {num: 6, file: '06-checkpointing-time-machine-explainer.html', title: 'Checkpointing Time Machine', desc: 'Saving and restoring training state', category: 'storage'},
+            {num: 21, file: '21-lustre-orchestra-explainer.html', title: 'Lustre Orchestra', desc: 'Parallel filesystem for AI workloads', category: 'storage'},
+            {num: 28, file: '28-storage-hierarchy-explainer.html', title: 'Storage Hierarchy', desc: 'From flash to cloud storage tiers', category: 'storage'},
+            {num: 63, file: '63-storage-requirements-ai-explainer.html', title: 'Storage Requirements for AI', desc: 'Understanding AI workload storage needs', category: 'storage'},
+            {num: 64, file: '64-io-patterns-ai-explainer.html', title: 'I/O Patterns for AI', desc: 'How AI workloads access storage', category: 'storage'},
+            {num: 65, file: '65-checkpointing-storage-explainer.html', title: 'Checkpointing Storage', desc: 'Storage options for model checkpoints', category: 'storage'},
+            {num: 66, file: '66-nfs-ai-explainer.html', title: 'NFS for AI', desc: 'Network File System for AI workloads', category: 'storage'},
+            {num: 67, file: '67-clustered-nas-explainer.html', title: 'Clustered NAS', desc: 'Scalable NAS for AI clusters', category: 'storage'},
+            {num: 68, file: '68-object-storage-s3-explainer.html', title: 'Object Storage S3', desc: 'S3-compatible storage for AI data', category: 'storage'},
+            {num: 69, file: '69-data-locality-explainer.html', title: 'Data Locality', desc: 'Keeping data close to compute', category: 'storage'},
+            {num: 70, file: '70-storage-validation-explainer.html', title: 'Storage Validation', desc: 'Testing storage systems', category: 'storage'},
+            {num: 71, file: '71-storage-commands-explainer.html', title: 'Storage Commands', desc: 'Essential Linux storage commands', category: 'storage'},
+            {num: 109, file: '109-storage-performance-tuning-explainer.html', title: 'Storage Performance Tuning', desc: 'Optimizing storage for AI workloads', category: 'storage'},
+            {num: 110, file: '110-storage-troubleshooting-explainer.html', title: 'Storage Troubleshooting', desc: 'Diagnosing storage problems', category: 'storage'},
+
+            // DPU & BlueField
+            {num: 5, file: '05-bluefield-dpu-swiss-army-knife-explainer.html', title: 'BlueField DPU', desc: 'Programmable infrastructure processor', category: 'dpu'},
+            {num: 11, file: '11-doca-operating-system-explainer.html', title: 'DOCA Operating System', desc: 'Framework for DPU applications', category: 'dpu'},
+            {num: 13, file: '13-dpu-bringup-ritual-explainer.html', title: 'DPU Bring-up Ritual', desc: 'Initializing and configuring DPUs', category: 'dpu'},
+            {num: 53, file: '53-bluefield-generations-explainer.html', title: 'BlueField Generations', desc: 'Evolution of BlueField DPUs', category: 'dpu'},
+            {num: 54, file: '54-doca-sdk-vs-runtime-explainer.html', title: 'DOCA SDK vs Runtime', desc: 'Development vs execution components', category: 'dpu'},
+            {num: 55, file: '55-doca-installation-host-vs-dpu-explainer.html', title: 'DOCA Installation', desc: 'Host vs DPU installation guide', category: 'dpu'},
+            {num: 56, file: '56-rshim-interface-explainer.html', title: 'RShim Interface', desc: 'Host-to-DPU communication', category: 'dpu'},
+            {num: 57, file: '57-dpu-network-interfaces-pfs-vfs-sfs-explainer.html', title: 'DPU Network Interfaces', desc: 'PF, VF, and SF explained', category: 'dpu'},
+            {num: 58, file: '58-dpu-ovs-bridges-explainer.html', title: 'DPU OVS Bridges', desc: 'Open vSwitch on DPU', category: 'dpu'},
+            {num: 59, file: '59-dpu-storage-acceleration-explainer.html', title: 'DPU Storage Acceleration', desc: 'Storage I/O acceleration with DPU', category: 'dpu'},
+            {num: 60, file: '60-dpu-security-functions-explainer.html', title: 'DPU Security Functions', desc: 'Hardware-accelerated security', category: 'dpu'},
+            {num: 61, file: '61-dpu-bring-up-process-explainer.html', title: 'DPU Bring-up Process', desc: 'Complete DPU initialization procedure', category: 'dpu'},
+            {num: 62, file: '62-dpu-firmware-management-explainer.html', title: 'DPU Firmware Management', desc: 'Managing DPU firmware updates', category: 'dpu'},
+
+            // Cluster Management
+            {num: 4, file: '04-base-command-manager-conductor-explainer.html', title: 'Base Command Manager', desc: 'Cluster orchestration platform', category: 'management'},
+            {num: 7, file: '07-cmsh-universal-remote-explainer.html', title: 'CMSH', desc: 'Cluster Management Shell', category: 'management'},
+            {num: 10, file: '10-dgx-superpod-city-explainer.html', title: 'DGX SuperPOD', desc: 'Scalable AI infrastructure solution', category: 'management'},
+            {num: 18, file: '18-health-checks-medical-exam-explainer.html', title: 'Health Checks', desc: 'Infrastructure monitoring and diagnostics', category: 'management'},
+            {num: 26, file: '26-pxe-boot-phoenix-explainer.html', title: 'PXE Boot Phoenix', desc: 'Network boot and provisioning', category: 'management'},
+            {num: 72, file: '72-cluster-architecture-types-explainer.html', title: 'Cluster Architecture Types', desc: 'Designing cluster architectures', category: 'management'},
+            {num: 73, file: '73-node-discovery-explainer.html', title: 'Node Discovery', desc: 'Automatic node discovery and integration', category: 'management'},
+            {num: 74, file: '74-software-image-management-explainer.html', title: 'Software Image Management', desc: 'Managing cluster software images', category: 'management'},
+            {num: 75, file: '75-node-categories-groups-explainer.html', title: 'Node Categories and Groups', desc: 'Organizing cluster nodes', category: 'management'},
+            {num: 76, file: '76-user-group-management-explainer.html', title: 'User and Group Management', desc: 'Managing cluster access and users', category: 'management'},
+            {num: 77, file: '77-base-view-web-gui-explainer.html', title: 'Base View Web GUI', desc: 'Web interface for cluster management', category: 'management'},
+            {num: 78, file: '78-workload-managers-explainer.html', title: 'Workload Managers', desc: 'SLURM, PBS, LSF job schedulers', category: 'management'},
+            {num: 79, file: '79-jupyter-ecosystem-explainer.html', title: 'Jupyter Ecosystem', desc: 'Interactive development on clusters', category: 'management'},
+            {num: 80, file: '80-bcm-auto-scaler-explainer.html', title: 'BCM Auto-Scaler', desc: 'Automatic cluster scaling', category: 'management'},
+            {num: 81, file: '81-cluster-maintenance-explainer.html', title: 'Cluster Maintenance', desc: 'Maintaining cluster health', category: 'management'},
+            {num: 107, file: '107-slurm-deep-dive-explainer.html', title: 'SLURM Deep Dive', desc: 'Advanced SLURM configuration', category: 'management'},
+            {num: 111, file: '111-bcm-troubleshooting-explainer.html', title: 'BCM Troubleshooting', desc: 'Diagnosing BCM issues', category: 'management'},
+            {num: 112, file: '112-bcm-advanced-configuration-explainer.html', title: 'BCM Advanced Configuration', desc: 'Advanced BCM setup', category: 'management'},
+            {num: 121, file: '121-job-scheduling-optimization-explainer.html', title: 'Job Scheduling Optimization', desc: 'Optimizing job schedulers', category: 'management'},
+            {num: 123, file: '123-data-center-operations-workflows-explainer.html', title: 'Data Center Operations Workflows', desc: 'Operational procedures and workflows', category: 'management'},
+
+            // Containers & Kubernetes
+            {num: 8, file: '08-container-toolkit-portal-explainer.html', title: 'NVIDIA Container Toolkit', desc: 'GPU access in containers', category: 'containers'},
+            {num: 12, file: '12-docker-vms-apartment-house-explainer.html', title: 'Containers vs Virtual Machines', desc: 'Choosing deployment options', category: 'containers'},
+            {num: 24, file: '24-ngc-app-store-explainer.html', title: 'NGC App Store', desc: 'NVIDIA GPU Cloud container registry', category: 'containers'},
+            {num: 92, file: '92-docker-workflow-explainer.html', title: 'Docker Workflow', desc: 'Containerizing AI workloads', category: 'containers'},
+            {num: 93, file: '93-kubernetes-gpu-operations-explainer.html', title: 'Kubernetes GPU Operations', desc: 'Running GPUs on Kubernetes', category: 'containers'},
+            {num: 94, file: '94-ngc-private-registry-explainer.html', title: 'NGC Private Registry', desc: 'Enterprise container registry', category: 'containers'},
+            {num: 95, file: '95-container-security-explainer.html', title: 'Container Security', desc: 'Securing containerized workloads', category: 'containers'},
+            {num: 96, file: '96-multi-container-workflows-explainer.html', title: 'Multi-Container Workflows', desc: 'Orchestrating container workflows', category: 'containers'},
+            {num: 113, file: '113-kubernetes-gpu-device-plugins-explainer.html', title: 'Kubernetes GPU Device Plugins', desc: 'GPU device plugins for Kubernetes', category: 'containers'},
+            {num: 120, file: '120-container-best-practices-gpu-workloads-explainer.html', title: 'Container Best Practices', desc: 'Best practices for GPU containers', category: 'containers'},
+            {num: 122, file: '122-kubernetes-gpu-scheduling-policies-explainer.html', title: 'Kubernetes GPU Scheduling', desc: 'GPU scheduling policies in Kubernetes', category: 'containers'},
+
+            // AI Software Stack
+            {num: 23, file: '23-nccl-collective-communication-explainer.html', title: 'NCCL Collective Communication', desc: 'GPU communication library', category: 'software'},
+            {num: 29, file: '29-tensorrt-inference-optimization-explainer.html', title: 'TensorRT Inference Optimization', desc: 'Optimizing inference performance', category: 'software'},
+            {num: 82, file: '82-cuda-toolkit-explainer.html', title: 'CUDA Toolkit', desc: 'GPU development environment', category: 'software'},
+            {num: 83, file: '83-cudnn-explainer.html', title: 'cuDNN', desc: 'Deep neural network library', category: 'software'},
+            {num: 84, file: '84-cublas-cusparse-explainer.html', title: 'cuBLAS and cuSPARSE', desc: 'Linear algebra libraries', category: 'software'},
+            {num: 85, file: '85-dali-explainer.html', title: 'DALI', desc: 'Data loading library', category: 'software'},
+            {num: 86, file: '86-tensorrt-deep-dive-explainer.html', title: 'TensorRT Deep Dive', desc: 'Advanced inference optimization', category: 'software'},
+            {num: 87, file: '87-triton-inference-server-explainer.html', title: 'Triton Inference Server', desc: 'Production inference serving', category: 'software'},
+            {num: 88, file: '88-nemo-explainer.html', title: 'NeMo', desc: 'Conversational AI framework', category: 'software'},
+            {num: 89, file: '89-rapids-explainer.html', title: 'RAPIDS', desc: 'GPU-accelerated data science', category: 'software'},
+            {num: 90, file: '90-nsight-tools-explainer.html', title: 'Nsight Tools', desc: 'GPU profiling and debugging', category: 'software'},
+            {num: 91, file: '91-nvidia-ai-enterprise-explainer.html', title: 'NVIDIA AI Enterprise', desc: 'Enterprise AI platform', category: 'software'},
+            {num: 97, file: '97-end-to-end-ml-pipeline-explainer.html', title: 'End-to-End ML Pipeline', desc: 'Complete ML lifecycle', category: 'software'},
+            {num: 98, file: '98-mlops-practices-explainer.html', title: 'MLOps Practices', desc: 'Operationalizing ML', category: 'software'},
+            {num: 99, file: '99-model-serving-production-explainer.html', title: 'Model Serving in Production', desc: 'Production model deployment', category: 'software'},
+            {num: 100, file: '100-ai-workflow-optimization-explainer.html', title: 'AI Workflow Optimization', desc: 'Optimizing complete AI workflows', category: 'software'},
+
+            // Operations & Troubleshooting
+            {num: 101, file: '101-energy-efficient-computing-explainer.html', title: 'Energy Efficient Computing', desc: 'Optimizing power consumption', category: 'operations'},
+            {num: 103, file: '103-hardware-validation-procedures-explainer.html', title: 'Hardware Validation Procedures', desc: 'Testing hardware before production', category: 'operations'},
+            {num: 104, file: '104-hardware-troubleshooting-explainer.html', title: 'Hardware Troubleshooting', desc: 'Diagnosing hardware problems', category: 'operations'},
+            {num: 105, file: '105-bios-uefi-configuration-explainer.html', title: 'BIOS/UEFI Configuration', desc: 'Server firmware configuration', category: 'operations'},
+            {num: 106, file: '106-pcie-configuration-explainer.html', title: 'PCIe Configuration', desc: 'Configuring PCIe for GPUs', category: 'operations'},
+            {num: 114, file: '114-data-center-design-principles-explainer.html', title: 'Data Center Design Principles', desc: 'Designing data centers for AI', category: 'operations'},
+            {num: 116, file: '116-performance-tuning-ai-workloads-explainer.html', title: 'Performance Tuning for AI', desc: 'Optimizing AI workload performance', category: 'operations'},
+            {num: 117, file: '117-hpc-workload-optimization-explainer.html', title: 'HPC Workload Optimization', desc: 'Optimizing HPC workloads', category: 'operations'},
+            {num: 133, file: '133-performance-analysis-tools-explainer.html', title: 'Performance Analysis Tools', desc: 'Tools for performance analysis', category: 'operations'},
+
+            // Advanced Topics
+            {num: 135, file: '135-infrastructure-as-code-explainer.html', title: 'Infrastructure as Code', desc: 'Managing infrastructure with code', category: 'advanced'},
+            {num: 136, file: '136-configuration-management-explainer.html', title: 'Configuration Management', desc: 'Ansible, Puppet, Chef for infrastructure', category: 'advanced'}
+        ];
+
+        function renderExplainers(category = 'all', searchTerm = '') {
+            const container = document.getElementById('tabContents');
+            let filtered = explainers;
+
+            if (category !== 'all') {
+                filtered = filtered.filter(e => e.category === category);
+            }
+
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(e => 
+                    e.title.toLowerCase().includes(term) ||
+                    e.desc.toLowerCase().includes(term) ||
+                    e.num.toString().includes(term)
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <h2>No explainers found</h2>
+                        <p>Try adjusting your search or selecting a different category</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const categoryNames = {
+                'all': 'All Explainers',
+                'foundation': 'Foundation & Fundamentals',
+                'gpu': 'GPU & Compute',
+                'networking': 'Networking',
+                'storage': 'Storage',
+                'dpu': 'DPU & BlueField',
+                'management': 'Cluster Management',
+                'containers': 'Containers & Kubernetes',
+                'software': 'AI Software Stack',
+                'operations': 'Operations & Troubleshooting',
+                'advanced': 'Advanced Topics'
+            };
+
+            let html = `<div class="category-header">${categoryNames[category]} (${filtered.length})</div>`;
+            html += '<div class="explainers-grid">';
+            
+            filtered.forEach(exp => {
+                html += `
+                    <a href="${exp.file}" class="explainer-card">
+                        <span class="explainer-number">#${exp.num}</span>
+                        <div class="explainer-title">${exp.title}</div>
+                        <div class="explainer-description">${exp.desc}</div>
+                    </a>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                const category = button.getAttribute('data-tab');
+                const searchTerm = document.getElementById('searchInput').value;
+                renderExplainers(category, searchTerm);
+            });
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value;
+            const activeTab = document.querySelector('.tab-button.active').getAttribute('data-tab');
+            renderExplainers(activeTab, searchTerm);
+        });
+
+        // Initial render
+        renderExplainers('all');
+    </script>
+</body>
+</html>

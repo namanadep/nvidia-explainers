@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H200NVL GPU VM Explainer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #0073E6;
+    --secondary-color: #00A8E8;
+    --accent-color: #FF6B35;
+    --success-color: #00C853;
+    --bg-color: #FFFFFF;
+    --card-bg: #F8F9FA;
+    --light-bg: #F0F4F8;
+    --text-color: #1A1A1A;
+    --text-muted: #6C757D;
+    --border-color: #E0E0E0;
+    --shadow: 0 2px 8px rgba(0, 115, 230, 0.1);
+    --shadow-hover: 0 4px 16px rgba(0, 115, 230, 0.15);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    text-align: center;
+    padding: 30px 40px;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+
+.nav-link:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+
+.nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+
+main {
+    width: 100%;
+    padding: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+
+.section h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 8px;
+}
+
+.section h3 {
+    font-size: 1.5rem;
+    margin: 20px 0 12px;
+    color: var(--secondary-color);
+}
+
+.section h4 {
+    font-size: 1.2rem;
+    margin: 15px 0 10px;
+    color: var(--text-color);
+}
+
+.section p {
+    margin-bottom: 15px;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-color);
+}
+
+.specs-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.spec-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.spec-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-hover);
+}
+
+.spec-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: var(--text-muted);
+}
+
+.spec-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.spec-detail {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.architecture-diagram,
+.memory-visualization,
+.performance-chart,
+.mig-visualization,
+.vgpu-visualization {
+    margin: 20px 0;
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.architecture-components {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.component-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.component-card:hover {
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.component-card h3 {
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.interactive-controls {
+    display: flex;
+    gap: 30px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.control-group input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-color);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 115, 230, 0.3);
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    background: var(--secondary-color);
+}
+
+.control-group input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 115, 230, 0.3);
+}
+
+.precision-selector,
+.use-case-selector {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.precision-btn,
+.usecase-btn {
+    padding: 10px 20px;
+    background: white;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+}
+
+.precision-btn:hover,
+.usecase-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
+}
+
+.precision-btn.active,
+.usecase-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.performance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.performance-table th,
+.performance-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.performance-table th {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+.performance-table tr:hover {
+    background: var(--light-bg);
+}
+
+.virtualization-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    background: white;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+}
+
+.tab-btn:hover {
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.tab-btn.active {
+    background: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+}
+
+.tab-content {
+    display: none;
+    margin-top: 30px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.mig-controls,
+.vgpu-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.mig-controls label,
+.vgpu-controls label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.vgpu-controls select {
+    padding: 10px 15px;
+    background: white;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.vgpu-controls select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 115, 230, 0.1);
+}
+
+.usecase-content {
+    display: none;
+    margin-top: 30px;
+}
+
+.usecase-content.active {
+    display: block;
+}
+
+.usecase-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.metric {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.metric:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.memory-details,
+.mig-details,
+.vgpu-details,
+.compute-details {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.memory-details ul,
+.mig-details ul,
+.vgpu-details ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.memory-details li,
+.mig-details li,
+.vgpu-details li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.memory-details li:last-child,
+.mig-details li:last-child,
+.vgpu-details li:last-child {
+    border-bottom: none;
+}
+
+.memory-details strong,
+.mig-details strong,
+.vgpu-details strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.example-box {
+    background: var(--light-bg);
+    border-left: 4px solid var(--primary-color);
+    padding: 15px 20px;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 8px;
+}
+
+footer {
+    text-align: center;
+    padding: 30px 40px;
+    margin-top: 0;
+    background: var(--light-bg);
+    border-top: 2px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+footer p {
+    margin: 10px 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (max-width: 1200px) {
+    .specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .architecture-components {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+
+    .section h2 {
+        font-size: 1.5rem;
+    }
+
+    .specs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .interactive-controls {
+        flex-direction: column;
+    }
+    
+    
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+
+/* Disable all tooltips */
+* {
+    pointer-events: auto;
+}
+
+[title] {
+    pointer-events: auto;
+}
+
+/* Prevent tooltip display */
+[title]:hover::after,
+[title]:hover::before {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    content: none !important;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>H200NVL GPU VM EXPLAINER</h1>
+            <p class="subtitle">Discover the power of NVLink-connected H200 GPUs - made simple!</p>
+        </header>
+
+        <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+            <a href="#overview" class="nav-link active">Overview</a>
+            <a href="#architecture" class="nav-link">Architecture</a>
+            <a href="#nvlink" class="nav-link">NVLink Power</a>
+            <a href="#memory" class="nav-link">Memory</a>
+            <a href="#compute" class="nav-link">Compute</a>
+            <a href="#virtualization" class="nav-link">Virtualization</a>
+            <a href="#use-cases" class="nav-link">Use Cases</a>
+        </nav>
+    <div class="main-content-wrapper">
+        <main>
+            <!-- Overview Section -->
+            <section id="overview" class="section">
+                <h2>What is the H200NVL GPU?</h2>
+                <p>
+                    The H200NVL is like having two super-powered brains working together as one! The "NVL" stands for 
+                    NVLink, which is a super-fast connection that lets two H200 GPUs work together seamlessly. 
+                    Think of it as two race cars connected by a perfect communication system - they work as a team 
+                    to go even faster!
+                </p>
+                <div class="example-box">
+                    <strong>Real-World Example:</strong>
+                    Imagine two chefs in a kitchen. Instead of working separately, they're connected by a perfect 
+                    communication system (NVLink) that lets them share ingredients instantly. They can cook twice 
+                    as many dishes in the same time, working as one super-efficient team!
+                </div>
+                <p>
+                    The H200NVL combines two H200 GPUs with ultra-fast NVLink connections, creating a massive 
+                    282GB of unified memory. This is perfect for training the largest AI models that need more 
+                    memory than a single GPU can provide. It's like having a warehouse twice the size, but with 
+                    instant access to everything!
+                </p>
+                
+                <div class="specs-grid">
+                    <div class="spec-card">
+                        <h3>Total Memory</h3>
+                        <div class="spec-value">282 GB</div>
+                        <div class="spec-detail">Unified HBM3e</div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>NVLink Speed</h3>
+                        <div class="spec-value">900 GB/s</div>
+                        <div class="spec-detail">Per GPU Link</div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>Tensor Performance</h3>
+                        <div class="spec-value">7,916 TFLOPS</div>
+                        <div class="spec-detail">FP8 Combined</div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>GPU Count</h3>
+                        <div class="spec-value">2 GPUs</div>
+                        <div class="spec-detail">NVLink Connected</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Architecture Section -->
+            <section id="architecture" class="section">
+                <h2>H200NVL Architecture - Two GPUs, One Team</h2>
+                <p>
+                    The H200NVL architecture is like a perfectly synchronized dance between two powerful GPUs. 
+                    They share information so fast through NVLink that they act as one unified system, with double 
+                    the memory and nearly double the computing power!
+                </p>
+
+                <div class="architecture-diagram">
+                    <svg id="architecture-svg" width="100%" height="400"></svg>
+                </div>
+
+                <div class="architecture-components">
+                    <div class="component-card">
+                        <h3>1. Dual GPU Design - The Power Couple</h3>
+                        <p>
+                            Two H200 GPUs work together, each with 141GB of memory. Through NVLink, they share 
+                            data instantly, making the combined 282GB available to both GPUs simultaneously.
+                        </p>
+                        <div class="example-box">
+                            <strong>Example:</strong> Like two libraries connected by a super-fast book delivery 
+                            system. You can access books from either library instantly, effectively doubling your 
+                            available resources!
+                        </div>
+                    </div>
+                    <div class="component-card">
+                        <h3>2. NVLink Interconnect - The Super Highway</h3>
+                        <p>
+                            NVLink provides 900GB/s bandwidth between the two GPUs - that's like transferring 
+                            900 full-length movies between them every second! This makes them work as one unified system.
+                        </p>
+                        <div class="example-box">
+                            <strong>Example:</strong> Imagine two computers sharing files. Regular sharing is like 
+                            using a slow USB drive. NVLink is like having a magical instant transfer - files appear 
+                            on the other computer before you even finish copying!
+                        </div>
+                    </div>
+                    <div class="component-card">
+                        <h3>3. Unified Memory - One Big Pool</h3>
+                        <p>
+                            The 282GB of memory is accessible by both GPUs simultaneously. This unified memory 
+                            architecture means you can train models that are twice as large as what a single GPU 
+                            can handle.
+                        </p>
+                    </div>
+                    <div class="component-card">
+                        <h3>4. Parallel Processing - Double the Speed</h3>
+                        <p>
+                            With two GPUs working in parallel, you get nearly double the compute performance. 
+                            Tasks are automatically split between GPUs, making everything run faster!
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- NVLink Section -->
+            <section id="nvlink" class="section">
+                <h2>NVLink - The Super Connection</h2>
+                <p>
+                    NVLink is what makes the H200NVL special. It's not just a connection - it's a super-fast 
+                    communication system that lets two GPUs share data almost instantly. Think of it as the 
+                    difference between sending a letter by mail versus instant messaging!
+                </p>
+                <div class="example-box">
+                    <strong>Real-World Comparison:</strong> If regular GPU connections are like a narrow country 
+                    road, NVLink is like a 20-lane superhighway. Data flows so fast that both GPUs can access 
+                    each other's memory as if it were their own!
+                </div>
+
+                <div class="interactive-controls">
+                    <div class="control-group">
+                        <label for="nvlink-util">NVLink Utilization: <span id="nvlink-value">75</span>%</label>
+                        <input type="range" id="nvlink-util" min="0" max="100" value="75">
+                    </div>
+                    <div class="control-group">
+                        <label for="data-transfer">Data Transfer Rate: <span id="transfer-value">675</span> GB/s</label>
+                        <input type="range" id="data-transfer" min="0" max="900" value="675">
+                    </div>
+                </div>
+
+                <div class="memory-visualization">
+                    <svg id="nvlink-svg" width="100%" height="300"></svg>
+                </div>
+
+                <div class="memory-details">
+                    <h3>Why NVLink is Revolutionary</h3>
+                    <ul>
+                        <li><strong>900 GB/s Bandwidth:</strong> Each GPU can transfer data at 900GB/s - that's 
+                        like downloading 900 high-definition movies in one second!</li>
+                        <li><strong>Low Latency:</strong> Data appears on the other GPU almost instantly - 
+                        like having a conversation in the same room instead of across the country</li>
+                        <li><strong>Unified Memory Access:</strong> Both GPUs can access the combined 282GB 
+                        memory pool as if it were one - no waiting, no delays</li>
+                        <li><strong>Automatic Load Balancing:</strong> Work is automatically shared between GPUs 
+                        for maximum efficiency - like having two workers who perfectly coordinate their tasks</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Memory Section -->
+            <section id="memory" class="section">
+                <h2>Unified Memory System - 282GB of Power</h2>
+                <p>
+                    The H200NVL has 282GB of unified HBM3e memory - that's like having two massive, super-fast 
+                    notebooks that are perfectly synchronized. Both GPUs can access all 282GB instantly, making 
+                    it perfect for the largest AI models.
+                </p>
+                <div class="example-box">
+                    <strong>Real-World Comparison:</strong> If a single GPU's 141GB memory is like a large library, 
+                    the H200NVL's 282GB is like two libraries connected by instant teleportation. You can access any 
+                    book from either library in the blink of an eye!
+                </div>
+
+                <div class="interactive-controls">
+                    <div class="control-group">
+                        <label for="memory-usage">Memory Usage: <span id="memory-value">60</span>%</label>
+                        <input type="range" id="memory-usage" min="0" max="100" value="60">
+                    </div>
+                    <div class="control-group">
+                        <label for="bandwidth-util">Bandwidth Utilization: <span id="bandwidth-value">70</span>%</label>
+                        <input type="range" id="bandwidth-util" min="0" max="100" value="70">
+                    </div>
+                </div>
+
+                <div class="memory-visualization">
+                    <svg id="memory-svg" width="100%" height="300"></svg>
+                </div>
+
+                <div class="memory-details">
+                    <h3>Memory Advantages</h3>
+                    <ul>
+                        <li><strong>282GB Total:</strong> Can store entire AI models with hundreds of billions 
+                        of parameters - like keeping a complete encyclopedia set in instant-access memory!</li>
+                        <li><strong>9.6 TB/s Combined Bandwidth:</strong> With two GPUs, you get double the 
+                        memory speed - data moves at incredible rates</li>
+                        <li><strong>Unified Access:</strong> Both GPUs see the same memory pool - no need to 
+                        manually manage which GPU has which data</li>
+                        <li><strong>Perfect for Large Models:</strong> Train models that are too large for 
+                        single GPUs - like having a bigger canvas for your masterpiece</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Compute Section -->
+            <section id="compute" class="section">
+                <h2>Compute Performance - Double the Power</h2>
+                <p>
+                    With two GPUs working together, the H200NVL delivers nearly double the compute performance 
+                    of a single H200. It's like having two expert chefs cooking simultaneously - you get twice 
+                    the output in the same time!
+                </p>
+                <div class="example-box">
+                    <strong>Simple Explanation:</strong> If one GPU can process 1000 images per second, two GPUs 
+                    working together can process nearly 2000 images per second. The NVLink connection ensures they 
+                    work perfectly in sync!
+                </div>
+
+                <div class="precision-selector">
+                    <button class="precision-btn active" data-precision="fp8">FP8</button>
+                    <button class="precision-btn" data-precision="fp16">FP16</button>
+                    <button class="precision-btn" data-precision="bf16">BFLOAT16</button>
+                    <button class="precision-btn" data-precision="tf32">TF32</button>
+                    <button class="precision-btn" data-precision="fp32">FP32</button>
+                    <button class="precision-btn" data-precision="fp64">FP64</button>
+                </div>
+
+                <div class="performance-chart">
+                    <svg id="performance-svg" width="100%" height="350"></svg>
+                </div>
+
+                <div class="compute-details">
+                    <h3>Combined Performance by Precision</h3>
+                    <table class="performance-table">
+                        <thead>
+                            <tr>
+                                <th>Mode</th>
+                                <th>Speed (TFLOPS)</th>
+                                <th>Best For</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FP8</strong> - Super Fast Mode</td>
+                                <td>7,916</td>
+                                <td>Training massive AI models (like GPT-4 scale)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FP16</strong> - Fast Mode</td>
+                                <td>3,958</td>
+                                <td>Balanced speed and accuracy for large AI models</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TF32</strong> - Smart Mode</td>
+                                <td>1,978</td>
+                                <td>AI training with automatic precision switching</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FP32</strong> - Standard Mode</td>
+                                <td>134</td>
+                                <td>Scientific calculations, complex simulations</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FP64</strong> - Precise Mode</td>
+                                <td>68</td>
+                                <td>Ultra-precise calculations (space missions, drug discovery)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Virtualization Section -->
+            <section id="virtualization" class="section">
+                <h2>Virtualization: Sharing Two GPUs with Many</h2>
+                <p>
+                    The H200NVL's dual-GPU design makes virtualization even more powerful. You can split the 
+                    combined 282GB memory and compute power across multiple virtual machines, giving each VM 
+                    access to the unified memory pool!
+                </p>
+                <div class="example-box">
+                    <strong>Real-World Example:</strong> Like a large apartment building with two powerful 
+                    generators (the two GPUs) connected by a super-fast power sharing system. Multiple apartments 
+                    (VMs) can use the combined power, and the system ensures everyone gets their fair share!
+                </div>
+
+                <div class="virtualization-tabs">
+                    <button class="tab-btn active" data-tab="mig">Multi-Instance GPU (MIG)</button>
+                    <button class="tab-btn" data-tab="vgpu">Virtual GPU (vGPU)</button>
+                </div>
+
+                <div class="tab-content active" id="mig-content">
+                    <h3>Multi-Instance GPU (MIG) - Maximum Flexibility</h3>
+                    <p>
+                        With two GPUs, MIG becomes even more powerful. You can create up to 14 isolated GPU 
+                        instances (7 per GPU), each with guaranteed resources. The unified memory means each 
+                        instance can access the full memory pool when needed!
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> Like having two large pizzas that you can cut into slices. 
+                        You can create 14 equal slices (7 from each pizza), or mix and match - some large slices 
+                        for big tasks, some small slices for smaller tasks. The best part? All slices can share 
+                        ingredients (memory) when needed!
+                    </div>
+                    
+                    <div class="mig-controls">
+                        <label for="mig-instances">Number of MIG Instances: <span id="mig-count">2</span></label>
+                        <input type="range" id="mig-instances" min="1" max="14" value="2">
+                    </div>
+
+                    <div class="mig-visualization">
+                        <svg id="mig-svg" width="100%" height="300"></svg>
+                    </div>
+
+                    <div class="mig-details">
+                        <h4>MIG Configuration Options - Double the Possibilities</h4>
+                        <ul>
+                            <li><strong>2x 141GB:</strong> One full GPU per instance - maximum power for two big tasks</li>
+                            <li><strong>4x 70GB:</strong> Four equal partitions - perfect for four different AI models</li>
+                            <li><strong>7x 40GB:</strong> Seven partitions from one GPU, full GPU for another</li>
+                            <li><strong>14x 18GB:</strong> Maximum sharing - 14 separate GPUs in one system!</li>
+                            <li>Unified memory access across all instances</li>
+                            <li>Hardware-level isolation ensures security and predictable performance</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="vgpu-content">
+                    <h3>Virtual GPU (vGPU) - Flexible Sharing</h3>
+                    <p>
+                        vGPU technology lets multiple virtual machines share the combined power of both GPUs. 
+                        With 282GB of unified memory, you can allocate larger vGPU profiles and run more VMs 
+                        simultaneously!
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> Like a shared workspace where multiple people can use two 
+                        powerful computers. The system ensures everyone gets fair access, and with the unified 
+                        memory, everyone can work on larger projects than with a single computer!
+                    </div>
+
+                    <div class="vgpu-controls">
+                        <label for="vgpu-vms">Number of VMs: <span id="vm-count">4</span></label>
+                        <input type="range" id="vgpu-vms" min="1" max="16" value="4">
+                        <label for="vgpu-profile">vGPU Profile: <span id="profile-name">vGPU-40GB</span></label>
+                        <select id="vgpu-profile">
+                            <option value="20">vGPU-20GB</option>
+                            <option value="40" selected>vGPU-40GB</option>
+                            <option value="60">vGPU-60GB</option>
+                            <option value="80">vGPU-80GB</option>
+                            <option value="100">vGPU-100GB</option>
+                            <option value="120">vGPU-120GB</option>
+                        </select>
+                    </div>
+
+                    <div class="vgpu-visualization">
+                        <svg id="vgpu-svg" width="100%" height="300"></svg>
+                    </div>
+
+                    <div class="vgpu-details">
+                        <h4>Why vGPU is Better with Dual GPUs</h4>
+                        <ul>
+                            <li><strong>More VMs:</strong> With 282GB total, you can run more VMs simultaneously</li>
+                            <li><strong>Larger Profiles:</strong> Allocate up to 120GB per VM - perfect for large models</li>
+                            <li><strong>Unified Memory:</strong> VMs can access memory from both GPUs seamlessly</li>
+                            <li><strong>Better Performance:</strong> Work is automatically balanced across both GPUs</li>
+                            <li><strong>Live Migration:</strong> Move VMs between servers without stopping them</li>
+                            <li><strong>Fair Sharing:</strong> Everyone gets equal time - no one hogs the resources</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Use Cases Section -->
+            <section id="use-cases" class="section">
+                <h2>Use Cases - Where H200NVL Shines</h2>
+                <p>
+                    The H200NVL is perfect for the most demanding AI workloads that need more memory and compute 
+                    than a single GPU can provide. Explore different use cases to see how dual-GPU power makes 
+                    a difference!
+                </p>
+
+                <div class="use-case-selector">
+                    <button class="usecase-btn active" data-usecase="llm">Massive Language Models</button>
+                    <button class="usecase-btn" data-usecase="multimodal">Multimodal AI</button>
+                    <button class="usecase-btn" data-usecase="research">Scientific Research</button>
+                    <button class="usecase-btn" data-usecase="inference">Large-Scale Inference</button>
+                </div>
+
+                <div class="usecase-content active" id="llm-content">
+                    <h3>Training Massive Language Models (GPT-4 Scale)</h3>
+                    <p>
+                        The H200NVL excels at training the largest language models with hundreds of billions or 
+                        even trillions of parameters. The 282GB unified memory allows for larger batch sizes and 
+                        longer sequences, while dual-GPU processing speeds up training significantly.
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> Training a model like GPT-4 requires processing trillions of 
+                        words. With 282GB memory, the H200NVL can keep the entire model in memory, eliminating 
+                        slow disk access. Dual GPUs process data in parallel, cutting training time in half 
+                        compared to single GPU systems!
+                    </div>
+                    <div class="usecase-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Model Size</div>
+                            <div class="metric-value">Up to 1T+ parameters</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Training Speed</div>
+                            <div class="metric-value">2x faster</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Memory</div>
+                            <div class="metric-value">282GB Unified</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="usecase-content" id="multimodal-content">
+                    <h3>Multimodal AI - Images, Video & Text Together</h3>
+                    <p>
+                        Modern AI models that understand images, video, and text simultaneously need massive amounts 
+                        of memory. The H200NVL's 282GB unified memory and dual-GPU processing make it perfect for 
+                        training and running these complex models.
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> AI that can describe videos, generate images from text, or answer 
+                        questions about pictures needs to process multiple types of data at once. The H200NVL can 
+                        handle 8K video processing while simultaneously running language models - like having a 
+                        team of experts working on different aspects of the same problem!
+                    </div>
+                    <div class="usecase-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Video Quality</div>
+                            <div class="metric-value">8K real-time</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Image Resolution</div>
+                            <div class="metric-value">Up to 16K</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Model Complexity</div>
+                            <div class="metric-value">Trillions of parameters</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="usecase-content" id="research-content">
+                    <h3>Scientific Research & Drug Discovery</h3>
+                    <p>
+                        Complex scientific simulations, molecular modeling, and climate research require both high 
+                        precision (FP64) and massive memory. The H200NVL delivers both, with 68 TFLOPS of FP64 
+                        performance and 282GB of unified memory.
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> Simulating how a new drug molecule interacts with proteins requires 
+                        calculating millions of atomic interactions. The H200NVL can model larger, more complex 
+                        molecules in less time, potentially accelerating drug discovery from years to months!
+                    </div>
+                    <div class="usecase-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Precision Mode</div>
+                            <div class="metric-value">68 TFLOPS</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Data Speed</div>
+                            <div class="metric-value">9.6 TB/s</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Simulation Size</div>
+                            <div class="metric-value">2x larger models</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="usecase-content" id="inference-content">
+                    <h3>Large-Scale AI Inference</h3>
+                    <p>
+                        Serving large AI models to thousands of users simultaneously requires both memory and 
+                        compute power. The H200NVL can run multiple large models concurrently, with MIG allowing 
+                        up to 14 isolated instances for different models or users.
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> A service like ChatGPT needs to answer millions of questions 
+                        per day. With H200NVL, you can run multiple large language models simultaneously, 
+                        each serving different users. The unified memory means models can share common data, 
+                        making everything more efficient!
+                    </div>
+                    <div class="usecase-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Concurrent Models</div>
+                            <div class="metric-value">Up to 14</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Response Speed</div>
+                            <div class="metric-value">3,958 TFLOPS</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Throughput</div>
+                            <div class="metric-value">2x single GPU</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+                </main>
+
+                </div>
+</div>
+
+    <footer>
+            <p>H200NVL GPU VM Explainer - Interactive Visualization</p>
+            <p>Based on NVIDIA H200 NVL GPU specifications and architecture</p>
+        </footer>
+    </div>
+
+    <script>
+// Performance data by precision for dual GPUs
+const performanceData = {
+    fp8: { value: 7916, color: '#0073E6' },
+    fp16: { value: 3958, color: '#00A8E8' },
+    bf16: { value: 3958, color: '#00A8E8' },
+    tf32: { value: 1978, color: '#FF6B35' },
+    fp32: { value: 134, color: '#FFA500' },
+    fp64: { value: 68, color: '#6C757D' }
+};
+
+// Simple function to remove all title attributes
+function removeAllTooltips() {
+    const elements = document.querySelectorAll('[title]');
+    elements.forEach(function(element) {
+        element.removeAttribute('title');
+    });
+}
+
+// Initialize visualizations when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Remove all title attributes immediately
+    removeAllTooltips();
+    
+    initializeArchitectureDiagram();
+    initializeNVLinkVisualization();
+    initializeMemoryVisualization();
+    initializePerformanceChart();
+    initializeMIGVisualization();
+    initializeVGPUVisualization();
+    setupInteractivity();
+    setupSmoothScrolling();
+    
+    // Remove tooltips after initialization
+    setTimeout(removeAllTooltips, 100);
+    setTimeout(removeAllTooltips, 500);
+    
+    // Monitor for new title attributes
+    const observer = new MutationObserver(function() {
+        removeAllTooltips();
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['title']
+    });
+    
+    // Remove tooltips periodically
+    setInterval(removeAllTooltips, 1000);
+    
+    // Remove on mouseover to prevent tooltip display
+    document.addEventListener('mouseover', function(e) {
+        if (e.target && e.target.hasAttribute && e.target.hasAttribute('title')) {
+            e.target.removeAttribute('title');
+        }
+    }, true);
+});
+
+// Architecture Diagram - Dual GPU
+function initializeArchitectureDiagram() {
+    const svg = d3.select('#architecture-svg');
+    const width = 1000;
+    const height = 400;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    // Clear previous content
+    svg.selectAll('*').remove();
+
+    // Define gradients
+    const defs = svg.append('defs');
+    const gradient1 = defs.append('linearGradient')
+        .attr('id', 'gpu1Gradient')
+        .attr('x1', '0%')
+        .attr('y1', '0%')
+        .attr('x2', '100%')
+        .attr('y2', '100%');
+    gradient1.append('stop').attr('offset', '0%').attr('stop-color', '#0073E6');
+    gradient1.append('stop').attr('offset', '100%').attr('stop-color', '#00A8E8');
+
+    const gradient2 = defs.append('linearGradient')
+        .attr('id', 'gpu2Gradient')
+        .attr('x1', '0%')
+        .attr('y1', '0%')
+        .attr('x2', '100%')
+        .attr('y2', '100%');
+    gradient2.append('stop').attr('offset', '0%').attr('stop-color', '#00A8E8');
+    gradient2.append('stop').attr('offset', '100%').attr('stop-color', '#0073E6');
+
+    // GPU 1
+    const gpu1X = 50;
+    const gpu1Y = 100;
+    const gpuWidth = 400;
+    const gpuHeight = 200;
+
+    svg.append('rect')
+        .attr('x', gpu1X)
+        .attr('y', gpu1Y)
+        .attr('width', gpuWidth)
+        .attr('height', gpuHeight)
+        .attr('fill', 'url(#gpu1Gradient)')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 3)
+        .attr('rx', 10)
+        .attr('opacity', 0.15);
+
+    svg.append('text')
+        .attr('x', gpu1X + gpuWidth / 2)
+        .attr('y', gpu1Y + gpuHeight / 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#0073E6')
+        .attr('font-size', '20px')
+        .attr('font-weight', 'bold')
+        .text('H200 GPU 1\n141 GB');
+
+    // GPU 2
+    const gpu2X = width - gpuWidth - 50;
+    const gpu2Y = 100;
+
+    svg.append('rect')
+        .attr('x', gpu2X)
+        .attr('y', gpu2Y)
+        .attr('width', gpuWidth)
+        .attr('height', gpuHeight)
+        .attr('fill', 'url(#gpu2Gradient)')
+        .attr('stroke', '#00A8E8')
+        .attr('stroke-width', 3)
+        .attr('rx', 10)
+        .attr('opacity', 0.15);
+
+    svg.append('text')
+        .attr('x', gpu2X + gpuWidth / 2)
+        .attr('y', gpu2Y + gpuHeight / 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#00A8E8')
+        .attr('font-size', '20px')
+        .attr('font-weight', 'bold')
+        .text('H200 GPU 2\n141 GB');
+
+    // NVLink connection
+    const linkX1 = gpu1X + gpuWidth;
+    const linkX2 = gpu2X;
+    const linkY = gpu1Y + gpuHeight / 2;
+
+    // Connection line
+    svg.append('line')
+        .attr('x1', linkX1)
+        .attr('y1', linkY)
+        .attr('x2', linkX2)
+        .attr('y2', linkY)
+        .attr('stroke', '#FF6B35')
+        .attr('stroke-width', 6)
+        .attr('stroke-dasharray', '10,5');
+
+    // NVLink label
+    svg.append('text')
+        .attr('x', (linkX1 + linkX2) / 2)
+        .attr('y', linkY - 15)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#FF6B35')
+        .attr('font-size', '18px')
+        .attr('font-weight', 'bold')
+        .text('NVLink 900 GB/s');
+
+    // Unified memory label
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', 50)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#0073E6')
+        .attr('font-size', '24px')
+        .attr('font-weight', 'bold')
+        .text('H200NVL - 282GB Unified Memory');
+
+    // Memory bars below GPUs
+    const memY = gpu1Y + gpuHeight + 20;
+    const memHeight = 30;
+
+    // GPU 1 memory
+    svg.append('rect')
+        .attr('x', gpu1X)
+        .attr('y', memY)
+        .attr('width', gpuWidth)
+        .attr('height', memHeight)
+        .attr('fill', '#FF6B35')
+        .attr('stroke', '#FF6B35')
+        .attr('stroke-width', 2)
+        .attr('rx', 5);
+
+    svg.append('text')
+        .attr('x', gpu1X + gpuWidth / 2)
+        .attr('y', memY + memHeight / 2 + 5)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '14px')
+        .attr('font-weight', 'bold')
+        .text('141 GB HBM3e');
+
+    // GPU 2 memory
+    svg.append('rect')
+        .attr('x', gpu2X)
+        .attr('y', memY)
+        .attr('width', gpuWidth)
+        .attr('height', memHeight)
+        .attr('fill', '#FF6B35')
+        .attr('stroke', '#FF6B35')
+        .attr('stroke-width', 2)
+        .attr('rx', 5);
+
+    svg.append('text')
+        .attr('x', gpu2X + gpuWidth / 2)
+        .attr('y', memY + memHeight / 2 + 5)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '14px')
+        .attr('font-weight', 'bold')
+        .text('141 GB HBM3e');
+}
+
+// NVLink Visualization
+function initializeNVLinkVisualization() {
+    const svg = d3.select('#nvlink-svg');
+    const width = 900;
+    const height = 300;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updateNVLinkVisualization(75, 675);
+}
+
+function updateNVLinkVisualization(utilPercent, transferRate) {
+    const svg = d3.select('#nvlink-svg');
+    const width = 900;
+    const height = 300;
+    
+    svg.selectAll('*').remove();
+
+    // GPU 1
+    const gpu1X = 100;
+    const gpu1Y = 100;
+    const gpuSize = 120;
+
+    const gpu1 = svg.append('g');
+    gpu1.append('rect')
+        .attr('x', gpu1X)
+        .attr('y', gpu1Y)
+        .attr('width', gpuSize)
+        .attr('height', gpuSize)
+        .attr('fill', '#F8F9FA')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 3)
+        .attr('rx', 10);
+
+    gpu1.append('text')
+        .attr('x', gpu1X + gpuSize / 2)
+        .attr('y', gpu1Y + gpuSize / 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#0073E6')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('GPU 1');
+
+    // GPU 2
+    const gpu2X = width - gpuSize - 100;
+    const gpu2Y = 100;
+
+    const gpu2 = svg.append('g');
+    gpu2.append('rect')
+        .attr('x', gpu2X)
+        .attr('y', gpu2Y)
+        .attr('width', gpuSize)
+        .attr('height', gpuSize)
+        .attr('fill', '#F8F9FA')
+        .attr('stroke', '#00A8E8')
+        .attr('stroke-width', 3)
+        .attr('rx', 10);
+
+    gpu2.append('text')
+        .attr('x', gpu2X + gpuSize / 2)
+        .attr('y', gpu2Y + gpuSize / 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#00A8E8')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('GPU 2');
+
+    // NVLink connection with data flow
+    const linkX1 = gpu1X + gpuSize;
+    const linkX2 = gpu2X;
+    const linkY = gpu1Y + gpuSize / 2;
+    const linkWidth = linkX2 - linkX1;
+
+    // Background link
+    svg.append('rect')
+        .attr('x', linkX1)
+        .attr('y', linkY - 15)
+        .attr('width', linkWidth)
+        .attr('height', 30)
+        .attr('fill', '#E0E0E0')
+        .attr('rx', 15);
+
+    // Active link based on utilization
+    const activeWidth = linkWidth * (utilPercent / 100);
+    svg.append('rect')
+        .attr('x', linkX1)
+        .attr('y', linkY - 15)
+        .attr('width', activeWidth)
+        .attr('height', 30)
+        .attr('fill', '#FF6B35')
+        .attr('rx', 15)
+        .attr('opacity', 0.9);
+
+    // Data flow arrows
+    for (let i = 0; i < 5; i++) {
+        const arrowX = linkX1 + (linkWidth / 6) * (i + 1);
+        svg.append('polygon')
+            .attr('points', `${arrowX},${linkY - 10} ${arrowX + 10},${linkY} ${arrowX},${linkY + 10}`)
+            .attr('fill', '#1A1A1A')
+            .attr('opacity', 0.7);
+    }
+
+    // Transfer rate label
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', linkY + 50)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#FF6B35')
+        .attr('font-size', '20px')
+        .attr('font-weight', 'bold')
+        .text(`${transferRate} GB/s Transfer Rate`);
+
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', linkY + 75)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#6C757D')
+        .attr('font-size', '14px')
+        .text(`${utilPercent}% NVLink Utilization`);
+}
+
+// Memory Visualization - Dual GPU
+function initializeMemoryVisualization() {
+    const svg = d3.select('#memory-svg');
+    const width = 900;
+    const height = 300;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updateMemoryVisualization(60, 70);
+}
+
+function updateMemoryVisualization(usagePercent, bandwidthPercent) {
+    const svg = d3.select('#memory-svg');
+    const width = 900;
+    const height = 300;
+    
+    svg.selectAll('*').remove();
+
+    // Unified memory bar
+    const barWidth = 600;
+    const barHeight = 200;
+    const startX = (width - barWidth) / 2;
+    const baseY = height - 50;
+    const maxHeight = barHeight;
+
+    // Total memory bar
+    const totalBar = svg.append('g');
+    totalBar.append('rect')
+        .attr('x', startX)
+        .attr('y', baseY - maxHeight)
+        .attr('width', barWidth)
+        .attr('height', maxHeight)
+        .attr('fill', '#E0E0E0')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 3)
+        .attr('rx', 10);
+
+    totalBar.append('rect')
+        .attr('x', startX)
+        .attr('y', baseY - (maxHeight * usagePercent / 100))
+        .attr('width', barWidth)
+        .attr('height', maxHeight * usagePercent / 100)
+        .attr('fill', '#0073E6')
+        .attr('rx', 10)
+        .attr('opacity', 0.9);
+
+    totalBar.append('text')
+        .attr('x', startX + barWidth / 2)
+        .attr('y', baseY - maxHeight - 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#0073E6')
+        .attr('font-size', '20px')
+        .attr('font-weight', 'bold')
+        .text('282 GB Unified Memory (GPU 1 + GPU 2)');
+
+    totalBar.append('text')
+        .attr('x', startX + barWidth / 2)
+        .attr('y', baseY + 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '16px')
+        .text(`${usagePercent}% Used (${Math.round(282 * usagePercent / 100)} GB)`);
+
+    // Bandwidth visualization
+    const bandwidthY = 30;
+    const bandwidthBar = svg.append('g');
+    
+    bandwidthBar.append('rect')
+        .attr('x', startX)
+        .attr('y', bandwidthY)
+        .attr('width', barWidth)
+        .attr('height', 40)
+        .attr('fill', '#E0E0E0')
+        .attr('stroke', '#00A8E8')
+        .attr('stroke-width', 2)
+        .attr('rx', 5);
+
+    const bandwidthActiveWidth = barWidth * (bandwidthPercent / 100);
+    bandwidthBar.append('rect')
+        .attr('x', startX)
+        .attr('y', bandwidthY)
+        .attr('width', bandwidthActiveWidth)
+        .attr('height', 40)
+        .attr('fill', '#00A8E8')
+        .attr('rx', 5)
+        .attr('opacity', 0.9);
+
+    bandwidthBar.append('text')
+        .attr('x', startX + barWidth / 2)
+        .attr('y', bandwidthY - 10)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#00A8E8')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('9.6 TB/s Combined Bandwidth (4.8 TB/s per GPU)');
+
+    bandwidthBar.append('text')
+        .attr('x', startX + barWidth / 2)
+        .attr('y', bandwidthY + 55)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '14px')
+        .text(`${bandwidthPercent}% Utilized`);
+}
+
+// Performance Chart
+function initializePerformanceChart() {
+    const svg = d3.select('#performance-svg');
+    const width = 1000;
+    const height = 350;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updatePerformanceChart('fp8');
+}
+
+function updatePerformanceChart(precision) {
+    const svg = d3.select('#performance-svg');
+    const width = 1000;
+    const height = 350;
+    
+    svg.selectAll('*').remove();
+
+    const data = performanceData[precision];
+    const maxValue = 8000;
+    const barWidth = 200;
+    const barHeight = (data.value / maxValue) * (height - 100);
+    const barX = (width - barWidth) / 2;
+    const barY = height - 50 - barHeight;
+
+    // Background bar
+    svg.append('rect')
+        .attr('x', barX)
+        .attr('y', height - 50 - (maxValue / maxValue) * (height - 100))
+        .attr('width', barWidth)
+        .attr('height', (maxValue / maxValue) * (height - 100))
+        .attr('fill', '#E0E0E0')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 2)
+        .attr('rx', 10);
+
+    // Performance bar
+    svg.append('rect')
+        .attr('x', barX)
+        .attr('y', barY)
+        .attr('width', barWidth)
+        .attr('height', barHeight)
+        .attr('fill', data.color)
+        .attr('rx', 10)
+        .attr('opacity', 0.9)
+        .transition()
+        .duration(1000)
+        .attr('opacity', 1);
+
+    // Value label
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', barY - 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', data.color)
+        .attr('font-size', '48px')
+        .attr('font-weight', 'bold')
+        .text(`${data.value.toLocaleString()} TFLOPS`);
+
+    // Precision label
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', barY - 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '24px')
+        .attr('font-weight', 'bold')
+        .text(`${precision.toUpperCase()} Precision (Dual GPU)`);
+
+    // Comparison bars
+    const comparisons = [
+        { label: 'FP64', value: 68, color: '#6C757D' },
+        { label: 'FP32', value: 134, color: '#FFA500' },
+        { label: 'TF32', value: 1978, color: '#FF6B35' },
+        { label: 'FP16', value: 3958, color: '#00A8E8' },
+        { label: 'FP8', value: 7916, color: '#0073E6' }
+    ];
+
+    const compBarWidth = 60;
+    const compSpacing = 20;
+    const compStartX = (width - (comparisons.length * (compBarWidth + compSpacing) - compSpacing)) / 2;
+    const compBaseY = height - 200;
+
+    comparisons.forEach((comp, i) => {
+        const compX = compStartX + i * (compBarWidth + compSpacing);
+        const compHeight = (comp.value / maxValue) * 100;
+
+        const compGroup = svg.append('g');
+        
+        compGroup.append('rect')
+            .attr('x', compX)
+            .attr('y', compBaseY - compHeight)
+            .attr('width', compBarWidth)
+            .attr('height', compHeight)
+            .attr('fill', comp.color)
+            .attr('opacity', comp.label === precision.toUpperCase() ? 1 : 0.5)
+            .attr('rx', 5);
+
+        compGroup.append('text')
+            .attr('x', compX + compBarWidth / 2)
+            .attr('y', compBaseY + 20)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#1A1A1A')
+            .attr('font-size', '12px')
+            .text(comp.label);
+
+        compGroup.append('text')
+            .attr('x', compX + compBarWidth / 2)
+            .attr('y', compBaseY - compHeight - 5)
+            .attr('text-anchor', 'middle')
+            .attr('fill', comp.color)
+            .attr('font-size', '10px')
+            .text(comp.value);
+    });
+}
+
+// MIG Visualization - Dual GPU
+function initializeMIGVisualization() {
+    const svg = d3.select('#mig-svg');
+    const width = 1000;
+    const height = 300;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updateMIGVisualization(2);
+}
+
+function updateMIGVisualization(instanceCount) {
+    const svg = d3.select('#mig-svg');
+    const width = 1000;
+    const height = 300;
+    
+    svg.selectAll('*').remove();
+
+    const totalMemory = 282;
+    const memoryPerInstance = totalMemory / instanceCount;
+    const instanceWidth = (width - 250) / instanceCount;
+    const instanceHeight = height - 120;
+    const startX = 100;
+    const startY = 80;
+
+    // Full GPU outline
+    svg.append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width - 200)
+        .attr('height', instanceHeight)
+        .attr('fill', 'none')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 3)
+        .attr('stroke-dasharray', '5,5')
+        .attr('rx', 10);
+
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', startY - 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#0073E6')
+        .attr('font-size', '18px')
+        .attr('font-weight', 'bold')
+        .text(`H200NVL Unified System (282 GB Total)`);
+
+    // MIG Instances
+    for (let i = 0; i < instanceCount; i++) {
+        const instanceX = startX + i * instanceWidth;
+        const instanceGroup = svg.append('g');
+
+        instanceGroup.append('rect')
+            .attr('x', instanceX)
+            .attr('y', startY)
+            .attr('width', instanceWidth - 5)
+            .attr('height', instanceHeight)
+            .attr('fill', `hsl(${200 + i * 15}, 70%, 85%)`)
+            .attr('stroke', '#0073E6')
+            .attr('stroke-width', 2)
+            .attr('rx', 5)
+            .attr('opacity', 0.9);
+
+        instanceGroup.append('text')
+            .attr('x', instanceX + instanceWidth / 2 - 2.5)
+            .attr('y', startY + 30)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#0073E6')
+            .attr('font-size', '16px')
+            .attr('font-weight', 'bold')
+            .text(`MIG Instance ${i + 1}`);
+
+        instanceGroup.append('text')
+            .attr('x', instanceX + instanceWidth / 2 - 2.5)
+            .attr('y', startY + 60)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#1A1A1A')
+            .attr('font-size', '14px')
+            .text(`${memoryPerInstance.toFixed(1)} GB`);
+
+        instanceGroup.append('text')
+            .attr('x', instanceX + instanceWidth / 2 - 2.5)
+            .attr('y', startY + 90)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6C757D')
+            .attr('font-size', '12px')
+            .text('Unified Memory Access');
+
+        instanceGroup.append('text')
+            .attr('x', instanceX + instanceWidth / 2 - 2.5)
+            .attr('y', startY + 110)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6C757D')
+            .attr('font-size', '12px')
+            .text('Hardware Isolated');
+    }
+}
+
+// vGPU Visualization - Dual GPU
+function initializeVGPUVisualization() {
+    const svg = d3.select('#vgpu-svg');
+    const width = 1000;
+    const height = 300;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updateVGPUVisualization(4, 40);
+}
+
+function updateVGPUVisualization(vmCount, profileGB) {
+    const svg = d3.select('#vgpu-svg');
+    const width = 1000;
+    const height = 300;
+    
+    svg.selectAll('*').remove();
+
+    const totalMemory = 282;
+    const vmWidth = (width - 300) / vmCount;
+    const vmHeight = 100;
+    const startX = 100;
+    const startY = 50;
+
+    // Physical GPUs
+    const gpuWidth = (width - 200) / 2;
+    const gpuHeight = 60;
+
+    // GPU 1
+    svg.append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', gpuWidth - 10)
+        .attr('height', gpuHeight)
+        .attr('fill', '#F8F9FA')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 2)
+        .attr('rx', 5);
+
+    svg.append('text')
+        .attr('x', startX + (gpuWidth - 10) / 2)
+        .attr('y', startY + gpuHeight / 2 + 5)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#0073E6')
+        .attr('font-size', '14px')
+        .attr('font-weight', 'bold')
+        .text('GPU 1 (141 GB)');
+
+    // GPU 2
+    svg.append('rect')
+        .attr('x', startX + gpuWidth)
+        .attr('y', startY)
+        .attr('width', gpuWidth - 10)
+        .attr('height', gpuHeight)
+        .attr('fill', '#F8F9FA')
+        .attr('stroke', '#00A8E8')
+        .attr('stroke-width', 2)
+        .attr('rx', 5);
+
+    svg.append('text')
+        .attr('x', startX + gpuWidth + (gpuWidth - 10) / 2)
+        .attr('y', startY + gpuHeight / 2 + 5)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#00A8E8')
+        .attr('font-size', '14px')
+        .attr('font-weight', 'bold')
+        .text('GPU 2 (141 GB)');
+
+    // NVLink connection
+    svg.append('line')
+        .attr('x1', startX + gpuWidth - 10)
+        .attr('y1', startY + gpuHeight / 2)
+        .attr('x2', startX + gpuWidth)
+        .attr('y2', startY + gpuHeight / 2)
+        .attr('stroke', '#FF6B35')
+        .attr('stroke-width', 3)
+        .attr('stroke-dasharray', '3,3');
+
+    // VMs
+    const vmStartY = startY + gpuHeight + 30;
+    for (let i = 0; i < vmCount; i++) {
+        const vmX = startX + i * vmWidth;
+        const vmGroup = svg.append('g');
+
+        // Connection lines to both GPUs
+        const connectionY = vmStartY;
+        svg.append('line')
+            .attr('x1', vmX + vmWidth / 2)
+            .attr('y1', startY + gpuHeight)
+            .attr('x2', vmX + vmWidth / 2)
+            .attr('y2', connectionY)
+            .attr('stroke', '#00A8E8')
+            .attr('stroke-width', 1.5)
+            .attr('stroke-dasharray', '2,2');
+
+        vmGroup.append('rect')
+            .attr('x', vmX)
+            .attr('y', vmStartY)
+            .attr('width', vmWidth - 10)
+            .attr('height', vmHeight)
+            .attr('fill', '#F8F9FA')
+            .attr('stroke', '#00A8E8')
+            .attr('stroke-width', 2)
+            .attr('rx', 5);
+
+        vmGroup.append('text')
+            .attr('x', vmX + vmWidth / 2 - 5)
+            .attr('y', vmStartY + 25)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#00A8E8')
+            .attr('font-size', '14px')
+            .attr('font-weight', 'bold')
+            .text(`VM ${i + 1}`);
+
+        vmGroup.append('text')
+            .attr('x', vmX + vmWidth / 2 - 5)
+            .attr('y', vmStartY + 45)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#1A1A1A')
+            .attr('font-size', '12px')
+            .text(`vGPU-${profileGB}GB`);
+
+        vmGroup.append('text')
+            .attr('x', vmX + vmWidth / 2 - 5)
+            .attr('y', vmStartY + 65)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6C757D')
+            .attr('font-size', '11px')
+            .text('Unified Access');
+
+        vmGroup.append('text')
+            .attr('x', vmX + vmWidth / 2 - 5)
+            .attr('y', vmStartY + 80)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6C757D')
+            .attr('font-size', '11px')
+            .text('Time-sliced');
+    }
+}
+
+// Setup Interactivity
+function setupInteractivity() {
+    // Remove any title attributes from interactive elements first
+    removeAllTooltips();
+    
+    // NVLink controls
+    const nvlinkSlider = document.getElementById('nvlink-util');
+    const transferSlider = document.getElementById('data-transfer');
+    const nvlinkValue = document.getElementById('nvlink-value');
+    const transferValue = document.getElementById('transfer-value');
+
+    if (nvlinkSlider && transferSlider && nvlinkValue && transferValue) {
+        nvlinkSlider.removeAttribute('title');
+        transferSlider.removeAttribute('title');
+        
+        nvlinkSlider.addEventListener('input', function() {
+            const value = this.value;
+            nvlinkValue.textContent = value;
+            const transfer = Math.round(900 * value / 100);
+            transferSlider.value = transfer;
+            transferValue.textContent = transfer;
+            updateNVLinkVisualization(parseInt(value), transfer);
+        });
+
+        transferSlider.addEventListener('input', function() {
+            const value = this.value;
+            transferValue.textContent = value;
+            const util = Math.round(value * 100 / 900);
+            nvlinkSlider.value = util;
+            nvlinkValue.textContent = util;
+            updateNVLinkVisualization(util, parseInt(value));
+        });
+    }
+
+    // Memory controls
+    const memorySlider = document.getElementById('memory-usage');
+    const bandwidthSlider = document.getElementById('bandwidth-util');
+    const memoryValue = document.getElementById('memory-value');
+    const bandwidthValue = document.getElementById('bandwidth-value');
+
+    if (memorySlider && bandwidthSlider && memoryValue && bandwidthValue) {
+        memorySlider.removeAttribute('title');
+        bandwidthSlider.removeAttribute('title');
+        
+        memorySlider.addEventListener('input', function() {
+            const value = this.value;
+            memoryValue.textContent = value;
+            updateMemoryVisualization(parseInt(value), parseInt(bandwidthSlider.value));
+        });
+
+        bandwidthSlider.addEventListener('input', function() {
+            const value = this.value;
+            bandwidthValue.textContent = value;
+            updateMemoryVisualization(parseInt(memorySlider.value), parseInt(value));
+        });
+    }
+
+    // Precision selector
+    const precisionButtons = document.querySelectorAll('.precision-btn');
+    precisionButtons.forEach(btn => {
+        btn.removeAttribute('title');
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            precisionButtons.forEach(b => {
+                b.classList.remove('active');
+                b.removeAttribute('title');
+            });
+            this.classList.add('active');
+            this.removeAttribute('title');
+            const precision = this.dataset.precision;
+            if (precision) {
+                updatePerformanceChart(precision);
+            }
+        });
+    });
+
+    // MIG controls
+    const migSlider = document.getElementById('mig-instances');
+    const migCount = document.getElementById('mig-count');
+    if (migSlider && migCount) {
+        migSlider.removeAttribute('title');
+        migSlider.addEventListener('input', function() {
+            const value = this.value;
+            migCount.textContent = value;
+            updateMIGVisualization(parseInt(value));
+        });
+    }
+
+    // vGPU controls
+    const vgpuSlider = document.getElementById('vgpu-vms');
+    const vgpuProfile = document.getElementById('vgpu-profile');
+    const vmCount = document.getElementById('vm-count');
+    const profileName = document.getElementById('profile-name');
+
+    if (vgpuSlider && vgpuProfile && vmCount && profileName) {
+        vgpuSlider.removeAttribute('title');
+        vgpuProfile.removeAttribute('title');
+        
+        vgpuSlider.addEventListener('input', function() {
+            const value = this.value;
+            vmCount.textContent = value;
+            updateVGPUVisualization(parseInt(value), parseInt(vgpuProfile.value));
+        });
+
+        vgpuProfile.addEventListener('change', function() {
+            const value = this.value;
+            profileName.textContent = `vGPU-${value}GB`;
+            updateVGPUVisualization(parseInt(vgpuSlider.value), parseInt(value));
+        });
+    }
+
+    // Tab switching
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+        btn.removeAttribute('title');
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            tabButtons.forEach(b => {
+                b.classList.remove('active');
+                b.removeAttribute('title');
+            });
+            this.classList.add('active');
+            this.removeAttribute('title');
+            
+            const tabName = this.dataset.tab;
+            if (tabName) {
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                const tabContent = document.getElementById(`${tabName}-content`);
+                if (tabContent) {
+                    tabContent.classList.add('active');
+                }
+            }
+        });
+    });
+
+    // Use case selector
+    const usecaseButtons = document.querySelectorAll('.usecase-btn');
+    usecaseButtons.forEach(btn => {
+        btn.removeAttribute('title');
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            usecaseButtons.forEach(b => {
+                b.classList.remove('active');
+                b.removeAttribute('title');
+            });
+            this.classList.add('active');
+            this.removeAttribute('title');
+            
+            const usecase = this.dataset.usecase;
+            if (usecase) {
+                document.querySelectorAll('.usecase-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                const usecaseContent = document.getElementById(`${usecase}-content`);
+                if (usecaseContent) {
+                    usecaseContent.classList.add('active');
+                }
+            }
+        });
+    });
+    
+    // Final cleanup - remove all tooltips
+    removeAllTooltips();
+}
+
+// Smooth scrolling for navigation
+function setupSmoothScrolling() {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Remove active class from all links
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            const targetId = this.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            }
+        });
+    });
+    
+    // Highlight active nav link on scroll
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (window.pageYOffset >= sectionTop - 100) {
+                current = section.getAttribute('id');
+            }
+
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+    });
+}
+
+// Update visualizations on window resize
+window.addEventListener('resize', function() {
+    // Reinitialize visualizations to adapt to new size
+    initializeArchitectureDiagram();
+    initializeNVLinkVisualization();
+    initializeMemoryVisualization();
+    initializePerformanceChart();
+    initializeMIGVisualization();
+    initializeVGPUVisualization();
+});
+    </script>
+</body>
+</html>
+

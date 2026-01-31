@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>136. Configuration Management: Managing Infrastructure Configuration</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #5D4037;
+    --secondary-color: #6D4C41;
+    --accent-color: #8D6E63;
+    --bg-color: #EFEBE9;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #BCAAA4;
+    --shadow: 0 2px 8px rgba(93, 64, 55, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #5D4037, #6D4C41);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.config-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.config-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #EFEBE9, #BCAAA4);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #8D6E63;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #BCAAA4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>136. Configuration Management</h1>
+        <p class="subtitle">Managing Infrastructure Configuration</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#tools" class="nav-link">Configuration Tools</a>
+        <a href="#drift-detection" class="nav-link">Drift Detection</a>
+        <a href="#versioning" class="nav-link">Versioning</a>
+        <a href="#compliance" class="nav-link">Compliance</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Configuration Management Overview</h2>
+            <p>
+                Configuration management ensures consistent configuration across infrastructure, detects configuration 
+                drift, and maintains compliance. Configuration management tools automate configuration deployment, 
+                track changes, and enforce policies. For AI infrastructure, configuration management ensures 
+                consistency and reduces configuration errors. Understanding configuration management enables efficient 
+                infrastructure operations.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Configuration Management] --> B[Configuration Tools]
+                    A --> C[Drift Detection]
+                    A --> D[Versioning]
+                    A --> E[Compliance]
+                    B --> F[Ansible]
+                    B --> G[Puppet]
+                    B --> H[Chef]
+                    C --> I[Change Detection]
+                    D --> J[Version Control]
+                    E --> K[Policy Enforcement]
+                    
+                    style A fill:#5D4037
+                    style B fill:#6D4C41
+                    style C fill:#8D6E63
+                </div>
+
+            <div class="example-box">
+                <strong>Configuration Management Impact:</strong>
+                Configuration management reduces configuration errors by 90%+, ensures consistency across 
+                infrastructure, enables rapid changes, and maintains compliance. Automated configuration management 
+                eliminates manual errors and ensures infrastructure reliability.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Configuration Management))
+                    Configuration Tools
+                      Ansible
+                      Puppet
+                      Chef
+                    Drift Detection
+                      Change Detection
+                      Configuration Audit
+                      Remediation
+                    Versioning
+                      Version Control
+                      Change Tracking
+                      Rollback
+                    Compliance
+                      Policy Enforcement
+                      Compliance Reporting
+                      Audit Trails
+            </div>
+        </section>
+
+        <section id="tools" class="section">
+            <h2>Configuration Management Tools</h2>
+            <p>
+                Configuration management tools automate configuration deployment and management. Popular tools 
+                include Ansible, Puppet, and Chef.
+            </p>
+
+            <div class="config-card">
+                <h3>Ansible</h3>
+                <p>Ansible for configuration management:</p>
+                
+                <p style="margin-top: 20px;"><strong>Ansible Playbook:</strong></p>
+                <div class="command-box">
+---
+- name: Configure GPU Node
+  hosts: gpu_nodes
+  become: yes
+  
+  tasks:
+    - name: Install NVIDIA drivers
+      apt:
+        name: nvidia-driver-535
+        state: present
+    
+    - name: Configure CUDA
+      copy:
+        src: cuda.conf
+        dest: /etc/cuda/cuda.conf
+    
+    - name: Configure InfiniBand
+      template:
+        src: infiniband.conf.j2
+        dest: /etc/infiniband/infiniband.conf
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Puppet</h3>
+                <p>Puppet for configuration management:</p>
+                
+                <p style="margin-top: 20px;"><strong>Puppet Manifest:</strong></p>
+                <div class="command-box">
+# gpu_node.pp
+class gpu_node {
+  package { 'nvidia-driver-535':
+    ensure => installed,
+  }
+  
+  file { '/etc/cuda/cuda.conf':
+    ensure => file,
+    source => 'puppet:///modules/cuda/cuda.conf',
+  }
+  
+  service { 'nvidia-persistenced':
+    ensure => running,
+    enable => true,
+  }
+}
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Chef</h3>
+                <p>Chef for configuration management:</p>
+                
+                <p style="margin-top: 20px;"><strong>Chef Recipe:</strong></p>
+                <div class="command-box">
+# gpu_node.rb
+package 'nvidia-driver-535' do
+  action :install
+end
+
+template '/etc/cuda/cuda.conf' do
+  source 'cuda.conf.erb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+end
+
+service 'nvidia-persistenced' do
+  action [:enable, :start]
+end
+                </div>
+            </div>
+        </section>
+
+        <section id="drift-detection" class="section">
+            <h2>Configuration Drift Detection</h2>
+            <p>
+                Detect configuration drift to identify unauthorized changes. Drift detection compares actual 
+                configuration with desired configuration and reports differences.
+            </p>
+
+            <div class="concept-card">
+                <h3>Drift Detection Process</h3>
+                <p>Implement drift detection:</p>
+                
+                <div class="mermaid">
+                    flowchart TD
+                        A[Desired Configuration] --> B[Apply Configuration]
+                        B --> C[Monitor Configuration]
+                        C --> D{Drift Detected?}
+                        D -->|Yes| E[Report Drift]
+                        D -->|No| C
+                        E --> F[Remediate]
+                        F --> B
+                        
+                        style A fill:#5D4037
+                        style F fill:#4CAF50
+                        style D fill:#FF9800
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Ansible Drift Detection:</strong></p>
+                <div class="command-box">
+# Check configuration drift
+ansible-playbook --check --diff playbook.yml
+
+# Enforce configuration
+ansible-playbook playbook.yml
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Configuration Audit</h3>
+                <p>Audit configuration regularly:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Regular Audits:</strong> Schedule regular configuration audits</li>
+                    <li><strong>Change Tracking:</strong> Track all configuration changes</li>
+                    <li><strong>Compliance Checks:</strong> Verify compliance with policies</li>
+                    <li><strong>Remediation:</strong> Automatically remediate drift</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="versioning" class="section">
+            <h2>Configuration Versioning</h2>
+            <p>
+                Version control configurations to track changes, enable rollback, and maintain history. Versioning 
+                enables change management and audit trails.
+            </p>
+
+            <div class="config-card">
+                <h3>Version Control</h3>
+                <p>Use version control for configurations:</p>
+                
+                <p style="margin-top: 20px;"><strong>Git Workflow:</strong></p>
+                <div class="command-box">
+# Initialize repository
+git init
+
+# Add configuration files
+git add .
+
+# Commit changes
+git commit -m "Initial configuration"
+
+# Tag versions
+git tag -a v1.0 -m "Production configuration"
+
+# Rollback if needed
+git checkout v1.0
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Change Tracking</h3>
+                <p>Track configuration changes:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Change Logs:</strong> Maintain change logs</li>
+                    <li><strong>Change Requests:</strong> Use change management process</li>
+                    <li><strong>Approval Process:</strong> Require approval for changes</li>
+                    <li><strong>Rollback Procedures:</strong> Document rollback procedures</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="compliance" class="section">
+            <h2>Compliance Management</h2>
+            <p>
+                Ensure configuration compliance with policies and standards. Compliance management enforces policies, 
+                generates reports, and maintains audit trails.
+            </p>
+
+            <div class="concept-card">
+                <h3>Policy Enforcement</h3>
+                <p>Enforce configuration policies:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Policy Definition:</strong> Define configuration policies</li>
+                    <li><strong>Policy Validation:</strong> Validate configurations against policies</li>
+                    <li><strong>Automated Enforcement:</strong> Automatically enforce policies</li>
+                    <li><strong>Compliance Reporting:</strong> Generate compliance reports</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Audit Trails</h3>
+                <p>Maintain audit trails:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Change Logging:</strong> Log all configuration changes</li>
+                    <li><strong>User Tracking:</strong> Track who made changes</li>
+                    <li><strong>Timestamp Tracking:</strong> Record when changes occurred</li>
+                    <li><strong>Audit Reports:</strong> Generate audit reports</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Configuration Management Best Practices</h2>
+            <p>
+                Follow best practices for effective configuration management.
+            </p>
+
+            <div class="concept-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Use configuration management tools</li>
+                    <li>Version control all configurations</li>
+                    <li>Implement drift detection</li>
+                    <li>Enforce configuration policies</li>
+                    <li>Maintain audit trails</li>
+                    <li>Test configurations before deployment</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Configuration Management Checklist:</strong>
+                1. Select configuration management tool<br>
+                2. Define configuration standards<br>
+                3. Version control configurations<br>
+                4. Implement drift detection<br>
+                5. Enforce policies<br>
+                6. Maintain audit trails<br>
+                7. Test configurations<br>
+                8. Deploy configurations<br>
+                9. Monitor compliance<br>
+                10. Review and improve
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Configuration Management | Managing Infrastructure Configuration</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>107. SLURM Deep Dive: Configuration, Job Scripts, and Resource Management</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #7B1FA2;
+    --secondary-color: #9C27B0;
+    --accent-color: #BA68C8;
+    --bg-color: #F3E5F5;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #CE93D8;
+    --shadow: 0 2px 8px rgba(123, 31, 162, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #7B1FA2, #9C27B0);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.config-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.config-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #F3E5F5, #CE93D8);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #BA68C8;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #CE93D8;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>107. SLURM Deep Dive</h1>
+        <p class="subtitle">Comprehensive Guide to SLURM Configuration, Job Scripts, and Resource Management</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#architecture" class="nav-link">Architecture</a>
+        <a href="#configuration" class="nav-link">Configuration</a>
+        <a href="#job-scripts" class="nav-link">Job Scripts</a>
+        <a href="#gpu-management" class="nav-link">GPU Management</a>
+        <a href="#resource-allocation" class="nav-link">Resource Allocation</a>
+        <a href="#accounting" class="nav-link">Accounting</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>SLURM Overview</h2>
+            <p>
+                SLURM (Simple Linux Utility for Resource Management) is an open-source workload manager and job 
+                scheduler for Linux clusters. It provides comprehensive job scheduling, resource management, and 
+                workload management capabilities for HPC and AI clusters. SLURM manages compute resources, schedules 
+                jobs, allocates resources, and provides accounting and reporting. Understanding SLURM configuration, 
+                job script syntax, and resource management is essential for effective cluster operations.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[SLURM Cluster] --> B[Control Node]
+                    A --> C[Compute Nodes]
+                    B --> D[slurmctld<br/>Controller Daemon]
+                    B --> E[slurmdbd<br/>Database Daemon]
+                    C --> F[slurmd<br/>Node Daemon]
+                    D --> G[Job Scheduling]
+                    D --> H[Resource Management]
+                    F --> I[Job Execution]
+                    E --> J[Accounting]
+                    
+                    style A fill:#7B1FA2
+                    style B fill:#9C27B0
+                    style C fill:#BA68C8
+            </div>
+
+            <div class="example-box">
+                <strong>SLURM Importance:</strong>
+                SLURM is the de facto standard for HPC and AI cluster job scheduling. It manages thousands of jobs 
+                across hundreds or thousands of nodes, ensuring efficient resource utilization and fair job scheduling. 
+                Proper SLURM configuration and job script writing are critical skills for cluster administrators and users.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((SLURM))
+                    Architecture
+                      Control Node
+                      Compute Nodes
+                      Daemons
+                    Configuration
+                      slurm.conf
+                      Partitions
+                      Nodes
+                      QOS
+                    Job Scripts
+                      SBATCH Directives
+                      Resource Requests
+                      Environment Setup
+                    GPU Management
+                      GPU Resource Requests
+                      GPU Scheduling
+                      Multi-GPU Jobs
+                    Resource Allocation
+                      CPU Allocation
+                      Memory Allocation
+                      Time Limits
+                    Accounting
+                      Job Accounting
+                      Usage Reporting
+                      Fair Share
+            </div>
+        </section>
+
+        <section id="architecture" class="section">
+            <h2>SLURM Architecture</h2>
+            <p>
+                SLURM consists of several components that work together to manage cluster resources and schedule jobs. 
+                Understanding the architecture helps with configuration and troubleshooting.
+            </p>
+
+            <div class="concept-card">
+                <h3>SLURM Components</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>slurmctld:</strong> Central controller daemon running on control node, manages job scheduling and resource allocation</li>
+                    <li><strong>slurmd:</strong> Node daemon running on each compute node, manages job execution and node resources</li>
+                    <li><strong>slurmdbd:</strong> Database daemon for accounting and job history (optional but recommended)</li>
+                    <li><strong>srun:</strong> Command to launch parallel jobs</li>
+                    <li><strong>sbatch:</strong> Command to submit batch jobs</li>
+                    <li><strong>scancel:</strong> Command to cancel jobs</li>
+                    <li><strong>squeue:</strong> Command to view job queue</li>
+                    <li><strong>sinfo:</strong> Command to view cluster status</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>SLURM Concepts</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Partition:</strong> Logical grouping of nodes with shared characteristics (e.g., gpu, cpu, highmem)</li>
+                    <li><strong>Node:</strong> Individual compute server in the cluster</li>
+                    <li><strong>Job:</strong> User-submitted workload that requests resources</li>
+                    <li><strong>Task:</strong> Individual process within a job (for MPI jobs)</li>
+                    <li><strong>QOS:</strong> Quality of Service, defines job limits and priorities</li>
+                    <li><strong>Account:</strong> Accounting entity for tracking resource usage</li>
+                </ul>
+            </div>
+
+            <div class="mermaid">
+                sequenceDiagram
+                    participant User
+                    participant sbatch
+                    participant slurmctld
+                    participant slurmd
+                    participant Job
+                    
+                    User->>sbatch: Submit Job Script
+                    sbatch->>slurmctld: Job Request
+                    slurmctld->>slurmctld: Schedule Job
+                    slurmctld->>slurmd: Allocate Resources
+                    slurmd->>Job: Execute Job
+                    Job->>slurmd: Job Complete
+                    slurmd->>slurmctld: Update Status
+                    slurmctld->>User: Job Finished
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Job Submission] --> B[Job Queued]
+                    B --> C{Scheduler Evaluates}
+                    C --> D{Resources Available?}
+                    D -->|No| E[Wait in Queue]
+                    E --> C
+                    D -->|Yes| F{Partition Match?}
+                    F -->|No| E
+                    F -->|Yes| G{QOS Limits OK?}
+                    G -->|No| E
+                    G -->|Yes| H[Allocate Resources]
+                    H --> I[Start Job]
+                    I --> J[Job Running]
+                    J --> K{Job Complete?}
+                    K -->|No| J
+                    K -->|Yes| L[Release Resources]
+                    L --> M[Job Finished]
+                    
+                    style A fill:#1976D2
+                    style M fill:#4CAF50
+                    style D fill:#FF9800
+                    style F fill:#FF9800
+                    style G fill:#FF9800
+                    style K fill:#FF9800
+            </div>
+        </section>
+
+        <section id="configuration" class="section">
+            <h2>SLURM Configuration</h2>
+            <p>
+                SLURM configuration is defined in <code>slurm.conf</code> on the control node. This file defines 
+                cluster topology, partitions, nodes, and scheduling parameters. Understanding configuration is 
+                essential for cluster setup and optimization.
+            </p>
+
+            <div class="config-card">
+                <h3>slurm.conf Structure</h3>
+                <p>Key configuration sections in slurm.conf:</p>
+                <div class="command-box">
+# Control Machine Configuration
+ControlMachine=control-node
+ControlAddr=192.168.1.10
+SlurmUser=slurm
+SlurmdUser=root
+
+# Cluster Name
+ClusterName=ai-cluster
+
+# Scheduler Configuration
+SchedulerType=sched/backfill
+SchedulerParameters=bf_interval=30
+
+# Node Configuration
+# Define 100 nodes with 64 CPUs, 256GB RAM, 2 sockets, 16 cores/socket, 2 threads/core
+NodeName=node[1-100] CPUs=64 RealMemory=256000 Sockets=2 CoresPerSocket=16 ThreadsPerCore=2
+
+# Define GPU resources for nodes 1-50 (8 GPUs per node)
+NodeName=node[1-50] Gres=gpu:8
+
+# Partition Configuration
+# GPU partition: nodes 1-50, default partition, 7-day max job time
+PartitionName=gpu Nodes=node[1-50] Default=YES MaxTime=7-00:00:00
+
+# CPU partition: nodes 51-100, not default, 3-day max job time
+PartitionName=cpu Nodes=node[51-100] Default=NO MaxTime=3-00:00:00
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Node Configuration</h3>
+                <p>Define compute nodes with their resources:</p>
+                <div class="command-box">
+# Node Syntax:
+# NodeName=name CPUs=X RealMemory=Y Sockets=Z CoresPerSocket=W ThreadsPerCore=T Gres=resources
+
+# Example 1: GPU Node Configuration
+# 20 GPU nodes, each with:
+#   64 CPUs (2 sockets × 16 cores × 2 threads)
+#   256GB RAM (256000 MB)
+#   8 GPUs
+NodeName=gpu-node[1-20] CPUs=64 RealMemory=256000 Sockets=2 CoresPerSocket=16 ThreadsPerCore=2 Gres=gpu:8
+
+# Example 2: CPU-Only Node Configuration
+# 50 CPU-only nodes, each with:
+#   128 CPUs (2 sockets × 32 cores × 2 threads)
+#   512GB RAM (512000 MB)
+#   No GPUs
+NodeName=cpu-node[1-50] CPUs=128 RealMemory=512000 Sockets=2 CoresPerSocket=32 ThreadsPerCore=2
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Partition Configuration</h3>
+                <p>Define partitions to organize nodes:</p>
+                <div class="command-box">
+# Partition Syntax:
+# PartitionName=name Nodes=nodelist Default=YES/NO MaxTime=time AllowGroups=groups
+
+# GPU Partition
+# Nodes: gpu-node[1-20]
+# Default: YES (default partition for job submission)
+# Max Time: 7 days
+# Allowed Groups: users, gpu-users
+# State: UP (partition is active)
+PartitionName=gpu Nodes=gpu-node[1-20] Default=YES MaxTime=7-00:00:00 AllowGroups=users,gpu-users State=UP
+
+# CPU Partition
+# Nodes: cpu-node[1-50]
+# Default: NO (not the default partition)
+# Max Time: 3 days
+# Allowed Groups: users
+# State: UP (partition is active)
+PartitionName=cpu Nodes=cpu-node[1-50] Default=NO MaxTime=3-00:00:00 AllowGroups=users State=UP
+
+# High-Memory Partition
+# Nodes: highmem-node[1-10]
+# Default: NO (not the default partition)
+# Max Time: 2 days
+# Allowed Groups: users
+# State: UP (partition is active)
+PartitionName=highmem Nodes=highmem-node[1-10] Default=NO MaxTime=2-00:00:00 AllowGroups=users State=UP
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>GPU Resource Configuration (Gres)</h3>
+                <p>Configure GPU resources for SLURM:</p>
+                <div class="command-box">
+# Step 1: Define GPU Resources in slurm.conf (on control node)
+# Define 8 GPUs per node for nodes 1-20
+NodeName=gpu-node[1-20] Gres=gpu:8
+
+# Step 2: Define GPU Details in gres.conf (on each compute node)
+# File: /etc/slurm/gres.conf
+# Maps generic GPU resources to specific device files
+Name=gpu File=/dev/nvidia0
+Name=gpu File=/dev/nvidia1
+Name=gpu File=/dev/nvidia2
+Name=gpu File=/dev/nvidia3
+Name=gpu File=/dev/nvidia4
+Name=gpu File=/dev/nvidia5
+Name=gpu File=/dev/nvidia6
+Name=gpu File=/dev/nvidia7
+
+# Step 3: MIG GPU Configuration (Optional)
+# For Multi-Instance GPU (MIG) configurations
+# Type specifies the MIG profile (e.g., a100-40c = A100 40GB compute instance)
+Name=gpu Type=a100-40c File=/dev/nvidia0
+Name=gpu Type=a100-40c File=/dev/nvidia1
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>QOS Configuration</h3>
+                <p>Define Quality of Service levels:</p>
+                <div class="command-box">
+# QOS Configuration (in slurm.conf or separate file)
+# Syntax: QOSName=name Priority=X MaxWall=time MaxJobs=N MaxTRES=cpu=X,mem=Y,gres/gpu=Z
+
+# Normal QOS (Standard Priority)
+# Priority: 50 (medium priority)
+# Max Wall Time: 7 days
+# Max Concurrent Jobs: 100
+QOSName=normal Priority=50 MaxWall=7-00:00:00 MaxJobs=100
+
+# High Priority QOS
+# Priority: 100 (high priority)
+# Max Wall Time: 3 days
+# Max Concurrent Jobs: 10
+# Max Resources: 256 CPUs, 512GB RAM, 16 GPUs
+QOSName=high Priority=100 MaxWall=3-00:00:00 MaxJobs=10 MaxTRES=cpu=256,mem=512000,gres/gpu=16
+
+# Low Priority QOS (Backfill Jobs)
+# Priority: 10 (low priority, preemptible)
+# Max Wall Time: 30 days
+# Max Concurrent Jobs: 1000
+QOSName=low Priority=10 MaxWall=30-00:00:00 MaxJobs=1000
+                </div>
+            </div>
+        </section>
+
+        <section id="job-scripts" class="section">
+            <h2>SLURM Job Scripts</h2>
+            <p>
+                SLURM job scripts use SBATCH directives to specify resource requirements and job parameters. 
+                Understanding job script syntax is essential for submitting jobs correctly.
+            </p>
+
+            <div class="config-card">
+                <h3>Basic Job Script Structure</h3>
+                <div class="command-box">
+#!/bin/bash
+# SLURM Job Script - Basic Template
+
+# Job Identification
+#SBATCH --job-name=my_job
+#SBATCH --output=job_%j.out
+#SBATCH --error=job_%j.err
+
+# Resource Requests
+#SBATCH --partition=gpu
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --gres=gpu:1
+#SBATCH --time=1:00:00
+
+# Environment Setup
+module load cuda/11.8
+module load python/3.9
+export CUDA_VISIBLE_DEVICES=$SLURM_JOB_GPUS
+
+# Application Execution
+python train.py
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Common SBATCH Directives</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>--job-name:</strong> Job name (displayed in queue)</li>
+                    <li><strong>--output:</strong> Standard output file</li>
+                    <li><strong>--error:</strong> Standard error file</li>
+                    <li><strong>--partition:</strong> Partition to submit to</li>
+                    <li><strong>--nodes:</strong> Number of nodes</li>
+                    <li><strong>--ntasks:</strong> Number of tasks (processes)</li>
+                    <li><strong>--cpus-per-task:</strong> CPUs per task</li>
+                    <li><strong>--mem:</strong> Memory per node</li>
+                    <li><strong>--gres:</strong> Generic resources (GPUs, etc.)</li>
+                    <li><strong>--time:</strong> Time limit (format: DD-HH:MM:SS)</li>
+                    <li><strong>--qos:</strong> Quality of Service</li>
+                    <li><strong>--account:</strong> Account for accounting</li>
+                </ul>
+            </div>
+
+            <div class="config-card">
+                <h3>GPU Job Script Examples</h3>
+                <p><strong>Example 1: Single GPU Job</strong></p>
+                <div class="command-box">
+#!/bin/bash
+# Single GPU Training Job
+
+#SBATCH --job-name=gpu_train
+#SBATCH --partition=gpu
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+#SBATCH --gres=gpu:1
+#SBATCH --time=4:00:00
+
+module load cuda/11.8 python/3.9
+export CUDA_VISIBLE_DEVICES=$SLURM_JOB_GPUS
+
+python train.py --gpu 0
+                </div>
+                
+                <p style="margin-top: 20px;"><strong>Example 2: Multi-GPU Job (Single Node)</strong></p>
+                <div class="command-box">
+#!/bin/bash
+# Multi-GPU Training Job (8 GPUs on Single Node)
+
+#SBATCH --job-name=multi_gpu_train
+#SBATCH --partition=gpu
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=256G
+#SBATCH --gres=gpu:8
+#SBATCH --time=24:00:00
+
+module load cuda/11.8 python/3.9
+export CUDA_VISIBLE_DEVICES=$SLURM_JOB_GPUS
+
+python train.py --gpus 8
+                </div>
+                
+                <p style="margin-top: 20px;"><strong>Example 3: Multi-Node Multi-GPU Job</strong></p>
+                <div class="command-box">
+#!/bin/bash
+# Distributed Training Job (4 Nodes × 8 GPUs = 32 GPUs Total)
+
+#SBATCH --job-name=distributed_train
+#SBATCH --partition=gpu
+#SBATCH --nodes=4
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=256G
+#SBATCH --gres=gpu:8
+#SBATCH --time=48:00:00
+
+module load cuda/11.8 python/3.9
+srun python train.py --nodes 4 --gpus-per-node 8
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>MPI Job Script</h3>
+                <div class="command-box">
+#!/bin/bash
+# MPI Parallel Job (256 tasks across 8 nodes)
+
+#SBATCH --job-name=mpi_job
+#SBATCH --partition=cpu
+#SBATCH --nodes=8
+#SBATCH --ntasks=256
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=2G
+#SBATCH --time=2:00:00
+
+module load openmpi/4.1.0
+srun mpirun -np 256 ./my_mpi_program
+                </div>
+            </div>
+        </section>
+
+        <section id="gpu-management" class="section">
+            <h2>GPU Resource Management</h2>
+            <p>
+                SLURM provides comprehensive GPU resource management through Gres (Generic Resources). Proper GPU 
+                configuration ensures efficient GPU allocation and scheduling.
+            </p>
+
+            <div class="concept-card">
+                <h3>GPU Resource Requests</h3>
+                <p>Request GPUs in job scripts:</p>
+                <div class="command-box">
+# Request single GPU
+#SBATCH --gres=gpu:1
+
+# Request multiple GPUs on single node
+#SBATCH --gres=gpu:4
+
+# Request specific GPU type (if configured)
+#SBATCH --gres=gpu:a100:2
+
+# Request GPUs with specific constraints
+#SBATCH --gres=gpu:1 --constraint=a100
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>GPU Environment Variables</h3>
+                <p>SLURM sets environment variables for GPU access:</p>
+                <div class="command-box">
+# CUDA_VISIBLE_DEVICES: List of GPU IDs available to job
+echo $CUDA_VISIBLE_DEVICES
+# Example output: 0,1,2,3
+
+# SLURM_JOB_GPUS: GPU IDs allocated to job
+echo $SLURM_JOB_GPUS
+# Example output: 0,1,2,3
+
+# Use in applications
+export CUDA_VISIBLE_DEVICES=$SLURM_JOB_GPUS
+python train.py
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>GPU Scheduling Policies</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Consumable Resources:</strong> GPUs are consumed when allocated (default)</li>
+                    <li><strong>Shared Resources:</strong> GPUs can be shared (requires configuration)</li>
+                    <li><strong>GPU Binding:</strong> Bind tasks to specific GPUs for optimal performance</li>
+                    <li><strong>GPU Affinity:</strong> Control GPU-to-task mapping</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="resource-allocation" class="section">
+            <h2>Resource Allocation Strategies</h2>
+            <p>
+                Effective resource allocation ensures optimal cluster utilization and job performance. Understanding 
+                resource allocation helps optimize job scripts and cluster configuration.
+            </p>
+
+            <div class="concept-card">
+                <h3>CPU Allocation</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>--cpus-per-task:</strong> CPUs allocated per task</li>
+                    <li><strong>--ntasks:</strong> Number of tasks (total CPUs = ntasks × cpus-per-task)</li>
+                    <li><strong>--ntasks-per-node:</strong> Tasks per node (for multi-node jobs)</li>
+                    <li><strong>CPU Binding:</strong> Bind tasks to specific CPU cores</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Memory Allocation</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>--mem:</strong> Memory per node</li>
+                    <li><strong>--mem-per-cpu:</strong> Memory per CPU</li>
+                    <li><strong>--mem-per-gpu:</strong> Memory per GPU (if using GPUs)</li>
+                    <li>Allocate sufficient memory to prevent OOM (Out of Memory) errors</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Time Limits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>--time:</strong> Job time limit (format: DD-HH:MM:SS or HH:MM:SS)</li>
+                    <li>Set realistic time limits based on workload</li>
+                    <li>Jobs exceeding time limit are killed</li>
+                    <li>Use checkpointing for long-running jobs</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="accounting" class="section">
+            <h2>SLURM Accounting</h2>
+            <p>
+                SLURM accounting tracks resource usage for jobs, users, and accounts. Accounting enables usage 
+                reporting, fair-share scheduling, and resource planning.
+            </p>
+
+            <div class="concept-card">
+                <h3>Accounting Commands</h3>
+                <div class="command-box">
+# View job accounting information
+sacct -j JOBID --format=JobID,JobName,Partition,Account,AllocCPUS,State,ExitCode,Elapsed,MaxRSS
+
+# View user's job history
+sacct -u username --starttime=2024-01-01
+
+# View account usage
+sacct -A account_name --format=JobID,JobName,AllocCPUS,Elapsed,MaxRSS
+
+# View cluster utilization
+sacct --starttime=today --format=Partition,AllocCPUS,Elapsed,MaxRSS
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Fair-Share Scheduling</h3>
+                <p>
+                    Fair-share scheduling ensures users/groups get fair access to resources based on historical usage. 
+                    Configured through QOS and account settings.
+                </p>
+            </div>
+
+            <div class="example-box">
+                <strong>SLURM Best Practices:</strong>
+                1. Request appropriate resources (don't overallocate)<br>
+                2. Set realistic time limits<br>
+                3. Use appropriate partition for workload<br>
+                4. Monitor job status with squeue<br>
+                5. Check job output/error files<br>
+                6. Use checkpointing for long jobs<br>
+                7. Understand partition and QOS limits<br>
+                8. Use job arrays for similar jobs<br>
+                9. Monitor resource usage with sacct<br>
+                10. Clean up temporary files after jobs
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>SLURM Deep Dive | Configuration, Job Scripts, and Resource Management</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>97. End-to-End ML Pipeline: From Data to Deployment</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #7B1FA2;
+    --secondary-color: #8E24AA;
+    --accent-color: #9C27B0;
+    --bg-color: #F3E5F5;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #CE93D8;
+    --shadow: 0 2px 8px rgba(123, 31, 162, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #7B1FA2, #8E24AA);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #CE93D8;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>97. End-to-End ML Pipeline</h1>
+        <p class="subtitle">From Data to Deployment</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#pipeline-stages" class="nav-link">Pipeline Stages</a>
+        <a href="#data-processing" class="nav-link">Data Processing</a>
+        <a href="#training" class="nav-link">Training</a>
+        <a href="#deployment" class="nav-link">Deployment</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>End-to-End ML Pipeline Overview</h2>
+            <p>
+                End-to-end ML pipelines encompass the complete machine learning lifecycle, from data ingestion and 
+                preprocessing to model training, evaluation, and deployment. These pipelines automate ML workflows, 
+                ensuring reproducibility, scalability, and operational efficiency. Understanding end-to-end ML pipelines 
+                enables building production-ready ML systems that handle the entire ML lifecycle, from raw data to 
+                deployed models, with automation, monitoring, and continuous improvement.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Data Ingestion] --> B[Data Processing]
+                    B --> C[Feature Engineering]
+                    C --> D[Model Training]
+                    D --> E[Evaluation]
+                    E --> F[Deployment]
+                    F --> G[Monitoring]
+                    
+                    style A fill:#7B1FA2
+                    style D fill:#8E24AA
+                    style F fill:#9C27B0
+            </div>
+
+            <div class="example-box">
+                <strong>Complete ML Lifecycle:</strong>
+                End-to-end ML pipelines automate the complete machine learning lifecycle. Data ingestion collects and 
+                loads data, data processing cleans and transforms data, training produces models, deployment makes models 
+                available for inference, and monitoring tracks model performance. ML pipelines ensure consistent, 
+                reproducible, and production-ready models through automation and standardization.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((End-to-End ML Pipeline))
+                    Pipeline Stages
+                      Data Ingestion
+                      Data Processing
+                      Feature Engineering
+                      Model Training
+                      Evaluation
+                      Deployment
+                      Monitoring
+                    Benefits
+                      Automation
+                      Reproducibility
+                      Scalability
+                      Operational Efficiency
+            </div>
+        </section>
+
+        <section id="pipeline-stages" class="section">
+            <h2>Pipeline Stages</h2>
+            <p>
+                ML pipelines consist of multiple stages, each handling specific aspects of the ML lifecycle, from data 
+                to deployment.
+            </p>
+
+            <div class="concept-card">
+                <h3>Pipeline Components</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Data Ingestion:</strong> Collect and ingest data</li>
+                    <li><strong>Data Processing:</strong> Clean and preprocess data</li>
+                    <li><strong>Feature Engineering:</strong> Create features</li>
+                    <li><strong>Model Training:</strong> Train models</li>
+                    <li><strong>Model Evaluation:</strong> Evaluate models</li>
+                    <li><strong>Model Deployment:</strong> Deploy models</li>
+                    <li><strong>Monitoring:</strong> Monitor deployed models</li>
+                </ol>
+            </div>
+
+            <div class="concept-card">
+                <h3>Pipeline Orchestration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Workflow Management:</strong> Manage pipeline workflows</li>
+                    <li><strong>Dependency Management:</strong> Handle dependencies</li>
+                    <li><strong>Scheduling:</strong> Schedule pipeline execution</li>
+                    <li><strong>Error Handling:</strong> Handle errors and retries</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Pipeline Tools</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Kubeflow:</strong> Kubernetes-based ML pipelines</li>
+                    <li><strong>MLflow:</strong> ML lifecycle management</li>
+                    <li><strong>Airflow:</strong> Workflow orchestration</li>
+                    <li><strong>Custom:</strong> Custom pipeline solutions</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="data-processing" class="section">
+            <h2>Data Processing</h2>
+            <p>
+                Data processing stages handle data ingestion, cleaning, transformation, and feature engineering, preparing 
+                data for model training.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Raw Data] --> B[Data Cleaning]
+                    B --> C[Data Transformation]
+                    C --> D[Feature Engineering]
+                    D --> E[Processed Data]
+                    
+                    style A fill:#7B1FA2
+                    style B fill:#8E24AA
+                    style E fill:#9C27B0
+            </div>
+
+            <div class="concept-card">
+                <h3>Data Ingestion</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Data Sources:</strong> Multiple data sources</li>
+                    <li><strong>Batch Ingestion:</strong> Batch data loading</li>
+                    <li><strong>Streaming:</strong> Real-time data ingestion</li>
+                    <li><strong>Validation:</strong> Data validation</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Data Transformation</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Cleaning:</strong> Data cleaning</li>
+                    <li><strong>Normalization:</strong> Data normalization</li>
+                    <li><strong>Encoding:</strong> Categorical encoding</li>
+                    <li><strong>Scaling:</strong> Feature scaling</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Feature Engineering</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Feature Creation:</strong> Create new features</li>
+                    <li><strong>Feature Selection:</strong> Select relevant features</li>
+                    <li><strong>Feature Transformation:</strong> Transform features</li>
+                    <li><strong>Feature Storage:</strong> Store features</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="training" class="section">
+            <h2>Model Training</h2>
+            <p>
+                Model training stages handle model training, hyperparameter tuning, and model evaluation, producing 
+                trained models ready for deployment.
+            </p>
+
+            <div class="concept-card">
+                <h3>Training Process</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Model Selection:</strong> Select model architecture</li>
+                    <li><strong>Hyperparameter Tuning:</strong> Tune hyperparameters</li>
+                    <li><strong>Training:</strong> Train models</li>
+                    <li><strong>Validation:</strong> Validate models</li>
+                    <li><strong>Evaluation:</strong> Evaluate model performance</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Distributed Training</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Multi-GPU:</strong> Multi-GPU training</li>
+                    <li><strong>Multi-Node:</strong> Multi-node training</li>
+                    <li><strong>Data Parallelism:</strong> Data parallel training</li>
+                    <li><strong>Model Parallelism:</strong> Model parallel training</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Model Management</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Versioning:</strong> Model versioning</li>
+                    <li><strong>Registry:</strong> Model registry</li>
+                    <li><strong>Metadata:</strong> Model metadata</li>
+                    <li><strong>Lineage:</strong> Model lineage tracking</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="deployment" class="section">
+            <h2>Deployment and Monitoring</h2>
+            <p>
+                Deployment stages handle model deployment, serving, and monitoring, ensuring models operate effectively 
+                in production.
+            </p>
+
+            <div class="concept-card">
+                <h3>Deployment Strategies</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Batch:</strong> Batch inference</li>
+                    <li><strong>Real-Time:</strong> Real-time inference</li>
+                    <li><strong>Canary:</strong> Canary deployments</li>
+                    <li><strong>A/B Testing:</strong> A/B testing</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Model Serving</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Triton:</strong> Triton Inference Server</li>
+                    <li><strong>Kubernetes:</strong> Kubernetes deployment</li>
+                    <li><strong>Scaling:</strong> Auto-scaling</li>
+                    <li><strong>Load Balancing:</strong> Load balancing</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Monitoring</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Performance:</strong> Model performance monitoring</li>
+                    <li><strong>Drift:</strong> Data drift detection</li>
+                    <li><strong>Latency:</strong> Latency monitoring</li>
+                    <li><strong>Errors:</strong> Error tracking</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>End-to-End ML Pipeline:</strong>
+                Build end-to-end ML pipelines by automating data processing, model training, evaluation, and deployment. 
+                Use pipeline orchestration tools, implement distributed training, manage models effectively, and deploy 
+                with monitoring. End-to-end ML pipelines enable production-ready ML systems that handle the complete ML 
+                lifecycle with automation and operational excellence.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>End-to-End ML Pipeline Guide | From Data to Deployment</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

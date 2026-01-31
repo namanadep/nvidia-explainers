@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>67. Clustered NAS: Shared Storage for Clusters</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #0288D1;
+    --secondary-color: #03A9F4;
+    --accent-color: #4FC3F7;
+    --bg-color: #E1F5FE;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #81D4FA;
+    --shadow: 0 2px 8px rgba(2, 136, 209, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0288D1, #03A9F4);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #81D4FA;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>67. Clustered NAS</h1>
+        <p class="subtitle">Shared Storage Architecture for AI Clusters</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#architecture" class="nav-link">Architecture</a>
+        <a href="#benefits" class="nav-link">Benefits</a>
+        <a href="#use-cases" class="nav-link">Use Cases</a>
+        <a href="#performance" class="nav-link">Performance</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Clustered NAS Overview</h2>
+            <p>
+                Clustered NAS (Network Attached Storage) provides shared file storage across multiple storage nodes, 
+                creating a scalable, high-performance storage system for AI clusters. Unlike traditional single-node NAS, 
+                clustered NAS distributes data and metadata across multiple nodes, enabling better performance, scalability, 
+                and reliability. Clustered NAS architectures are designed to handle the high-throughput, concurrent access 
+                patterns typical of AI training workloads, making them well-suited for AI infrastructure.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Clustered NAS] --> B[Storage Node 1]
+                    A --> C[Storage Node 2]
+                    A --> D[Storage Node 3]
+                    A --> E[Storage Node N]
+                    
+                    B --> F[Shared Namespace]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    F --> G[Compute Nodes]
+                    
+                    style A fill:#0288D1
+                    style F fill:#03A9F4
+                    style G fill:#4FC3F7
+            </div>
+
+            <div class="example-box">
+                <strong>Clustered NAS:</strong>
+                Clustered NAS is like a distributed library system where books (data) are stored across multiple library 
+                branches (storage nodes), but all branches share a unified catalog (namespace). This allows multiple readers 
+                (compute nodes) to access books simultaneously from different branches, providing better performance and 
+                scalability than a single large library.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Clustered NAS))
+                    Architecture
+                      Distributed Storage
+                      Unified Namespace
+                      Multiple Storage Nodes
+                    Benefits
+                      Better Performance
+                      Scalability
+                      Shared Storage
+                    Use Cases
+                      Medium to Large Clusters
+                      High Performance Requirements
+                      Shared File Storage
+                    vs Single NAS
+                      Better Performance
+                      Better Scalability
+                      Distributed Architecture
+            </div>
+        </section>
+
+        <section id="architecture" class="section">
+            <h2>Clustered NAS Architecture</h2>
+            <p>
+                Clustered NAS architectures distribute storage across multiple nodes while presenting a unified namespace 
+                to clients. This enables scalability and performance improvements over single-node NAS.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Architecture Components] --> B[Storage Nodes<br/>Multiple Nodes]
+                    A --> C[Metadata Servers<br/>Manage Metadata]
+                    A --> D[Data Servers<br/>Store File Data]
+                    A --> E[Unified Namespace<br/>Single Namespace]
+                    A --> F[Load Balancing<br/>Balance Across Nodes]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                    style F fill:#BBDEFB
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Data Distribution] --> B[Striping<br/>Across Multiple Nodes]
+                    A --> C[Replication<br/>For Reliability]
+                    A --> D[Load Balancing<br/>Balance Across Nodes]
+                    A --> E[Parallel Access<br/>Multiple Nodes]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Metadata Management] --> B[Distributed Metadata<br/>Across Nodes]
+                    A --> C[Metadata Servers<br/>Dedicated Servers]
+                    A --> D[Consistency<br/>Consistency Mechanisms]
+                    A --> E[Performance<br/>High-Performance Ops]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+        </section>
+
+        <section id="benefits" class="section">
+            <h2>Clustered NAS Benefits</h2>
+            <p>
+                Clustered NAS provides significant advantages over traditional single-node NAS for AI workloads, including 
+                better performance, scalability, and reliability.
+            </p>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Performance Benefits] --> B[Parallel Access<br/>Multiple Nodes]
+                    A --> C[High Throughput<br/>Aggregate Throughput]
+                    A --> D[Load Distribution<br/>Across Nodes]
+                    A --> E[Scalable Performance<br/>Scales with Nodes]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="concept-card">
+                <h3>Scalability Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Horizontal Scaling:</strong> Add nodes to scale capacity</li>
+                    <li><strong>Performance Scaling:</strong> Performance scales with nodes</li>
+                    <li><strong>Large Capacity:</strong> Support for large capacities</li>
+                    <li><strong>Elastic Growth:</strong> Grow capacity as needed</li>
+                </ul>
+            </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Reliability Benefits] --> B[High Availability<br/>Through Redundancy]
+                    A --> C[Fault Tolerance<br/>Tolerate Failures]
+                    A --> D[Data Protection<br/>Replication & Protection]
+                    A --> E[No Single Point<br/>No Single Failure]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+        </section>
+
+        <section id="use-cases" class="section">
+            <h2>Clustered NAS Use Cases</h2>
+            <p>
+                Clustered NAS is well-suited for AI workloads requiring shared storage with high performance and scalability.
+            </p>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[AI Training Use Cases] --> B[Shared Datasets<br/>Shared Access]
+                    A --> C[Checkpoint Storage<br/>Shared Storage]
+                    A --> D[Multi-Node Training<br/>Multi-Node Support]
+                    A --> E[High Throughput<br/>Data Loading]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[HPC Applications] --> B[Shared Data<br/>Simulation Data]
+                    A --> C[Checkpointing<br/>Efficient Storage]
+                    A --> D[Results Storage<br/>Shared Results]
+                    A --> E[High Performance<br/>High-Performance Requirements]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="concept-card">
+                <h3>Multi-Tenant Environments</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Shared Storage:</strong> Shared storage for multiple tenants</li>
+                    <li><strong>Isolation:</strong> Tenant isolation capabilities</li>
+                    <li><strong>Scalability:</strong> Scale with tenant growth</li>
+                    <li><strong>Performance:</strong> Maintain performance under load</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="performance" class="section">
+            <h2>Performance Characteristics</h2>
+            <p>
+                Clustered NAS performance characteristics make it suitable for AI workloads, with performance that scales 
+                with the number of storage nodes.
+            </p>
+
+            <div class="concept-card">
+                <h3>Throughput</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Aggregate Throughput:</strong> Sum of all node throughputs</li>
+                    <li><strong>Scalable:</strong> Throughput scales with nodes</li>
+                    <li><strong>High Performance:</strong> Can achieve 100+ GB/s aggregate</li>
+                    <li><strong>Concurrent Access:</strong> Supports concurrent access</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Latency</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Low Latency:</strong> Low latency for metadata operations</li>
+                    <li><strong>Consistent:</strong> Consistent latency characteristics</li>
+                    <li><strong>Optimized:</strong> Optimized for AI workloads</li>
+                    <li><strong>Network Dependent:</strong> Latency depends on network</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Scalability</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Capacity Scaling:</strong> Capacity scales with nodes</li>
+                    <li><strong>Performance Scaling:</strong> Performance scales with nodes</li>
+                    <li><strong>Linear Scaling:</strong> Near-linear scaling characteristics</li>
+                    <li><strong>Large Scale:</strong> Supports large-scale deployments</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Clustered NAS Selection:</strong>
+                Choose clustered NAS for AI workloads requiring shared storage with high performance and scalability. 
+                Clustered NAS provides better performance and scalability than single-node NAS, making it suitable for 
+                medium to large AI clusters. Consider clustered NAS when you need shared file storage with performance 
+                that scales with cluster size.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Clustered NAS Guide | Shared Storage for Clusters</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

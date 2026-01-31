@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>131. Kubernetes Network Policies: Network Security and Traffic Isolation</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #B71C1C;
+    --secondary-color: #C62828;
+    --accent-color: #D32F2F;
+    --bg-color: #FFEBEE;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #EF9A9A;
+    --shadow: 0 2px 8px rgba(183, 28, 28, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #B71C1C, #C62828);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.policy-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.policy-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFEBEE, #EF9A9A);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #D32F2F;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #EF9A9A;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>131. Kubernetes Network Policies</h1>
+        <p class="subtitle">Network Security and Traffic Isolation</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#policy-basics" class="nav-link">Policy Basics</a>
+        <a href="#security-policies" class="nav-link">Security Policies</a>
+        <a href="#traffic-isolation" class="nav-link">Traffic Isolation</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Kubernetes Network Policies Overview</h2>
+            <p>
+                Kubernetes Network Policies control traffic flow between pods, enabling network security and traffic 
+                isolation. Network policies define rules for ingress and egress traffic based on pod selectors, 
+                namespaces, and IP blocks. For AI workloads, network policies ensure secure communication and 
+                isolate sensitive workloads. Understanding network policies enables implementation of network security 
+                in Kubernetes clusters.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Network Policies] --> B[Ingress Rules]
+                    A --> C[Egress Rules]
+                    A --> D[Pod Selectors]
+                    A --> E[Namespace Selectors]
+                    B --> F[Allow Traffic]
+                    B --> G[Deny Traffic]
+                    C --> F
+                    C --> G
+                    D --> H[Label-Based Selection]
+                    E --> I[Namespace-Based Selection]
+                    
+                    style A fill:#B71C1C
+                    style B fill:#C62828
+                    style C fill:#D32F2F
+                </div>
+
+            <div class="example-box">
+                <strong>Network Policy Impact:</strong>
+                Network policies provide network-level security, enable traffic isolation, and prevent unauthorized 
+                access. Proper network policy implementation ensures secure communication between AI workloads and 
+                protects sensitive data.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Network Policies))
+                    Policy Basics
+                      Ingress Rules
+                      Egress Rules
+                      Pod Selectors
+                    Security Policies
+                      Default Deny
+                      Allow Specific Traffic
+                      Port Restrictions
+                    Traffic Isolation
+                      Namespace Isolation
+                      Pod Isolation
+                      Multi-Tenant Isolation
+                    Best Practices
+                      Default Deny Policy
+                      Least Privilege
+                      Policy Testing
+            </div>
+        </section>
+
+        <section id="policy-basics" class="section">
+            <h2>Network Policy Basics</h2>
+            <p>
+                Network policies define rules for pod-to-pod communication. Policies use selectors to identify pods 
+                and rules to control traffic flow.
+            </p>
+
+            <div class="policy-card">
+                <h3>Basic Network Policy</h3>
+                <p>Create a basic network policy:</p>
+                
+                <p style="margin-top: 20px;"><strong>Example Network Policy:</strong></p>
+                <div class="command-box">
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: ai-training
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  # No rules means deny all traffic
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Allow Specific Traffic:</strong></p>
+                <div class="command-box">
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-training-traffic
+  namespace: ai-training
+spec:
+  podSelector:
+    matchLabels:
+      app: training
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: data-loader
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: storage
+    ports:
+    - protocol: TCP
+      port: 9000
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Pod Traffic] --> B{Network Policy Exists?}
+                    B -->|No| C[Allow All Traffic]
+                    B -->|Yes| D{Match Ingress Rule?}
+                    D -->|Yes| E[Allow Traffic]
+                    D -->|No| F{Default Deny?}
+                    F -->|Yes| G[Deny Traffic]
+                    F -->|No| E
+                    
+                    style A fill:#B71C1C
+                    style E fill:#4CAF50
+                    style G fill:#D32F2F
+                    style B fill:#FF9800
+                    style D fill:#FF9800
+                </div>
+        </section>
+
+        <section id="security-policies" class="section">
+            <h2>Security Policies</h2>
+            <p>
+                Implement security policies to control network access and protect workloads. Security policies 
+                enforce default deny, allow specific traffic, and restrict ports.
+            </p>
+
+            <div class="concept-card">
+                <h3>Default Deny Policy</h3>
+                <p>Implement default deny for security:</p>
+                
+                <p style="margin-top: 20px;"><strong>Default Deny Policy:</strong></p>
+                <div class="command-box">
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: ai-training
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  # Deny all ingress traffic by default
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Allow Specific Traffic</h3>
+                <p>Allow specific traffic with policies:</p>
+                
+                <p style="margin-top: 20px;"><strong>Allow Traffic Policy:</strong></p>
+                <div class="command-box">
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-access
+  namespace: ai-training
+spec:
+  podSelector:
+    matchLabels:
+      app: api-server
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: frontend
+    ports:
+    - protocol: TCP
+      port: 443
+                </div>
+            </div>
+        </section>
+
+        <section id="traffic-isolation" class="section">
+            <h2>Traffic Isolation</h2>
+            <p>
+                Use network policies to isolate traffic between namespaces, pods, and tenants. Traffic isolation 
+                improves security and prevents unauthorized access.
+            </p>
+
+            <div class="policy-card">
+                <h3>Namespace Isolation</h3>
+                <p>Isolate traffic between namespaces:</p>
+                
+                <p style="margin-top: 20px;"><strong>Namespace Isolation Policy:</strong></p>
+                <div class="command-box">
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-other-namespaces
+  namespace: ai-training
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ai-training
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: ai-training
+                </div>
+            </div>
+
+            <div class="policy-card">
+                <h3>Multi-Tenant Isolation</h3>
+                <p>Isolate traffic for multi-tenant environments:</p>
+                
+                <p style="margin-top: 20px;"><strong>Multi-Tenant Policy:</strong></p>
+                <div class="command-box">
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tenant-isolation
+  namespace: tenant-a
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          tenant: tenant-a
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          tenant: tenant-a
+                </div>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Network Policy Best Practices</h2>
+            <p>
+                Follow best practices for effective network policy implementation.
+            </p>
+
+            <div class="concept-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Implement default deny policies</li>
+                    <li>Use least privilege principle</li>
+                    <li>Test policies before production</li>
+                    <li>Document policy purposes</li>
+                    <li>Monitor policy effectiveness</li>
+                    <li>Review policies regularly</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Network Policy Checklist:</strong>
+                1. Implement default deny policy<br>
+                2. Define pod selectors<br>
+                3. Create ingress rules<br>
+                4. Create egress rules<br>
+                5. Test policies<br>
+                6. Document policies<br>
+                7. Monitor policy enforcement<br>
+                8. Review and update policies<br>
+                9. Implement namespace isolation<br>
+                10. Enforce multi-tenant isolation
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Kubernetes Network Policies | Network Security and Traffic Isolation</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

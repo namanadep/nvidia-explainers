@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>66. NFS for AI: Network File System Configuration</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #1976D2;
+    --secondary-color: #2196F3;
+    --accent-color: #64B5F6;
+    --bg-color: #E3F2FD;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #90CAF9;
+    --shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #1976D2, #2196F3);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.command-box {
+    background: #263238;
+    color: #90CAF9;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #90CAF9;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>66. NFS for AI</h1>
+        <p class="subtitle">Network File System Configuration for AI Workloads</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#configuration" class="nav-link">Configuration</a>
+        <a href="#performance" class="nav-link">Performance Tuning</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+        <a href="#limitations" class="nav-link">Limitations</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>NFS for AI Overview</h2>
+            <p>
+                NFS (Network File System) provides shared file storage across network nodes, enabling multiple compute 
+                nodes to access the same datasets and checkpoints. For AI workloads, NFS offers simplicity and ease of 
+                use, making it a common choice for shared storage in AI clusters. However, NFS performance characteristics 
+                require careful configuration and tuning to meet AI workload requirements. Proper NFS configuration can 
+                provide adequate performance for many AI use cases, while understanding limitations helps make informed 
+                storage decisions.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[NFS Server] --> B[Network]
+                    B --> C[Compute Node 1]
+                    B --> D[Compute Node 2]
+                    B --> E[Compute Node N]
+                    
+                    C --> F[Shared Datasets]
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style F fill:#64B5F6
+            </div>
+
+            <div class="example-box">
+                <strong>NFS for AI:</strong>
+                NFS is like a shared network drive that multiple computers can access simultaneously. For AI workloads, 
+                this enables multiple training nodes to access the same datasets without copying data to each node. 
+                However, like a shared drive, performance depends on network speed and server capacity, requiring proper 
+                configuration for optimal AI workload performance.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((NFS for AI))
+                    Characteristics
+                      Shared Storage
+                      Network-Based
+                      Simultaneous Access
+                    Benefits
+                      Simplicity
+                      Ease of Use
+                      Shared Datasets
+                    Considerations
+                      Network Speed
+                      Server Capacity
+                      Configuration
+                    Use Cases
+                      Small to Medium Clusters
+                      Moderate Performance
+                      Simple Deployment
+            </div>
+        </section>
+
+        <section id="configuration" class="section">
+            <h2>NFS Configuration</h2>
+            <p>
+                Proper NFS configuration is essential for AI workload performance. Configuration includes server setup, 
+                client mounting, and performance tuning parameters.
+            </p>
+
+            <div class="concept-card">
+                <h3>NFS Server Configuration</h3>
+                <p>Configure NFS server:</p>
+                <div class="command-box">
+# Install NFS server<br>
+sudo apt-get install nfs-kernel-server<br>
+<br>
+# Configure exports<br>
+sudo vi /etc/exports<br>
+/data 10.0.0.0/24(rw,sync,no_subtree_check)<br>
+<br>
+# Export filesystems<br>
+sudo exportfs -ra<br>
+sudo systemctl start nfs-kernel-server
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>NFS Client Configuration</h3>
+                <p>Mount NFS on client:</p>
+                <div class="command-box">
+# Install NFS client<br>
+sudo apt-get install nfs-common<br>
+<br>
+# Mount NFS<br>
+sudo mount -t nfs server:/data /mnt/data<br>
+<br>
+# Auto-mount in /etc/fstab<br>
+server:/data /mnt/data nfs defaults 0 0
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[NFS Versions] --> B[NFSv3<br/>Widely Supported]
+                    A --> C[NFSv4<br/>Enhanced Security]
+                    A --> D[NFSv4.1<br/>Parallel NFS]
+                    A --> E[Recommendation<br/>NFSv4/v4.1 for AI]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+        </section>
+
+        <section id="performance" class="section">
+            <h2>Performance Tuning</h2>
+            <p>
+                NFS performance tuning optimizes throughput and latency for AI workloads. Key tuning parameters include 
+                block sizes, read/write sizes, and caching options.
+            </p>
+
+            <div class="concept-card">
+                <h3>Mount Options</h3>
+                <p>Optimize mount options:</p>
+                <div class="command-box">
+# High-performance mount options<br>
+mount -t nfs -o rsize=1048576,wsize=1048576,hard,intr,timeo=600,retrans=2 server:/data /mnt/data<br>
+<br>
+# Options explanation:<br>
+# rsize/wsize: Large read/write sizes (1MB)<br>
+# hard: Hard mount (retry on failure)<br>
+# intr: Interruptible<br>
+# timeo: Timeout (60 seconds)<br>
+# retrans: Retransmission count
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Server Tuning] --> B[Thread Count<br/>Increase NFS Threads]
+                    A --> C[Memory<br/>Sufficient Memory]
+                    A --> D[Network<br/>High-Speed Network]
+                    A --> E[Storage<br/>High-Performance Backend]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Client Tuning] --> B[Read-Ahead<br/>Enable Caching]
+                    A --> C[Attribute Caching<br/>Configure Caching]
+                    A --> D[Connection Pooling<br/>Use Pooling]
+                    A --> E[Network<br/>Optimize Config]
+                    
+                    style A fill:#1976D2
+                    style B fill:#2196F3
+                    style C fill:#42A5F5
+                    style D fill:#64B5F6
+                    style E fill:#90CAF9
+                </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Best Practices</h2>
+            <p>
+                Following NFS best practices ensures reliable and performant storage for AI workloads.
+            </p>
+
+            <div class="concept-card">
+                <h3>Configuration Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Use NFSv4:</strong> Use NFSv4 or NFSv4.1</li>
+                    <li><strong>Large Block Sizes:</strong> Use large rsize/wsize</li>
+                    <li><strong>Hard Mounts:</strong> Use hard mounts for reliability</li>
+                    <li><strong>High-Speed Network:</strong> Use high-speed network (10GbE+)</li>
+                    <li><strong>High-Performance Storage:</strong> Use high-performance storage backend</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Operational Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Monitor Performance:</strong> Monitor NFS performance</li>
+                    <li><strong>Test Workloads:</strong> Test with actual AI workloads</li>
+                    <li><strong>Backup Strategy:</strong> Implement backup strategy</li>
+                    <li><strong>Documentation:</strong> Document configuration</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Use Case Recommendations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Small to Medium Clusters:</strong> Good for small-medium clusters</li>
+                    <li><strong>Moderate Performance Needs:</strong> Adequate for moderate performance</li>
+                    <li><strong>Simplicity:</strong> Simple to deploy and manage</li>
+                    <li><strong>Cost-Effective:</strong> Cost-effective solution</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="limitations" class="section">
+            <h2>NFS Limitations</h2>
+            <p>
+                Understanding NFS limitations helps make informed decisions about when to use NFS vs. other storage 
+                solutions for AI workloads.
+            </p>
+
+            <div class="concept-card">
+                <h3>Performance Limitations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Single Server:</strong> Single server can be bottleneck</li>
+                    <li><strong>Network Overhead:</strong> Network protocol overhead</li>
+                    <li><strong>Latency:</strong> Higher latency than local storage</li>
+                    <li><strong>Scalability:</strong> Limited scalability vs. distributed storage</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Feature Limitations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>No Object Storage:</strong> File-based, not object-based</li>
+                    <li><strong>Limited Metadata:</strong> Limited metadata capabilities</li>
+                    <li><strong>Single Namespace:</strong> Single namespace limitations</li>
+                    <li><strong>Consistency:</strong> Consistency model limitations</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>When to Consider Alternatives</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>High Performance Needs:</strong> Consider Lustre or distributed storage</li>
+                    <li><strong>Large Scale:</strong> Consider distributed storage for large scale</li>
+                    <li><strong>Object Storage:</strong> Consider S3 for object storage needs</li>
+                    <li><strong>Very Low Latency:</strong> Consider local or high-performance network storage</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>NFS Decision:</strong>
+                Use NFS for AI workloads when simplicity and ease of use are priorities, performance requirements are 
+                moderate, and cluster size is small to medium. Consider alternatives like Lustre or distributed storage 
+                for high-performance requirements, large-scale deployments, or when NFS limitations become bottlenecks. 
+                Proper configuration and tuning can make NFS suitable for many AI use cases.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>NFS for AI Guide | Network File System Configuration</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

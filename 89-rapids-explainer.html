@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>89. RAPIDS: GPU-Accelerated Data Science</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #00695C;
+    --secondary-color: #00897B;
+    --accent-color: #26A69A;
+    --bg-color: #E0F2F1;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #80CBC4;
+    --shadow: 0 2px 8px rgba(0, 105, 92, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #00695C, #00897B);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E0F2F1, #B2DFDB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #80CBC4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>89. RAPIDS</h1>
+        <p class="subtitle">GPU-Accelerated Data Science Platform</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#data-science" class="nav-link">Data Science</a>
+        <a href="#libraries" class="nav-link">Libraries</a>
+        <a href="#workflows" class="nav-link">End-to-End Workflows</a>
+        <a href="#performance" class="nav-link">Performance</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>RAPIDS Overview</h2>
+            <p>
+                RAPIDS is NVIDIA's suite of open-source libraries for GPU-accelerated data science and analytics. RAPIDS 
+                enables end-to-end GPU workflows by providing GPU-accelerated alternatives to popular Python data science 
+                libraries like pandas, NumPy, and scikit-learn. The RAPIDS ecosystem includes cuDF (GPU DataFrames), 
+                cuPy (NumPy-like arrays), cuML (machine learning), cuGraph (graph analytics), and more. RAPIDS enables 
+                data scientists to accelerate their entire workflow on GPU, from data loading and preprocessing to model 
+                training and deployment, without changing their familiar Python APIs.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[RAPIDS Ecosystem] --> B[cuDF<br/>DataFrames]
+                    A --> C[cuPy<br/>Arrays]
+                    A --> D[cuML<br/>ML Algorithms]
+                    A --> E[cuGraph<br/>Graph Analytics]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style C fill:#26A69A
+                    style D fill:#4DB6AC
+                    style E fill:#80CBC4
+            </div>
+
+            <div class="example-box">
+                <strong>GPU-Accelerated Data Science:</strong>
+                RAPIDS is like upgrading your data science tools from manual to power tools - cuDF is like pandas but 
+                GPU-powered (like using a power drill instead of a manual drill), cuPy is like NumPy but GPU-accelerated 
+                (like using power tools for calculations), and cuML is like scikit-learn but on GPU (like using automated 
+                machinery). RAPIDS enables your entire data science workflow to run on GPU for massive speedups.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((RAPIDS))
+                    Libraries
+                      cuDF
+                        GPU DataFrames
+                      cuPy
+                        NumPy-like Arrays
+                      cuML
+                        Machine Learning
+                      cuGraph
+                        Graph Analytics
+                    Benefits
+                      End-to-End GPU Workflows
+                      Familiar Python APIs
+                      Massive Speedups
+                    Use Cases
+                      Data Science
+                      Analytics
+                      Machine Learning
+            </div>
+        </section>
+
+        <section id="data-science" class="section">
+            <h2>Data Science Acceleration</h2>
+            <p>
+                RAPIDS accelerates the entire data science workflow, from data loading to model deployment, providing 
+                GPU-accelerated alternatives to popular Python data science tools.
+            </p>
+
+            <div class="concept-card">
+                <h3>Acceleration Areas</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Data Loading:</strong> GPU-accelerated data loading</li>
+                    <li><strong>Data Manipulation:</strong> GPU DataFrame operations</li>
+                    <li><strong>Preprocessing:</strong> GPU preprocessing pipelines</li>
+                    <li><strong>Feature Engineering:</strong> GPU feature engineering</li>
+                    <li><strong>Model Training:</strong> GPU-accelerated ML training</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Workflow Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Speed:</strong> 10-100x speedup over CPU</li>
+                    <li><strong>Scalability:</strong> Handle larger datasets</li>
+                    <li><strong>Efficiency:</strong> Better resource utilization</li>
+                    <li><strong>Familiar APIs:</strong> Python-friendly APIs</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Integration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Python:</strong> Python API compatibility</li>
+                    <li><strong>Jupyter:</strong> Works in Jupyter notebooks</li>
+                    <li><strong>Pandas/NumPy:</strong> Drop-in replacements</li>
+                    <li><strong>Frameworks:</strong> Integrates with ML frameworks</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="libraries" class="section">
+            <h2>RAPIDS Libraries</h2>
+            <p>
+                RAPIDS provides a comprehensive suite of libraries covering different aspects of data science and 
+                analytics, each optimized for GPU execution.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[RAPIDS] --> B[cuDF<br/>DataFrames]
+                    A --> C[cuPy<br/>NumPy Arrays]
+                    A --> D[cuML<br/>ML]
+                    A --> E[cuGraph<br/>Graph]
+                    A --> F[cuSpatial<br/>Spatial]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style C fill:#26A69A
+            </div>
+
+            <div class="concept-card">
+                <h3>cuDF: GPU DataFrames</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Pandas-like:</strong> pandas-like API</li>
+                    <li><strong>DataFrames:</strong> GPU DataFrames</li>
+                    <li><strong>Operations:</strong> GPU-accelerated operations</li>
+                    <li><strong>Joins:</strong> Fast joins and merges</li>
+                    <li><strong>Groupby:</strong> GPU groupby operations</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>cuPy: NumPy Alternative</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>NumPy API:</strong> NumPy-compatible API</li>
+                    <li><strong>GPU Arrays:</strong> GPU array operations</li>
+                    <li><strong>Performance:</strong> GPU-accelerated operations</li>
+                    <li><strong>CUDA Integration:</strong> CUDA integration</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>cuML: Machine Learning</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Algorithms:</strong> GPU-accelerated ML algorithms</li>
+                    <li><strong>Scikit-learn:</strong> scikit-learn-like API</li>
+                    <li><strong>Models:</strong> Classification, regression, clustering</li>
+                    <li><strong>Training:</strong> Fast model training</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>cuGraph: Graph Analytics</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Graph Operations:</strong> GPU graph algorithms</li>
+                    <li><strong>NetworkX:</strong> NetworkX-like API</li>
+                    <li><strong>Algorithms:</strong> PageRank, BFS, shortest paths</li>
+                    <li><strong>Large Graphs:</strong> Handle large graphs</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="workflows" class="section">
+            <h2>End-to-End Workflows</h2>
+            <p>
+                RAPIDS enables end-to-end GPU workflows, allowing data scientists to accelerate their entire pipeline 
+                from data loading to model deployment without CPU-GPU data transfers.
+            </p>
+
+            <div class="concept-card">
+                <h3>Workflow Pipeline</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Data Loading:</strong> Load data with cuDF</li>
+                    <li><strong>Data Cleaning:</strong> Clean with cuDF operations</li>
+                    <li><strong>Preprocessing:</strong> Preprocess with cuDF/cuPy</li>
+                    <li><strong>Feature Engineering:</strong> Engineer features on GPU</li>
+                    <li><strong>Model Training:</strong> Train with cuML</li>
+                    <li><strong>Inference:</strong> Deploy and infer</li>
+                </ol>
+            </div>
+
+            <div class="concept-card">
+                <h3>Zero-Copy Integration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Memory Sharing:</strong> Share memory between libraries</li>
+                    <li><strong>No Transfers:</strong> Avoid CPU-GPU transfers</li>
+                    <li><strong>Efficiency:</strong> Efficient memory usage</li>
+                    <li><strong>Performance:</strong> Maximum performance</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Workflow Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Speed:</strong> Significant speedup</li>
+                    <li><strong>Scalability:</strong> Handle larger datasets</li>
+                    <li><strong>Efficiency:</strong> Efficient GPU utilization</li>
+                    <li><strong>Productivity:</strong> Faster iteration</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="performance" class="section">
+            <h2>Performance Characteristics</h2>
+            <p>
+                RAPIDS provides significant performance improvements over CPU-based data science tools, enabling faster 
+                iteration and handling of larger datasets.
+            </p>
+
+            <div class="concept-card">
+                <h3>Performance Improvements</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Speedup:</strong> 10-100x speedup over CPU</li>
+                    <li><strong>Scalability:</strong> Handle larger datasets</li>
+                    <li><strong>Throughput:</strong> Higher processing throughput</li>
+                    <li><strong>Latency:</strong> Lower latency for operations</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Large Datasets:</strong> Process large datasets</li>
+                    <li><strong>Real-Time Analytics:</strong> Real-time data processing</li>
+                    <li><strong>ML Pipelines:</strong> Accelerate ML pipelines</li>
+                    <li><strong>Data Exploration:</strong> Faster data exploration</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GPU Memory:</strong> Manage GPU memory effectively</li>
+                    <li><strong>Data Locality:</strong> Keep data on GPU</li>
+                    <li><strong>Batch Operations:</strong> Use batch operations</li>
+                    <li><strong>Profiling:</strong> Profile and optimize</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>RAPIDS Usage:</strong>
+                Accelerate data science workflows with RAPIDS by using cuDF for DataFrame operations, cuPy for array 
+                operations, cuML for machine learning, and cuGraph for graph analytics. Build end-to-end GPU workflows 
+                that avoid CPU-GPU transfers, leverage GPU acceleration for all steps, and achieve significant speedups 
+                over CPU-based tools. RAPIDS enables data scientists to work with larger datasets and iterate faster.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>RAPIDS Guide | GPU-Accelerated Data Science</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

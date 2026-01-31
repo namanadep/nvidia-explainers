@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>130. Kubernetes Networking Plugins: CNI Plugins for AI Networks</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #01579B;
+    --secondary-color: #0277BD;
+    --accent-color: #0288D1;
+    --bg-color: #E1F5FE;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #81D4FA;
+    --shadow: 0 2px 8px rgba(1, 87, 155, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #01579B, #0277BD);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.plugin-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.plugin-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E1F5FE, #81D4FA);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #0288D1;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #81D4FA;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>130. Kubernetes Networking Plugins</h1>
+        <p class="subtitle">CNI Plugins for AI Networks</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#cni-basics" class="nav-link">CNI Basics</a>
+        <a href="#plugin-selection" class="nav-link">Plugin Selection</a>
+        <a href="#custom-plugins" class="nav-link">Custom Plugins</a>
+        <a href="#multi-network" class="nav-link">Multi-Network</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Kubernetes Networking Plugins Overview</h2>
+            <p>
+                Kubernetes networking plugins (CNI plugins) provide network connectivity for pods in Kubernetes 
+                clusters. CNI plugins configure network interfaces, IP addresses, and routing for pods. For AI 
+                workloads, selecting appropriate CNI plugins ensures optimal network performance and supports 
+                high-bandwidth communication requirements. Understanding CNI plugins enables effective network 
+                configuration for AI workloads in Kubernetes.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[CNI Plugins] --> B[Network Plugin]
+                    A --> C[IPAM Plugin]
+                    A --> D[Meta Plugin]
+                    B --> E[Bridge]
+                    B --> F[Host-Device]
+                    B --> G[Macvlan]
+                    C --> H[Host-Local]
+                    C --> I[DHCP]
+                    D --> J[Flannel]
+                    D --> K[Calico]
+                    D --> L[Multus]
+                    
+                    style A fill:#01579B
+                    style B fill:#0277BD
+                    style D fill:#0288D1
+                </div>
+
+            <div class="example-box">
+                <strong>CNI Plugin Impact:</strong>
+                Proper CNI plugin selection ensures optimal network performance, supports high-bandwidth AI workloads, 
+                and enables advanced networking features. For AI clusters, plugins supporting high-performance 
+                networks (InfiniBand, RDMA) are essential.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((CNI Plugins))
+                    CNI Basics
+                      Plugin Architecture
+                      Network Configuration
+                      IPAM Configuration
+                    Plugin Selection
+                      Standard Plugins
+                      High-Performance Plugins
+                      AI Network Support
+                    Custom Plugins
+                      Plugin Development
+                      Integration
+                      Testing
+                    Multi-Network
+                      Multus CNI
+                      Multiple Interfaces
+                      Network Selection
+            </div>
+        </section>
+
+        <section id="cni-basics" class="section">
+            <h2>CNI Basics</h2>
+            <p>
+                CNI (Container Network Interface) is a specification for configuring network interfaces in 
+                containers. CNI plugins implement this specification to provide network connectivity.
+            </p>
+
+            <div class="plugin-card">
+                <h3>CNI Architecture</h3>
+                <p>CNI plugins operate during pod lifecycle:</p>
+                
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant Kubelet
+                        participant CNI Plugin
+                        participant Network
+                        participant Pod
+
+                        Kubelet->>CNI Plugin: ADD Command
+                        CNI Plugin->>Network: Configure Interface
+                        Network->>Pod: Assign IP Address
+                        CNI Plugin->>Kubelet: Success
+                        Pod->>Pod: Network Ready
+                        Kubelet->>CNI Plugin: DEL Command
+                        CNI Plugin->>Network: Remove Interface
+                        Network->>Pod: Release IP
+                </div>
+
+                <p style="margin-top: 20px;"><strong>CNI Configuration:</strong></p>
+                <div class="command-box">
+# CNI configuration file example
+# /etc/cni/net.d/10-mynet.conf
+{
+  "cniVersion": "0.4.0",
+  "name": "mynet",
+  "type": "bridge",
+  "bridge": "cnio0",
+  "isDefaultGateway": true,
+  "ipMasq": true,
+  "ipam": {
+    "type": "host-local",
+    "subnet": "10.244.0.0/16",
+    "routes": [
+      { "dst": "0.0.0.0/0" }
+    ]
+  }
+}
+                </div>
+            </div>
+
+            <div class="plugin-card">
+                <h3>CNI Plugin Types</h3>
+                <p>CNI plugins fall into categories:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Network Plugins:</strong> Configure network interfaces (bridge, macvlan, etc.)</li>
+                    <li><strong>IPAM Plugins:</strong> Manage IP address allocation (host-local, DHCP)</li>
+                    <li><strong>Meta Plugins:</strong> Combine multiple plugins (flannel, calico, multus)</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="plugin-selection" class="section">
+            <h2>Plugin Selection</h2>
+            <p>
+                Select appropriate CNI plugins based on network requirements. For AI workloads, consider plugins 
+                that support high-performance networks.
+            </p>
+
+            <div class="concept-card">
+                <h3>Standard CNI Plugins</h3>
+                <p>Common CNI plugins for standard networks:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Bridge:</strong> Creates bridge for pod networking</li>
+                    <li><strong>Host-Device:</strong> Moves host device into pod</li>
+                    <li><strong>Macvlan:</strong> Creates MACVLAN interface</li>
+                    <li><strong>IPVLAN:</strong> Creates IPVLAN interface</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>High-Performance CNI Plugins</h3>
+                <p>CNI plugins for high-performance AI networks:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>SR-IOV CNI:</strong> Direct device access via SR-IOV</li>
+                    <li><strong>RDMA CNI:</strong> RDMA network support</li>
+                    <li><strong>InfiniBand CNI:</strong> InfiniBand network support</li>
+                    <li><strong>Multus:</strong> Multi-network support</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Multus CNI Configuration:</strong></p>
+                <div class="command-box">
+# Multus CNI allows multiple network interfaces per pod
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: infiniband-net
+spec:
+  config: '{
+    "cniVersion": "0.4.0",
+    "type": "sriov",
+    "vlan": 100
+  }'
+                </div>
+            </div>
+        </section>
+
+        <section id="custom-plugins" class="section">
+            <h2>Custom CNI Plugins</h2>
+            <p>
+                Develop custom CNI plugins for specific requirements. Custom plugins enable integration with 
+                specialized network hardware or protocols.
+            </p>
+
+            <div class="plugin-card">
+                <h3>Plugin Development</h3>
+                <p>CNI plugins implement standard interface:</p>
+                
+                <p style="margin-top: 20px;"><strong>CNI Plugin Interface:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li><strong>ADD:</strong> Add network interface to container</li>
+                    <li><strong>DEL:</strong> Remove network interface from container</li>
+                    <li><strong>CHECK:</strong> Check network interface status</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Plugin Implementation:</strong></p>
+                <div class="command-box">
+#!/bin/bash
+# Simple CNI plugin example
+
+case "$1" in
+  ADD)
+    # Add network interface
+    ip link add $CNI_IFNAME type veth peer name veth0
+    ip link set $CNI_IFNAME up
+    ip addr add $CNI_IP4_ADDRESS dev $CNI_IFNAME
+    ;;
+  DEL)
+    # Remove network interface
+    ip link delete $CNI_IFNAME
+    ;;
+esac
+                </div>
+            </div>
+        </section>
+
+        <section id="multi-network" class="section">
+            <h2>Multi-Network Support</h2>
+            <p>
+                Use Multus CNI to enable multiple network interfaces per pod. Multi-network support enables pods 
+                to access multiple networks simultaneously.
+            </p>
+
+            <div class="concept-card">
+                <h3>Multus CNI</h3>
+                <p>Multus enables multiple network interfaces:</p>
+                
+                <p style="margin-top: 20px;"><strong>Pod with Multiple Networks:</strong></p>
+                <div class="command-box">
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-net-pod
+  annotations:
+    k8s.v1.cni.cncf.io/networks: |
+      [
+        {
+          "name": "infiniband-net",
+          "interface": "ib0"
+        },
+        {
+          "name": "ethernet-net",
+          "interface": "eth1"
+        }
+      ]
+spec:
+  containers:
+  - name: app
+    image: nvidia/cuda:12.0.0-base-ubuntu22.04
+                </div>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>CNI Plugin Best Practices</h2>
+            <p>
+                Follow best practices for effective CNI plugin usage.
+            </p>
+
+            <div class="concept-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Select plugins based on network requirements</li>
+                    <li>Use Multus for multi-network scenarios</li>
+                    <li>Test plugins in non-production first</li>
+                    <li>Monitor network performance</li>
+                    <li>Document plugin configuration</li>
+                    <li>Keep plugins updated</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>CNI Plugin Checklist:</strong>
+                1. Identify network requirements<br>
+                2. Select appropriate CNI plugin<br>
+                3. Configure CNI plugin<br>
+                4. Test network connectivity<br>
+                5. Configure multi-network if needed<br>
+                6. Monitor network performance<br>
+                7. Document configuration<br>
+                8. Update plugins regularly<br>
+                9. Test plugin updates<br>
+                10. Maintain plugin documentation
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Kubernetes Networking Plugins | CNI Plugins for AI Networks</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

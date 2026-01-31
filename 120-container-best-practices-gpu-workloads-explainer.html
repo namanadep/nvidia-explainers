@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>120. Container Best Practices for GPU Workloads: Optimizing GPU Container Deployment</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #455A64;
+    --secondary-color: #546E7A;
+    --accent-color: #607D8B;
+    --bg-color: #ECEFF1;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #90A4AE;
+    --shadow: 0 2px 8px rgba(69, 90, 100, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #455A64, #546E7A);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.practice-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.practice-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #ECEFF1, #90A4AE);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #607D8B;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #90A4AE;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>120. Container Best Practices for GPU Workloads</h1>
+        <p class="subtitle">Optimizing GPU Container Deployment and Operations</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#image-optimization" class="nav-link">Image Optimization</a>
+        <a href="#multi-gpu" class="nav-link">Multi-GPU Containers</a>
+        <a href="#resource-limits" class="nav-link">Resource Limits</a>
+        <a href="#security" class="nav-link">Security</a>
+        <a href="#performance" class="nav-link">Performance</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Container Best Practices Overview</h2>
+            <p>
+                Container best practices for GPU workloads ensure optimal performance, security, and resource utilization. 
+                Proper container configuration maximizes GPU utilization, ensures security, and enables efficient multi-GPU 
+                deployments. Best practices include image optimization, resource limits, security hardening, and performance 
+                tuning. Understanding container best practices enables efficient GPU workload deployment and management.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[GPU Container Best Practices] --> B[Image Optimization]
+                    A --> C[Resource Management]
+                    A --> D[Multi-GPU Support]
+                    A --> E[Security]
+                    A --> F[Performance]
+                    B --> G[Base Image Selection]
+                    B --> H[Layer Optimization]
+                    C --> I[GPU Limits]
+                    C --> J[Memory Limits]
+                    D --> K[GPU Selection]
+                    D --> L[GPU Topology]
+                    E --> M[Security Context]
+                    E --> N[Image Scanning]
+                    F --> O[Data Loading]
+                    F --> P[GPU Utilization]
+                    
+                    style A fill:#455A64
+                    style B fill:#546E7A
+                    style C fill:#607D8B
+            </div>
+
+            <div class="example-box">
+                <strong>Best Practices Impact:</strong>
+                Following container best practices can improve GPU utilization by 20-30%, reduce container startup time 
+                by 50%, and improve security posture. Proper resource limits prevent resource contention, and optimized 
+                images reduce storage and network overhead.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((GPU Container Best Practices))
+                    Image Optimization
+                      Base Image Selection
+                      Layer Optimization
+                      Image Size Reduction
+                    Resource Management
+                      GPU Limits
+                      Memory Limits
+                      CPU Limits
+                    Multi-GPU Support
+                      GPU Selection
+                      GPU Topology
+                      Communication Optimization
+                    Security
+                      Security Context
+                      Image Scanning
+                      Runtime Security
+                    Performance
+                      Data Loading
+                      GPU Utilization
+                      Memory Management
+            </div>
+        </section>
+
+        <section id="image-optimization" class="section">
+            <h2>Container Image Optimization</h2>
+            <p>
+                Optimize container images for GPU workloads to reduce image size, improve startup time, and enhance 
+                security. Image optimization includes base image selection, layer optimization, and dependency management.
+            </p>
+
+            <div class="practice-card">
+                <h3>Base Image Selection</h3>
+                <p>Choose appropriate base images for GPU workloads:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>NVIDIA CUDA Images:</strong> Use official NVIDIA CUDA base images from NGC</li>
+                    <li><strong>PyTorch/TensorFlow Images:</strong> Use framework-specific images with CUDA support</li>
+                    <li><strong>Minimal Images:</strong> Use minimal base images when possible</li>
+                    <li><strong>Version Pinning:</strong> Pin specific versions for reproducibility</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Example Dockerfile:</strong></p>
+                <div class="command-box">
+# Use official NVIDIA CUDA base image
+FROM nvcr.io/nvidia/pytorch:23.10-py3
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Set default command
+CMD ["python", "train.py"]
+                </div>
+            </div>
+
+            <div class="practice-card">
+                <h3>Layer Optimization</h3>
+                <p>Optimize Dockerfile layers for better caching:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Order Layers:</strong> Place frequently changing layers last</li>
+                    <li><strong>Combine Commands:</strong> Combine RUN commands to reduce layers</li>
+                    <li><strong>Use .dockerignore:</strong> Exclude unnecessary files</li>
+                    <li><strong>Multi-stage Builds:</strong> Use multi-stage builds for smaller images</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Optimized Dockerfile:</strong></p>
+                <div class="command-box">
+# Multi-stage build for smaller image
+FROM nvcr.io/nvidia/pytorch:23.10-py3 AS builder
+
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Final stage
+FROM nvcr.io/nvidia/pytorch:23.10-py3
+
+WORKDIR /workspace
+COPY --from=builder /usr/local/lib/python3.10/site-packages \
+     /usr/local/lib/python3.10/site-packages
+COPY . .
+
+CMD ["python", "train.py"]
+                </div>
+            </div>
+        </section>
+
+        <section id="multi-gpu" class="section">
+            <h2>Multi-GPU Container Configuration</h2>
+            <p>
+                Configure containers for multi-GPU workloads to enable efficient GPU utilization and communication. 
+                Multi-GPU configuration includes GPU selection, topology awareness, and communication optimization.
+            </p>
+
+            <div class="concept-card">
+                <h3>GPU Selection</h3>
+                <p>Select specific GPUs for containers:</p>
+                
+                <p style="margin-top: 20px;"><strong>Docker GPU Selection:</strong></p>
+                <div class="command-box">
+# Run container with specific GPU
+docker run --gpus '"device=0,1"' \
+    nvidia/cuda:12.0.0-base-ubuntu22.04 \
+    nvidia-smi
+
+# Run container with all GPUs
+docker run --gpus all \
+    nvidia/cuda:12.0.0-base-ubuntu22.04 \
+    nvidia-smi
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Kubernetes GPU Selection:</strong></p>
+                <div class="command-box">
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-pod
+spec:
+  containers:
+  - name: gpu-container
+    image: nvidia/cuda:12.0.0-base-ubuntu22.04
+    resources:
+      limits:
+        nvidia.com/gpu: 2
+      requests:
+        nvidia.com/gpu: 2
+    env:
+    - name: NVIDIA_VISIBLE_DEVICES
+      value: "0,1"
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>GPU Topology Awareness</h3>
+                <p>Configure containers for GPU topology:</p>
+                
+                <p style="margin-top: 20px;"><strong>NCCL Environment Variables:</strong></p>
+                <div class="command-box">
+# Set NCCL environment for optimal communication
+docker run --gpus all \
+    -e NCCL_DEBUG=INFO \
+    -e NCCL_SOCKET_IFNAME=eth0 \
+    -e NCCL_IB_DISABLE=0 \
+    -e NCCL_P2P_DISABLE=0 \
+    nvidia/cuda:12.0.0-base-ubuntu22.04 \
+    python train.py
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Multi-GPU Container] --> B{GPU Selection}
+                    B -->|Specific GPUs| C[Set NVIDIA_VISIBLE_DEVICES]
+                    B -->|All GPUs| D[Use All Available]
+                    C --> E[Configure Topology]
+                    D --> E
+                    E --> F[NCCL Configuration]
+                    F --> G[Optimize Communication]
+                    G --> H[Run Multi-GPU Workload]
+                    
+                    style A fill:#455A64
+                    style H fill:#4CAF50
+                    style B fill:#FF9800
+            </div>
+        </section>
+
+        <section id="resource-limits" class="section">
+            <h2>Resource Limits</h2>
+            <p>
+                Set appropriate resource limits for GPU containers to prevent resource contention and ensure fair 
+                resource allocation. Resource limits include GPU limits, memory limits, and CPU limits.
+            </p>
+
+            <div class="practice-card">
+                <h3>GPU Resource Limits</h3>
+                <p>Set GPU resource limits in containers:</p>
+                
+                <p style="margin-top: 20px;"><strong>Docker GPU Limits:</strong></p>
+                <div class="command-box">
+# Limit GPU memory
+docker run --gpus all \
+    --gpus '"device=0,memory=8192"' \
+    nvidia/cuda:12.0.0-base-ubuntu22.04 \
+    python train.py
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Kubernetes GPU Limits:</strong></p>
+                <div class="command-box">
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-pod
+spec:
+  containers:
+  - name: gpu-container
+    image: nvidia/cuda:12.0.0-base-ubuntu22.04
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        memory: "16Gi"
+        cpu: "4"
+      requests:
+        nvidia.com/gpu: 1
+        memory: "16Gi"
+        cpu: "4"
+                </div>
+            </div>
+
+            <div class="practice-card">
+                <h3>Memory Limits</h3>
+                <p>Set memory limits to prevent OOM (Out of Memory) issues:</p>
+                
+                <p style="margin-top: 20px;"><strong>Container Memory Limits:</strong></p>
+                <div class="command-box">
+# Docker memory limit
+docker run --memory="16g" \
+    --gpus all \
+    nvidia/cuda:12.0.0-base-ubuntu22.04 \
+    python train.py
+
+# Kubernetes memory limit (already shown above)
+                </div>
+
+                <p style="margin-top: 20px;"><strong>GPU Memory Management:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Set appropriate GPU memory limits</li>
+                    <li>Monitor GPU memory usage</li>
+                    <li>Use gradient checkpointing for large models</li>
+                    <li>Enable memory pooling when available</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="security" class="section">
+            <h2>Container Security</h2>
+            <p>
+                Implement security best practices for GPU containers to protect workloads and infrastructure. Security 
+                includes image scanning, runtime security, and access control.
+            </p>
+
+            <div class="concept-card">
+                <h3>Security Context</h3>
+                <p>Configure security context for containers:</p>
+                
+                <p style="margin-top: 20px;"><strong>Kubernetes Security Context:</strong></p>
+                <div class="command-box">
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-gpu-pod
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+  containers:
+  - name: gpu-container
+    image: nvidia/cuda:12.0.0-base-ubuntu22.04
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Image Scanning</h3>
+                <p>Scan container images for vulnerabilities:</p>
+                
+                <p style="margin-top: 20px;"><strong>Scan Images:</strong></p>
+                <div class="command-box">
+# Use Trivy to scan images
+trivy image nvidia/cuda:12.0.0-base-ubuntu22.04
+
+# Scan with specific severity
+trivy image --severity HIGH,CRITICAL \
+    nvidia/cuda:12.0.0-base-ubuntu22.04
+
+# Scan and generate report
+trivy image --format json \
+    --output scan-report.json \
+    nvidia/cuda:12.0.0-base-ubuntu22.04
+                </div>
+            </div>
+        </section>
+
+        <section id="performance" class="section">
+            <h2>Performance Optimization</h2>
+            <p>
+                Optimize container performance for GPU workloads through data loading, GPU utilization, and memory 
+                management. Performance optimization ensures efficient GPU usage and faster training/inference.
+            </p>
+
+            <div class="practice-card">
+                <h3>Data Loading Optimization</h3>
+                <p>Optimize data loading in containers:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Multiple Workers:</strong> Use multiple data loader workers</li>
+                    <li><strong>Pin Memory:</strong> Enable pin_memory for faster CPU-GPU transfer</li>
+                    <li><strong>Prefetching:</strong> Use prefetch_factor for data prefetching</li>
+                    <li><strong>Persistent Workers:</strong> Use persistent_workers to avoid restart overhead</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>PyTorch DataLoader Example:</strong></p>
+                <div class="command-box">
+from torch.utils.data import DataLoader
+
+dataloader = DataLoader(
+    dataset,
+    batch_size=32,
+    num_workers=8,
+    pin_memory=True,
+    prefetch_factor=2,
+    persistent_workers=True
+)
+                </div>
+            </div>
+
+            <div class="practice-card">
+                <h3>GPU Utilization</h3>
+                <p>Maximize GPU utilization:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Monitor Utilization:</strong> Use nvidia-smi to monitor GPU usage</li>
+                    <li><strong>Batch Size:</strong> Optimize batch size for GPU memory</li>
+                    <li><strong>Mixed Precision:</strong> Use FP16 for faster training</li>
+                    <li><strong>Kernel Optimization:</strong> Use optimized CUDA kernels</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Container Best Practices Summary</h2>
+            <p>
+                Follow these best practices for GPU container deployment and management.
+            </p>
+
+            <div class="concept-card">
+                <h3>Image Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Use official NVIDIA base images</li>
+                    <li>Pin image versions for reproducibility</li>
+                    <li>Optimize Dockerfile layers</li>
+                    <li>Use multi-stage builds</li>
+                    <li>Scan images for vulnerabilities</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Resource Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Set appropriate GPU limits</li>
+                    <li>Set memory limits to prevent OOM</li>
+                    <li>Set CPU limits for fair scheduling</li>
+                    <li>Monitor resource usage</li>
+                    <li>Use resource quotas in Kubernetes</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Security Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Run containers as non-root</li>
+                    <li>Use read-only root filesystem when possible</li>
+                    <li>Drop unnecessary capabilities</li>
+                    <li>Scan images for vulnerabilities</li>
+                    <li>Use security contexts</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Container Best Practices Checklist:</strong>
+                1. Use optimized base images<br>
+                2. Set appropriate resource limits<br>
+                3. Configure multi-GPU support<br>
+                4. Implement security best practices<br>
+                5. Optimize data loading<br>
+                6. Monitor GPU utilization<br>
+                7. Scan images for vulnerabilities<br>
+                8. Use resource quotas<br>
+                9. Document container configuration<br>
+                10. Test containers before deployment
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Container Best Practices for GPU Workloads | Optimizing GPU Container Deployment</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>90. Nsight Tools: GPU Profiling and Debugging</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #00695C;
+    --secondary-color: #00897B;
+    --accent-color: #26A69A;
+    --bg-color: #E0F2F1;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #80CBC4;
+    --shadow: 0 2px 8px rgba(0, 105, 92, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #00695C, #00897B);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.tool-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.tool-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E0F2F1, #B2DFDB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #80CBC4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>90. Nsight Tools</h1>
+        <p class="subtitle">GPU Profiling and Debugging Suite</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#nsight-systems" class="nav-link">Nsight Systems</a>
+        <a href="#nsight-compute" class="nav-link">Nsight Compute</a>
+        <a href="#nsight-graphics" class="nav-link">Nsight Graphics</a>
+        <a href="#workflows" class="nav-link">Profiling Workflows</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Nsight Tools Overview</h2>
+            <p>
+                NVIDIA Nsight is a suite of development tools for GPU profiling, debugging, and optimization. Nsight 
+                Systems provides system-wide performance analysis, Nsight Compute offers kernel-level profiling, and 
+                Nsight Graphics focuses on graphics application debugging. These tools enable developers to identify 
+                performance bottlenecks, optimize GPU code, and debug GPU applications effectively. Understanding Nsight 
+                tools is essential for GPU development and optimization, providing insights into GPU utilization, 
+                memory usage, and kernel performance.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Nsight Suite] --> B[Nsight Systems<br/>System Analysis]
+                    A --> C[Nsight Compute<br/>Kernel Profiling]
+                    A --> D[Nsight Graphics<br/>Graphics Debugging]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style C fill:#26A69A
+                    style D fill:#4DB6AC
+            </div>
+
+            <div class="example-box">
+                <strong>GPU Profiling Tools:</strong>
+                Nsight tools provide comprehensive GPU profiling and debugging capabilities. Nsight Systems provides 
+                system-wide performance analysis showing CPU, GPU, memory, and I/O activity. Nsight Compute provides 
+                detailed kernel-level profiling for GPU compute operations. Nsight Graphics provides graphics debugging 
+                and profiling. These tools help identify performance bottlenecks and optimize GPU applications for 
+                maximum performance.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Nsight Tools))
+                    Nsight Systems
+                      System-Wide Analysis
+                      CPU/GPU/Memory/I/O
+                    Nsight Compute
+                      Kernel Profiling
+                      GPU Compute Operations
+                    Nsight Graphics
+                      Graphics Debugging
+                      Graphics Profiling
+                    Benefits
+                      Performance Analysis
+                      Bottleneck Identification
+                      Optimization
+            </div>
+        </section>
+
+        <section id="nsight-systems" class="section">
+            <h2>Nsight Systems</h2>
+            <p>
+                Nsight Systems provides system-wide performance analysis, profiling CPU, GPU, memory, and I/O to identify 
+                bottlenecks and optimization opportunities.
+            </p>
+
+            <div class="tool-card">
+                <h3>Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>System-Wide:</strong> System-wide performance profiling</li>
+                    <li><strong>Timeline View:</strong> Timeline visualization</li>
+                    <li><strong>GPU Activity:</strong> GPU kernel and memory operations</li>
+                    <li><strong>CPU Activity:</strong> CPU thread activity</li>
+                    <li><strong>Memory Usage:</strong> Memory usage analysis</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Bottleneck Identification:</strong> Identify performance bottlenecks</li>
+                    <li><strong>Optimization:</strong> Optimize application performance</li>
+                    <li><strong>Debugging:</strong> Debug performance issues</li>
+                    <li><strong>Analysis:</strong> Analyze application behavior</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Key Metrics</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GPU Utilization:</strong> GPU utilization metrics</li>
+                    <li><strong>Kernel Execution:</strong> Kernel execution times</li>
+                    <li><strong>Memory Transfers:</strong> CPU-GPU memory transfers</li>
+                    <li><strong>CPU-GPU Overlap:</strong> CPU-GPU execution overlap</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="nsight-compute" class="section">
+            <h2>Nsight Compute</h2>
+            <p>
+                Nsight Compute provides detailed kernel-level profiling and analysis, enabling deep optimization of 
+                GPU kernels.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Kernel] --> B[Nsight Compute]
+                    B --> C[Performance Metrics]
+                    B --> D[Memory Analysis]
+                    B --> E[Optimization]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style E fill:#26A69A
+            </div>
+
+            <div class="tool-card">
+                <h3>Kernel Profiling</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Detailed Metrics:</strong> Detailed kernel metrics</li>
+                    <li><strong>Warp-Level:</strong> Warp-level analysis</li>
+                    <li><strong>Memory Analysis:</strong> Memory access patterns</li>
+                    <li><strong>Occupancy:</strong> Occupancy analysis</li>
+                    <li><strong>Bottlenecks:</strong> Identify bottlenecks</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Metrics Provided</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Execution Time:</strong> Kernel execution time</li>
+                    <li><strong>Memory Throughput:</strong> Memory bandwidth utilization</li>
+                    <li><strong>Compute Throughput:</strong> Compute utilization</li>
+                    <li><strong>Occupancy:</strong> Occupancy metrics</li>
+                    <li><strong>Efficiency:</strong> Warp efficiency</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Optimization Insights</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Memory Coalescing:</strong> Memory access patterns</li>
+                    <li><strong>Bank Conflicts:</strong> Shared memory bank conflicts</li>
+                    <li><strong>Instruction Analysis:</strong> Instruction-level analysis</li>
+                    <li><strong>Optimization Suggestions:</strong> Optimization recommendations</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="nsight-graphics" class="section">
+            <h2>Nsight Graphics</h2>
+            <p>
+                Nsight Graphics is a graphics debugging and profiling tool for graphics applications, providing 
+                frame debugging and performance analysis.
+            </p>
+
+            <div class="tool-card">
+                <h3>Graphics Debugging</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Frame Debugging:</strong> Debug individual frames</li>
+                    <li><strong>Shader Debugging:</strong> Debug shaders</li>
+                    <li><strong>Render State:</strong> Inspect render state</li>
+                    <li><strong>Performance:</strong> Graphics performance analysis</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>API Inspection:</strong> Inspect graphics API calls</li>
+                    <li><strong>Resource Inspection:</strong> Inspect graphics resources</li>
+                    <li><strong>Frame Capture:</strong> Capture frames for analysis</li>
+                    <li><strong>Performance:</strong> Frame performance metrics</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Graphics Debugging:</strong> Debug graphics applications</li>
+                    <li><strong>Performance:</strong> Optimize graphics performance</li>
+                    <li><strong>Rendering:</strong> Analyze rendering pipelines</li>
+                    <li><strong>Visualization:</strong> Visualize graphics state</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="workflows" class="section">
+            <h2>Profiling Workflows</h2>
+            <p>
+                Effective profiling workflows using Nsight tools enable systematic optimization of GPU applications, 
+                from initial analysis to final optimization.
+            </p>
+
+            <div class="tool-card">
+                <h3>Optimization Workflow</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Profile:</strong> Profile with Nsight Systems</li>
+                    <li><strong>Identify:</strong> Identify bottlenecks</li>
+                    <li><strong>Deep Dive:</strong> Deep dive with Nsight Compute</li>
+                    <li><strong>Optimize:</strong> Optimize based on insights</li>
+                    <li><strong>Validate:</strong> Validate improvements</li>
+                </ol>
+            </div>
+
+            <div class="tool-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Start Broad:</strong> Start with system-wide profiling</li>
+                    <li><strong>Narrow Down:</strong> Narrow to specific kernels</li>
+                    <li><strong>Iterate:</strong> Iterate on optimization</li>
+                    <li><strong>Measure:</strong> Measure before and after</li>
+                    <li><strong>Document:</strong> Document optimization changes</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Integration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>CI/CD:</strong> Integrate into CI/CD pipelines</li>
+                    <li><strong>Automation:</strong> Automate profiling</li>
+                    <li><strong>Reporting:</strong> Generate performance reports</li>
+                    <li><strong>Monitoring:</strong> Continuous performance monitoring</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Nsight Profiling:</strong>
+                Use Nsight Systems for system-wide profiling to identify bottlenecks, then use Nsight Compute for 
+                detailed kernel-level analysis and optimization. Follow profiling workflows: profile broadly, identify 
+                bottlenecks, optimize, and validate. Nsight tools provide comprehensive insights into GPU performance, 
+                enabling effective optimization of GPU applications.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Nsight Tools Guide | GPU Profiling and Debugging</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

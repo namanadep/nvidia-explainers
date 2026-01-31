@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>84. cuBLAS and cuSPARSE: Linear Algebra Acceleration</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #00695C;
+    --secondary-color: #00897B;
+    --accent-color: #26A69A;
+    --bg-color: #E0F2F1;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #80CBC4;
+    --shadow: 0 2px 8px rgba(0, 105, 92, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #00695C, #00897B);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E0F2F1, #B2DFDB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #80CBC4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>84. cuBLAS and cuSPARSE</h1>
+        <p class="subtitle">Linear Algebra Acceleration Libraries</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#cublas" class="nav-link">cuBLAS</a>
+        <a href="#cusparse" class="nav-link">cuSPARSE</a>
+        <a href="#performance" class="nav-link">Performance</a>
+        <a href="#use-cases" class="nav-link">Use Cases</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>cuBLAS and cuSPARSE Overview</h2>
+            <p>
+                cuBLAS (CUDA Basic Linear Algebra Subroutines) and cuSPARSE (CUDA Sparse Matrix library) are NVIDIA's 
+                GPU-accelerated linear algebra libraries. cuBLAS provides optimized implementations of BLAS (Basic 
+                Linear Algebra Subroutines) operations for dense matrices, while cuSPARSE focuses on sparse matrix 
+                operations. These libraries are essential for scientific computing, machine learning, and HPC applications 
+                that require high-performance linear algebra operations. Both libraries are highly optimized for NVIDIA 
+                GPU architectures and provide the computational foundation for many GPU-accelerated applications.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Linear Algebra Libraries] --> B[cuBLAS<br/>Dense Matrices]
+                    A --> C[cuSPARSE<br/>Sparse Matrices]
+                    
+                    B --> D[Matrix Multiply]
+                    B --> E[Vector Operations]
+                    
+                    C --> F[Sparse Operations]
+                    C --> G[Format Conversions]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style C fill:#26A69A
+            </div>
+
+            <div class="example-box">
+                <strong>Linear Algebra Acceleration:</strong>
+                cuBLAS and cuSPARSE are like specialized calculators for linear algebra - cuBLAS handles dense matrix 
+                operations (like multiplying full matrices), while cuSPARSE handles sparse matrices (matrices with many 
+                zeros). These libraries accelerate linear algebra operations 
+                on GPUs, providing the computational foundation for many scientific and AI applications.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((cuBLAS & cuSPARSE))
+                    cuBLAS
+                      Dense Matrices
+                      Matrix Multiply
+                      Vector Operations
+                    cuSPARSE
+                      Sparse Matrices
+                      Sparse Operations
+                      Format Conversions
+                    Use Cases
+                      Scientific Computing
+                      Machine Learning
+                      HPC Applications
+            </div>
+        </section>
+
+        <section id="cublas" class="section">
+            <h2>cuBLAS: Dense Matrix Operations</h2>
+            <p>
+                cuBLAS provides GPU-accelerated implementations of BLAS operations for dense matrices, including matrix 
+                multiplication, vector operations, and other linear algebra primitives.
+            </p>
+
+            <div class="concept-card">
+                <h3>cuBLAS Operations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Level 1:</strong> Vector operations (scalar, dot product)</li>
+                    <li><strong>Level 2:</strong> Matrix-vector operations</li>
+                    <li><strong>Level 3:</strong> Matrix-matrix operations (GEMM)</li>
+                    <li><strong>Extensions:</strong> Batched operations, mixed precision</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Key Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>High Performance:</strong> Optimized for GPU architectures</li>
+                    <li><strong>Tensor Cores:</strong> Leverages Tensor Cores for GEMM</li>
+                    <li><strong>Batched Operations:</strong> Batch processing support</li>
+                    <li><strong>Mixed Precision:</strong> Mixed precision operations</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Common Operations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GEMM:</strong> General matrix multiplication</li>
+                    <li><strong>GEMV:</strong> General matrix-vector multiplication</li>
+                    <li><strong>DOT:</strong> Vector dot product</li>
+                    <li><strong>AXPY:</strong> Scalar-vector multiply and add</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="cusparse" class="section">
+            <h2>cuSPARSE: Sparse Matrix Operations</h2>
+            <p>
+                cuSPARSE provides GPU-accelerated operations for sparse matrices, which are common in many scientific 
+                and engineering applications where matrices contain many zero elements.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Sparse Matrix] --> B[cuSPARSE]
+                    B --> C[Format Conversion]
+                    B --> D[Sparse Operations]
+                    D --> E[Result]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style E fill:#26A69A
+            </div>
+
+            <div class="concept-card">
+                <h3>Sparse Formats</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>CSR:</strong> Compressed Sparse Row</li>
+                    <li><strong>CSC:</strong> Compressed Sparse Column</li>
+                    <li><strong>COO:</strong> Coordinate format</li>
+                    <li><strong>ELL:</strong> ELLPACK format</li>
+                    <li><strong>Hybrid:</strong> Hybrid formats</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>cuSPARSE Operations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>SpMV:</strong> Sparse matrix-vector multiplication</li>
+                    <li><strong>SpMM:</strong> Sparse matrix-matrix multiplication</li>
+                    <li><strong>Format Conversion:</strong> Convert between formats</li>
+                    <li><strong>Triangular Solve:</strong> Sparse triangular solve</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Optimization Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Format Selection:</strong> Optimal format selection</li>
+                    <li><strong>Memory Efficiency:</strong> Efficient memory usage</li>
+                    <li><strong>Kernel Selection:</strong> Optimized kernel selection</li>
+                    <li><strong>Preprocessing:</strong> Matrix preprocessing</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="performance" class="section">
+            <h2>Performance Characteristics</h2>
+            <p>
+                Both cuBLAS and cuSPARSE are highly optimized for NVIDIA GPU architectures, providing significant 
+                performance improvements over CPU implementations.
+            </p>
+
+            <div class="concept-card">
+                <h3>Performance Factors</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GPU Architecture:</strong> Optimized for each GPU generation</li>
+                    <li><strong>Tensor Cores:</strong> Leverages Tensor Cores for GEMM</li>
+                    <li><strong>Memory Bandwidth:</strong> Optimized memory access</li>
+                    <li><strong>Problem Size:</strong> Performance scales with problem size</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Optimization Tips</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Batch Operations:</strong> Use batched operations when possible</li>
+                    <li><strong>Format Selection:</strong> Choose optimal sparse format</li>
+                    <li><strong>Memory Layout:</strong> Use optimal memory layouts</li>
+                    <li><strong>Precision:</strong> Use appropriate precision</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Benchmarking</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Performance Testing:</strong> Benchmark operations</li>
+                    <li><strong>Comparison:</strong> Compare with CPU implementations</li>
+                    <li><strong>Profiling:</strong> Profile with Nsight tools</li>
+                    <li><strong>Optimization:</strong> Iterate on optimization</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="use-cases" class="section">
+            <h2>Use Cases</h2>
+            <p>
+                cuBLAS and cuSPARSE are used in a wide range of applications requiring high-performance linear algebra 
+                operations.
+            </p>
+
+            <div class="concept-card">
+                <h3>cuBLAS Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Deep Learning:</strong> Neural network operations</li>
+                    <li><strong>Scientific Computing:</strong> Dense matrix computations</li>
+                    <li><strong>Signal Processing:</strong> Signal processing algorithms</li>
+                    <li><strong>Computer Vision:</strong> Image processing operations</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>cuSPARSE Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Graph Algorithms:</strong> Graph processing</li>
+                    <li><strong>Finite Element:</strong> Finite element methods</li>
+                    <li><strong>Computational Fluid Dynamics:</strong> CFD simulations</li>
+                    <li><strong>Sparse Neural Networks:</strong> Sparse model operations</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Integration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Frameworks:</strong> Used by deep learning frameworks</li>
+                    <li><strong>Applications:</strong> Direct integration in applications</li>
+                    <li><strong>Libraries:</strong> Foundation for other libraries</li>
+                    <li><strong>Custom Code:</strong> Custom GPU applications</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Linear Algebra Libraries:</strong>
+                Use cuBLAS for dense matrix operations like matrix multiplication, vector operations, and other BLAS 
+                operations. Use cuSPARSE for sparse matrix operations, choosing appropriate sparse formats and operations. 
+                Both libraries provide high-performance GPU acceleration for linear algebra, forming the computational 
+                foundation for many scientific computing and AI applications.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>cuBLAS and cuSPARSE Guide | Linear Algebra Acceleration</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

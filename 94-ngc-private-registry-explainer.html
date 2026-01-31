@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>94. NGC Private Registry: Enterprise Container Management</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #5D4037;
+    --secondary-color: #6D4C41;
+    --accent-color: #8D6E63;
+    --bg-color: #EFEBE9;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #BCAAA4;
+    --shadow: 0 2px 8px rgba(93, 64, 55, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #5D4037, #6D4C41);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #EFEBE9, #D7CCC8);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #BCAAA4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>94. NGC Private Registry</h1>
+        <p class="subtitle">Enterprise Container Management</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#setup" class="nav-link">Private Registry Setup</a>
+        <a href="#security" class="nav-link">Security</a>
+        <a href="#access-control" class="nav-link">Access Control</a>
+        <a href="#cicd" class="nav-link">CI/CD Integration</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>NGC Private Registry Overview</h2>
+            <p>
+                NGC Private Registry enables organizations to host their own private container registry, providing secure, 
+                controlled access to container images within their infrastructure. Private registries enable organizations 
+                to store custom images, control access, ensure security compliance, and integrate with CI/CD pipelines. 
+                NGC Private Registry provides enterprise features including access control, image scanning, versioning, 
+                and integration with enterprise systems. Understanding private registry setup and management enables 
+                organizations to maintain control over their container images and ensure security and compliance.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Private Registry] --> B[Image Storage]
+                    A --> C[Access Control]
+                    A --> D[Security Scanning]
+                    A --> E[CI/CD Integration]
+                    
+                    style A fill:#5D4037
+                    style B fill:#6D4C41
+                    style C fill:#8D6E63
+            </div>
+
+            <div class="example-box">
+                <strong>Private Container Registry:</strong>
+                NGC Private Registry provides private container image storage and distribution. You control access 
+                through authentication and authorization, manage image repositories and versions, and distribute images 
+                securely. A private registry provides control, security, and compliance for container images, enabling 
+                organizations to manage their container image lifecycle internally.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((NGC Private Registry))
+                    Features
+                      Image Storage
+                      Access Control
+                      Security Scanning
+                      Versioning
+                    Benefits
+                      Control
+                      Security
+                      Compliance
+                    Integration
+                      CI/CD Integration
+                      Enterprise Systems
+            </div>
+        </section>
+
+        <section id="setup" class="section">
+            <h2>Private Registry Setup</h2>
+            <p>
+                Setting up a private registry involves deploying registry infrastructure, configuring storage, and 
+                establishing access mechanisms.
+            </p>
+
+            <div class="concept-card">
+                <h3>Registry Deployment</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Infrastructure:</strong> Deploy registry infrastructure</li>
+                    <li><strong>Storage:</strong> Configure storage backend</li>
+                    <li><strong>Networking:</strong> Configure network access</li>
+                    <li><strong>High Availability:</strong> Set up high availability</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Registry Configuration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Authentication:</strong> Configure authentication</li>
+                    <li><strong>Authorization:</strong> Set up authorization</li>
+                    <li><strong>Storage:</strong> Configure storage</li>
+                    <li><strong>Networking:</strong> Configure networking</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Image Management</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Image Push:</strong> Push images to registry</li>
+                    <li><strong>Image Pull:</strong> Pull images from registry</li>
+                    <li><strong>Versioning:</strong> Manage image versions</li>
+                    <li><strong>Tagging:</strong> Tag images appropriately</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="security" class="section">
+            <h2>Security</h2>
+            <p>
+                Private registry security involves image scanning, vulnerability management, and secure access controls 
+                to ensure container security.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Image] --> B[Security Scan]
+                    B --> C{Vulnerabilities?}
+                    C -->|Yes| D[Block/Alert]
+                    C -->|No| E[Approve]
+                    
+                    style A fill:#5D4037
+                    style B fill:#6D4C41
+                    style E fill:#8D6E63
+            </div>
+
+            <div class="concept-card">
+                <h3>Image Scanning</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Vulnerability Scanning:</strong> Scan for vulnerabilities</li>
+                    <li><strong>Policy Enforcement:</strong> Enforce security policies</li>
+                    <li><strong>Compliance:</strong> Ensure compliance</li>
+                    <li><strong>Reporting:</strong> Security reporting</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Security Features</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Encryption:</strong> Image encryption</li>
+                    <li><strong>Access Control:</strong> Fine-grained access control</li>
+                    <li><strong>Audit Logging:</strong> Audit logging</li>
+                    <li><strong>Compliance:</strong> Compliance features</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Regular Scanning:</strong> Regular image scanning</li>
+                    <li><strong>Policy Enforcement:</strong> Enforce security policies</li>
+                    <li><strong>Access Control:</strong> Implement access controls</li>
+                    <li><strong>Monitoring:</strong> Monitor security events</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="access-control" class="section">
+            <h2>Access Control</h2>
+            <p>
+                Private registry access control manages who can access, push, and pull images, ensuring secure and 
+                controlled image distribution.
+            </p>
+
+            <div class="concept-card">
+                <h3>Access Models</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Role-Based:</strong> Role-based access control</li>
+                    <li><strong>User-Based:</strong> User-based access control</li>
+                    <li><strong>Team-Based:</strong> Team-based access</li>
+                    <li><strong>Project-Based:</strong> Project-based access</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Permissions</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Read:</strong> Pull images</li>
+                    <li><strong>Write:</strong> Push images</li>
+                    <li><strong>Admin:</strong> Administrative access</li>
+                    <li><strong>Custom:</strong> Custom permissions</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Authentication</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Credentials:</strong> Username/password</li>
+                    <li><strong>Tokens:</strong> API tokens</li>
+                    <li><strong>OAuth:</strong> OAuth integration</li>
+                    <li><strong>LDAP:</strong> LDAP integration</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="cicd" class="section">
+            <h2>CI/CD Integration</h2>
+            <p>
+                Private registries integrate with CI/CD pipelines, enabling automated image building, scanning, and 
+                deployment workflows.
+            </p>
+
+            <div class="concept-card">
+                <h3>CI/CD Workflow</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Build:</strong> Build container images</li>
+                    <li><strong>Scan:</strong> Scan images for vulnerabilities</li>
+                    <li><strong>Push:</strong> Push to private registry</li>
+                    <li><strong>Deploy:</strong> Deploy from registry</li>
+                </ol>
+            </div>
+
+            <div class="concept-card">
+                <h3>Integration Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Automation:</strong> Automated image management</li>
+                    <li><strong>Security:</strong> Automated security scanning</li>
+                    <li><strong>Versioning:</strong> Automated versioning</li>
+                    <li><strong>Deployment:</strong> Automated deployment</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Automated Builds:</strong> Automate image builds</li>
+                    <li><strong>Security Gates:</strong> Implement security gates</li>
+                    <li><strong>Versioning:</strong> Use semantic versioning</li>
+                    <li><strong>Tagging:</strong> Tag images appropriately</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>NGC Private Registry:</strong>
+                Set up NGC Private Registry for enterprise container management by deploying registry infrastructure, 
+                configuring security and access control, implementing image scanning, and integrating with CI/CD pipelines. 
+                Use private registries to maintain control over container images, ensure security compliance, and enable 
+                efficient image distribution. Private registries provide enterprise-grade container management capabilities.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>NGC Private Registry Guide | Enterprise Container Management</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

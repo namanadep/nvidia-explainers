@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>55. DOCA Installation: Host vs DPU Deployment</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #AD1457;
+    --secondary-color: #C2185B;
+    --accent-color: #E91E63;
+    --bg-color: #FCE4EC;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #F8BBD0;
+    --shadow: 0 2px 8px rgba(173, 20, 87, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #AD1457, #C2185B);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.deployment-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.deployment-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.command-box {
+    background: #263238;
+    color: #F8BBD0;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FCE4EC, #F8BBD0);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #F8BBD0;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>55. DOCA Installation: Host vs DPU</h1>
+        <p class="subtitle">Deployment Strategies for DOCA Applications</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#host-installation" class="nav-link">Host Installation</a>
+        <a href="#dpu-installation" class="nav-link">DPU Installation</a>
+        <a href="#approaches" class="nav-link">Approaches</a>
+        <a href="#configuration" class="nav-link">Configuration</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>DOCA Installation Overview</h2>
+            <p>
+                DOCA can be installed on either the host system or directly on the DPU, each approach serving 
+                different use cases and deployment scenarios. Host installation enables host-based DPU management 
+                and applications that interact with DPU from the host, while DPU installation enables native DPU 
+                applications that run directly on the DPU's ARM cores. Understanding both approaches helps design 
+                optimal deployment architectures for different workload requirements.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[DOCA Installation] --> B[Host Installation]
+                    A --> C[DPU Installation]
+                    
+                    B --> B1[Host-Based Apps<br/>DPU Management]
+                    C --> C1[Native DPU Apps<br/>DPU Services]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+            </div>
+
+            <div class="example-box">
+                <strong>Deployment Strategies:</strong>
+                DOCA installation location determines where applications run and how they interact with DPU hardware. 
+                Host installation is like having a remote control (host) that manages a device (DPU), while DPU 
+                installation is like having the device operate independently. Both approaches have their place in 
+                modern infrastructure deployments.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((DOCA Installation))
+                    Host Installation
+                      Applications on Host
+                      Remote DPU Management
+                      Host-Based Control
+                    DPU Installation
+                      Applications on DPU
+                      Independent Operation
+                      DPU-Based Control
+                    Configuration
+                      Host Discovery
+                      Network Settings
+                      Service Configuration
+                    Best Practices
+                      Proper Configuration
+                      Testing & Verification
+                      Documentation
+            </div>
+        </section>
+
+        <section id="host-installation" class="section">
+            <h2>Host Installation</h2>
+            <p>
+                Host installation places DOCA components on the host system, enabling host-based applications to 
+                interact with DPU hardware and manage DPU resources. This approach is common for management applications 
+                and workloads that coordinate between host and DPU.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Host Installation Components] --> B[DOCA Libraries<br/>Host-DPU Communication]
+                    A --> C[DPU Drivers<br/>Hardware Access]
+                    A --> D[Management Tools<br/>DPU Management]
+                    A --> E[APIs<br/>Host-DPU Interaction]
+                    
+                    style A fill:#5E35B1
+                    style B fill:#7E57C2
+                    style C fill:#9575CD
+                    style D fill:#B39DDB
+                    style E fill:#CE93D8
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Host Installation] --> B[Prerequisites<br/>Verify Requirements]
+                    B --> C[Package Download<br/>DOCA Host Package]
+                    C --> D[Installation<br/>Install on Host]
+                    D --> E[Configuration<br/>Host-DPU Connection]
+                    E --> F[Verification<br/>Verify Installation]
+                    
+                    style A fill:#5E35B1
+                    style F fill:#7E57C2
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Host Installation Use Cases] --> B[DPU Management<br/>Manage from Host]
+                    A --> C[Host-Based Apps<br/>Apps on Host]
+                    A --> D[Coordination<br/>Host & DPU Resources]
+                    A --> E[Development<br/>Development & Testing]
+                    
+                    style A fill:#5E35B1
+                    style B fill:#7E57C2
+                    style C fill:#9575CD
+                    style D fill:#B39DDB
+                    style E fill:#CE93D8
+                </div>
+
+            <div class="deployment-card">
+                <h3>Installation Command Example</h3>
+                <div class="command-box">
+# Install DOCA Runtime on host<br>
+sudo apt-get update<br>
+sudo apt-get install doca-runtime<br>
+<br>
+# Or install DOCA SDK for development<br>
+sudo apt-get install doca-sdk
+                </div>
+            </div>
+        </section>
+
+        <section id="dpu-installation" class="section">
+            <h2>DPU Installation</h2>
+            <p>
+                DPU installation places DOCA components directly on the DPU, enabling native applications to run 
+                on the DPU's ARM cores. This approach enables DPU-native workloads and services that operate 
+                independently of the host.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[DPU Installation Components] --> B[DOCA Runtime<br/>Runtime Libraries]
+                    A --> C[DPU Services<br/>Services on DPU]
+                    A --> D[DPU Applications<br/>Native Apps]
+                    A --> E[DPU OS<br/>Operating System]
+                    
+                    style A fill:#5E35B1
+                    style B fill:#7E57C2
+                    style C fill:#9575CD
+                    style D fill:#B39DDB
+                    style E fill:#CE93D8
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[DPU Installation] --> B[DPU Access<br/>RShim or Network]
+                    B --> C[OS Preparation<br/>Prepare DPU OS]
+                    C --> D[Package Transfer<br/>Transfer DOCA]
+                    D --> E[Installation<br/>Install on DPU]
+                    E --> F[Configuration<br/>Configure Services]
+                    F --> G[Verification<br/>Verify Installation]
+                    
+                    style A fill:#5E35B1
+                    style G fill:#7E57C2
+                </div>
+            </div>
+
+            <div class="deployment-card">
+                <h3>DPU Installation Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Native DPU Apps:</strong> Applications running on DPU</li>
+                    <li><strong>DPU Services:</strong> Services running on DPU</li>
+                    <li><strong>Independent Operation:</strong> DPU operating independently</li>
+                    <li><strong>Offloading:</strong> Infrastructure offloading</li>
+                </ul>
+            </div>
+
+            <div class="deployment-card">
+                <h3>Installation Methods</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>RShim:</strong> Via RShim interface</li>
+                    <li><strong>Network:</strong> Via network connection</li>
+                    <li><strong>BFB Install:</strong> Via BlueField Bundle</li>
+                    <li><strong>Image-Based:</strong> Via DPU image</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="approaches" class="section">
+            <h2>Deployment Approaches</h2>
+            <p>
+                Different deployment approaches serve different use cases. Some scenarios require host installation, 
+                others require DPU installation, and some benefit from both.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Deployment Approach] --> B[Host Only]
+                    A --> C[DPU Only]
+                    A --> D[Both Host and DPU]
+                    
+                    B --> B1[Host Management<br/>Host Apps]
+                    C --> C1[Native DPU Apps<br/>DPU Services]
+                    D --> D1[Hybrid Apps<br/>Coordinated Operation]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+                    style D fill:#F06292
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Host Installation</th>
+                        <th>DPU Installation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Application Location</strong></td>
+                        <td>Runs on host</td>
+                        <td>Runs on DPU</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DPU Access</strong></td>
+                        <td>Via APIs/drivers</td>
+                        <td>Direct hardware access</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Use Case</strong></td>
+                        <td>Management, coordination</td>
+                        <td>Native DPU workloads</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance</strong></td>
+                        <td>Host-DPU communication overhead</td>
+                        <td>Direct DPU performance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Independence</strong></td>
+                        <td>Requires host</td>
+                        <td>Can operate independently</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="deployment-card">
+                <h3>Hybrid Approach</h3>
+                <p>Both host and DPU installation:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Host Components:</strong> Management and coordination on host</li>
+                    <li><strong>DPU Components:</strong> Native workloads on DPU</li>
+                    <li><strong>Coordination:</strong> Host and DPU work together</li>
+                    <li><strong>Use Case:</strong> Complex applications requiring both</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="configuration" class="section">
+            <h2>Installation Configuration</h2>
+            <p>
+                Proper configuration ensures DOCA installations work correctly and applications can access DPU resources. 
+                Configuration differs between host and DPU installations.
+            </p>
+
+            <div class="deployment-card">
+                <h3>Host Configuration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>DPU Discovery:</strong> Configure DPU discovery</li>
+                    <li><strong>Connection:</strong> Configure host-DPU connection</li>
+                    <li><strong>Permissions:</strong> Set appropriate permissions</li>
+                    <li><strong>Environment:</strong> Configure environment variables</li>
+                </ul>
+            </div>
+
+            <div class="deployment-card">
+                <h3>DPU Configuration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Network Configuration:</strong> Configure DPU network</li>
+                    <li><strong>Service Configuration:</strong> Configure DOCA services</li>
+                    <li><strong>Resource Allocation:</strong> Configure DPU resources</li>
+                    <li><strong>Security:</strong> Configure security settings</li>
+                </ul>
+            </div>
+
+            <div class="deployment-card">
+                <h3>Verification Steps</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Installation Check:</strong> Verify DOCA installation</li>
+                    <li><strong>Connectivity:</strong> Verify host-DPU connectivity</li>
+                    <li><strong>Services:</strong> Verify DOCA services running</li>
+                    <li><strong>Applications:</strong> Test application execution</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Configuration Best Practices:</strong>
+                For host installation, ensure proper DPU discovery and connection configuration. For DPU installation, 
+                configure network settings and DOCA services appropriately. Verify installations by testing basic 
+                operations and checking service status. Document configuration for reproducibility and troubleshooting.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>DOCA Installation Guide | Host vs DPU Deployment</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

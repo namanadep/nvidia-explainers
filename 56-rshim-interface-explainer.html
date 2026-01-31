@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>56. RShim Interface: DPU Communication Bridge</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #6A1B9A;
+    --secondary-color: #8E24AA;
+    --accent-color: #AB47BC;
+    --bg-color: #F3E5F5;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #CE93D8;
+    --shadow: 0 2px 8px rgba(106, 27, 154, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #6A1B9A, #8E24AA);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.command-box {
+    background: #263238;
+    color: #CE93D8;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #CE93D8;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>56. RShim Interface</h1>
+        <p class="subtitle">DPU Communication Bridge for Management and Access</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#configuration" class="nav-link">Configuration</a>
+        <a href="#ssh-access" class="nav-link">SSH Access</a>
+        <a href="#use-cases" class="nav-link">Use Cases</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>RShim Interface Overview</h2>
+            <p>
+                RShim (Remote Shell Interface) is a communication interface that enables host systems to interact 
+                with BlueField DPUs. It provides a bridge between the host and DPU, allowing management, configuration, 
+                and access to DPU resources. RShim enables SSH access to the DPU, console access, file transfer, and 
+                other management operations. This interface is essential for DPU bring-up, configuration, and ongoing 
+                management, providing a reliable way to access and manage DPU functionality from the host system.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Host System] --> B[RShim Interface]
+                    B --> C[DPU ARM Cores]
+                    B --> D[DPU Services]
+                    B --> E[DPU Management]
+                    
+                    B --> F[SSH Access]
+                    B --> G[Console Access]
+                    B --> H[File Transfer]
+                    
+                    style A fill:#6A1B9A
+                    style B fill:#8E24AA
+                    style C fill:#AB47BC
+            </div>
+
+            <div class="example-box">
+                <strong>Communication Bridge:</strong>
+                RShim functions like a communication bridge between two islands (host and DPU). Just as a bridge 
+                enables people and goods to move between islands, RShim enables commands, data, and management 
+                operations to flow between the host system and DPU, enabling seamless interaction and management 
+                of DPU resources.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((RShim Interface))
+                    Function
+                      Communication Bridge
+                      Host-DPU Interface
+                      Management Access
+                    Capabilities
+                      SSH Access
+                      Command Execution
+                      File Transfer
+                      System Management
+                    Use Cases
+                      DPU Configuration
+                      Application Deployment
+                      Monitoring & Debugging
+                    Benefits
+                      Standard Interface
+                      Familiar SSH Access
+                      Seamless Management
+            </div>
+        </section>
+
+        <section id="how-it-works" class="section">
+            <h2>How RShim Works</h2>
+            <p>
+                RShim operates by creating a virtual network interface on the host that connects to the DPU's ARM 
+                cores. This interface enables various communication channels including SSH, console, and file transfer.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[RShim Components] --> B[Host Driver<br/>RShim Driver]
+                    A --> C[Virtual Interface<br/>rshim0]
+                    A --> D[DPU Service<br/>RShim Service]
+                    A --> E[Communication Channel<br/>PCIe-Based]
+                    
+                    style A fill:#00BCD4
+                    style B fill:#26C6DA
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                    style E fill:#B2EBF2
+                </div>
+
+            <div class="concept-card">
+                <h3>RShim Interface Creation</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Driver Load:</strong> RShim driver loaded on host</li>
+                    <li><strong>Interface Creation:</strong> Virtual interface created (rshim0)</li>
+                    <li><strong>IP Assignment:</strong> IP address assigned to interface</li>
+                    <li><strong>DPU Connection:</strong> Connection established to DPU</li>
+                    <li><strong>Service Ready:</strong> RShim service ready on DPU</li>
+                </ol>
+            </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Communication Channels] --> B[SSH<br/>Secure Shell]
+                    A --> C[Console<br/>Serial Console]
+                    A --> D[File Transfer<br/>SCP/SFTP]
+                    A --> E[Management<br/>Configuration]
+                    
+                    style A fill:#00BCD4
+                    style B fill:#26C6DA
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                    style E fill:#B2EBF2
+                </div>
+        </section>
+
+        <section id="configuration" class="section">
+            <h2>RShim Configuration</h2>
+            <p>
+                Proper RShim configuration ensures reliable host-DPU communication. Configuration involves setting 
+                up the virtual interface, assigning IP addresses, and configuring network settings.
+            </p>
+
+            <div class="concept-card">
+                <h3>Interface Configuration</h3>
+                <p>Configure the RShim virtual interface:</p>
+                <div class="command-box">
+# Check RShim interface status<br>
+ip link show rshim0<br>
+<br>
+# Configure IP address<br>
+sudo ip addr add 192.168.100.1/24 dev rshim0<br>
+sudo ip link set rshim0 up<br>
+<br>
+# Verify connectivity<br>
+ping 192.168.100.2
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Network Configuration] --> B[IP Address<br/>Assign to rshim0]
+                    A --> C[Subnet<br/>Configure Subnet]
+                    A --> D[Routing<br/>Configure Routing]
+                    A --> E[Firewall<br/>Configure if Needed]
+                    
+                    style A fill:#00BCD4
+                    style B fill:#26C6DA
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                    style E fill:#B2EBF2
+                </div>
+
+            <div class="concept-card">
+                <h3>Persistent Configuration</h3>
+                <p>Make RShim configuration persistent:</p>
+                <div class="command-box">
+# Add to /etc/network/interfaces or netplan config<br>
+auto rshim0<br>
+iface rshim0 inet static<br>
+    address 192.168.100.1<br>
+    netmask 255.255.255.0
+                </div>
+            </div>
+        </section>
+
+        <section id="ssh-access" class="section">
+            <h2>SSH Access via RShim</h2>
+            <p>
+                RShim enables SSH access to the DPU, allowing secure remote management and configuration. This 
+                provides a familiar interface for DPU administration.
+            </p>
+
+            <div class="concept-card">
+                <h3>SSH Connection</h3>
+                <p>Connect to DPU via SSH:</p>
+                <div class="command-box">
+# SSH to DPU via RShim<br>
+ssh root@192.168.100.2<br>
+<br>
+# Or use specific user<br>
+ssh user@192.168.100.2
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>SSH Configuration</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Key Authentication:</strong> Configure SSH keys</li>
+                    <li><strong>Password Authentication:</strong> Set up passwords</li>
+                    <li><strong>SSH Config:</strong> Configure SSH client settings</li>
+                    <li><strong>Security:</strong> Follow security best practices</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>File Transfer</h3>
+                <p>Transfer files to/from DPU:</p>
+                <div class="command-box">
+# Copy file to DPU<br>
+scp file.txt root@192.168.100.2:/path/<br>
+<br>
+# Copy file from DPU<br>
+scp root@192.168.100.2:/path/file.txt .<br>
+<br>
+# Or use SFTP<br>
+sftp root@192.168.100.2
+                </div>
+            </div>
+        </section>
+
+        <section id="use-cases" class="section">
+            <h2>RShim Use Cases</h2>
+            <p>
+                RShim enables various management and operational tasks for DPU administration, from initial bring-up 
+                to ongoing management.
+            </p>
+
+            <div class="concept-card">
+                <h3>DPU Bring-Up</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Initial Configuration:</strong> Configure DPU during bring-up</li>
+                    <li><strong>Firmware Updates:</strong> Update DPU firmware</li>
+                    <li><strong>OS Installation:</strong> Install DPU operating system</li>
+                    <li><strong>Network Setup:</strong> Configure DPU network</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>DPU Management</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Configuration:</strong> Configure DPU settings</li>
+                    <li><strong>Monitoring:</strong> Monitor DPU status</li>
+                    <li><strong>Troubleshooting:</strong> Troubleshoot DPU issues</li>
+                    <li><strong>Maintenance:</strong> Perform maintenance tasks</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Application Deployment</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>File Transfer:</strong> Transfer application files</li>
+                    <li><strong>Installation:</strong> Install applications on DPU</li>
+                    <li><strong>Configuration:</strong> Configure applications</li>
+                    <li><strong>Updates:</strong> Update applications</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Development and Testing</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Development:</strong> Develop DPU applications</li>
+                    <li><strong>Testing:</strong> Test applications on DPU</li>
+                    <li><strong>Debugging:</strong> Debug DPU applications</li>
+                    <li><strong>Logging:</strong> Access DPU logs</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Essential Management Tool:</strong>
+                RShim is essential for DPU management, providing the primary interface for accessing and configuring 
+                DPU resources. Without RShim, managing DPUs would be significantly more difficult. It provides a 
+                standard, familiar interface (SSH) for DPU administration, making DPU management similar to managing 
+                any Linux system.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>RShim Interface Guide | DPU Communication Bridge</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

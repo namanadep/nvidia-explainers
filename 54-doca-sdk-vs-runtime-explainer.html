@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>54. DOCA SDK vs Runtime: Development vs Deployment</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #7B1FA2;
+    --secondary-color: #9C27B0;
+    --accent-color: #BA68C8;
+    --bg-color: #F3E5F5;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #CE93D8;
+    --shadow: 0 2px 8px rgba(123, 31, 162, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #7B1FA2, #9C27B0);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #CE93D8;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>54. DOCA SDK vs Runtime</h1>
+        <p class="subtitle">Development vs Deployment: Understanding the Difference</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#sdk" class="nav-link">DOCA SDK</a>
+        <a href="#runtime" class="nav-link">DOCA Runtime</a>
+        <a href="#comparison" class="nav-link">Comparison</a>
+        <a href="#when-to-use" class="nav-link">When to Use</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>DOCA SDK vs Runtime Overview</h2>
+            <p>
+                DOCA (Data Center Infrastructure-on-a-Chip Architecture) provides two distinct components: SDK 
+                (Software Development Kit) and Runtime. Understanding the difference between these components is 
+                crucial for proper DPU application development and deployment. The SDK is used during development 
+                to build applications, while the Runtime is deployed on production systems to run those applications. 
+                This separation enables efficient development workflows and optimized production deployments.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[DOCA Components] --> B[DOCA SDK<br/>Development]
+                    A --> C[DOCA Runtime<br/>Deployment]
+                    
+                    B --> B1[Headers<br/>Libraries<br/>Tools]
+                    B --> B2[Build Applications]
+                    
+                    C --> C1[Libraries<br/>Services<br/>Drivers]
+                    C --> C2[Run Applications]
+                    
+                    style A fill:#7B1FA2
+                    style B fill:#9C27B0
+                    style C fill:#BA68C8
+            </div>
+
+            <div class="example-box">
+                <strong>Development vs Deployment:</strong>
+                DOCA SDK vs Runtime is like the difference between a construction site (SDK) and a finished building 
+                (Runtime). Developers use the SDK with all its tools, headers, and development libraries to build 
+                applications. Once built, applications run on systems with just the Runtime, which contains only 
+                the essential libraries and services needed for execution, without development tools.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((DOCA SDK vs Runtime))
+                    DOCA SDK
+                      Development Tools
+                      Headers & Libraries
+                      Build Tools
+                      Documentation
+                    DOCA Runtime
+                      Essential Libraries
+                      Runtime Services
+                      No Development Tools
+                      Production Deployment
+                    Usage
+                      SDK for Development
+                      Runtime for Production
+                      Application Compatibility
+            </div>
+        </section>
+
+        <section id="sdk" class="section">
+            <h2>DOCA SDK</h2>
+            <p>
+                DOCA SDK is the development kit used to build DPU applications. It includes headers, libraries, 
+                tools, documentation, and examples needed for application development.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[SDK Components] --> B[Headers<br/>C/C++ APIs]
+                    A --> C[Development Libraries<br/>Static & Shared]
+                    A --> D[Development Tools<br/>Compilers, Debuggers]
+                    A --> E[Documentation<br/>API Docs, Guides]
+                    A --> F[Examples<br/>Sample Code]
+                    A --> G[Build System<br/>Configuration Files]
+                    
+                    style A fill:#00BCD4
+                    style B fill:#26C6DA
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[SDK Installation] --> B[Host System<br/>Development Host]
+                    A --> C[Cross-Compilation<br/>For DPU]
+                    A --> D[Size<br/>Larger Installation]
+                    A --> E[Dependencies<br/>Development Required]
+                    
+                    style A fill:#00BCD4
+                    style B fill:#26C6DA
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                    style E fill:#B2EBF2
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[SDK Use Cases] --> B[Application Development<br/>Building Apps]
+                    A --> C[Code Compilation<br/>Compiling Source]
+                    A --> D[Debugging<br/>Debug Applications]
+                    A --> E[Testing<br/>Development Testing]
+                    A --> F[Learning<br/>DOCA APIs]
+                    
+                    style A fill:#00BCD4
+                    style B fill:#26C6DA
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                    style E fill:#B2EBF2
+                    style F fill:#E0F7FA
+                </div>
+        </section>
+
+        <section id="runtime" class="section">
+            <h2>DOCA Runtime</h2>
+            <p>
+                DOCA Runtime is the deployment package containing libraries, services, and drivers needed to run 
+                DOCA applications. It's optimized for production deployment and doesn't include development tools.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Runtime Components] --> B[Runtime Libraries<br/>Shared Libraries]
+                    A --> C[Services<br/>DMA, DPA, etc.]
+                    A --> D[Drivers<br/>DPU Hardware]
+                    A --> E[Configuration Tools<br/>Runtime Utilities]
+                    A --> F[No Dev Tools<br/>No Compilers/Debuggers]
+                    
+                    style A fill:#00BCD4
+                    style B fill:#26C6DA
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                    style E fill:#B2EBF2
+                    style F fill:#E0F7FA
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Runtime Installation] --> B[Production Systems<br/>DPU Systems]
+                    A --> C[Minimal Footprint<br/>Smaller Size]
+                    A --> D[Optimized<br/>Runtime Performance]
+                    A --> E[Dependencies<br/>Runtime Only]
+                    
+                    style A fill:#00BCD4
+                    style B fill:#26C6DA
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                    style E fill:#B2EBF2
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Runtime Use Cases] --> B[Application Execution<br/>Running Apps]
+                    A --> C[Production Deployment<br/>Production Systems]
+                    A --> D[Service Operation<br/>DOCA Services]
+                    A --> E[Minimal Systems<br/>No Dev Tools]
+                    
+                    style A fill:#00BCD4
+                    style B fill:#26C6DA
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                    style E fill:#B2EBF2
+                </div>
+        </section>
+
+        <section id="comparison" class="section">
+            <h2>SDK vs Runtime Comparison</h2>
+            <p>
+                Understanding the differences between SDK and Runtime helps make informed decisions about installation 
+                and deployment strategies.
+            </p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Characteristic</th>
+                        <th>DOCA SDK</th>
+                        <th>DOCA Runtime</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Purpose</strong></td>
+                        <td>Application development</td>
+                        <td>Application execution</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Components</strong></td>
+                        <td>Headers, libraries, tools, docs</td>
+                        <td>Libraries, services, drivers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Development Tools</strong></td>
+                        <td>Included (compilers, debuggers)</td>
+                        <td>Not included</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Installation Size</strong></td>
+                        <td>Larger (includes dev tools)</td>
+                        <td>Smaller (runtime only)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Installation Location</strong></td>
+                        <td>Development host</td>
+                        <td>Production DPU systems</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dependencies</strong></td>
+                        <td>Development dependencies</td>
+                        <td>Runtime dependencies only</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Use Case</strong></td>
+                        <td>Building applications</td>
+                        <td>Running applications</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="mermaid">
+                graph LR
+                    A[Development Workflow] --> B[Install SDK on Host]
+                    B --> C[Develop Application]
+                    C --> D[Build Application]
+                    D --> E[Deploy Runtime on DPU]
+                    E --> F[Run Application]
+                    
+                    style A fill:#7B1FA2
+                    style B fill:#9C27B0
+                    style E fill:#BA68C8
+            </div>
+        </section>
+
+        <section id="when-to-use" class="section">
+            <h2>When to Use SDK vs Runtime</h2>
+            <p>
+                Choosing between SDK and Runtime depends on the system's role: development systems need the SDK, 
+                while production systems only need the Runtime.
+            </p>
+
+            <div class="concept-card">
+                <h3>Use DOCA SDK When:</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Developing Applications:</strong> Building new DPU applications</li>
+                    <li><strong>Compiling Code:</strong> Need to compile source code</li>
+                    <li><strong>Debugging:</strong> Need debugging tools</li>
+                    <li><strong>Learning:</strong> Learning DOCA development</li>
+                    <li><strong>Development Host:</strong> On development machines</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Use DOCA Runtime When:</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Running Applications:</strong> Executing DOCA applications</li>
+                    <li><strong>Production Deployment:</strong> Production DPU systems</li>
+                    <li><strong>Minimal Footprint:</strong> Need minimal installation</li>
+                    <li><strong>No Development:</strong> No development needed</li>
+                    <li><strong>Optimized Systems:</strong> Optimized production systems</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Typical Workflow</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Development Host:</strong> Install SDK on development machine</li>
+                    <li><strong>Develop:</strong> Develop and build application using SDK</li>
+                    <li><strong>Build:</strong> Compile application into binary</li>
+                    <li><strong>Deploy:</strong> Install Runtime on production DPU</li>
+                    <li><strong>Run:</strong> Deploy and run application binary on DPU</li>
+                </ol>
+            </div>
+
+            <div class="example-box">
+                <strong>Best Practice:</strong>
+                Install DOCA SDK on development hosts where you build applications. Install DOCA Runtime on production 
+                DPU systems where applications run. This separation keeps production systems lean and optimized while 
+                providing full development capabilities on development systems. Applications built with SDK can run on 
+                systems with Runtime installed.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>DOCA SDK vs Runtime Guide | Development vs Deployment</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

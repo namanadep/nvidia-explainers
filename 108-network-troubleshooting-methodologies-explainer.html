@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>108. Network Troubleshooting Methodologies: Systematic Approach to Network Issue Resolution</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #0288D1;
+    --secondary-color: #03A9F4;
+    --accent-color: #29B6F6;
+    --bg-color: #E1F5FE;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #81D4FA;
+    --shadow: 0 2px 8px rgba(2, 136, 209, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0288D1, #03A9F4);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.methodology-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.methodology-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.step-number {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    font-weight: bold;
+    margin-right: 15px;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E1F5FE, #81D4FA);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #29B6F6;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #81D4FA;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>108. Network Troubleshooting Methodologies</h1>
+        <p class="subtitle">Systematic Approach to Network Issue Resolution in AI Infrastructure</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#methodology" class="nav-link">Methodology</a>
+        <a href="#osi-model" class="nav-link">OSI Model</a>
+        <a href="#infiniband" class="nav-link">InfiniBand</a>
+        <a href="#ethernet" class="nav-link">Ethernet</a>
+        <a href="#tools" class="nav-link">Tools</a>
+        <a href="#common-issues" class="nav-link">Common Issues</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Network Troubleshooting Overview</h2>
+            <p>
+                Network troubleshooting in AI infrastructure requires a systematic methodology to identify, isolate, 
+                and resolve connectivity and performance issues. Effective troubleshooting minimizes downtime, ensures 
+                reliable data transfer for training workloads, and maintains optimal network performance. A structured 
+                approach following the OSI model layers and using appropriate diagnostic tools enables efficient 
+                problem resolution in complex AI network environments.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Network Issue] --> B[Gather Information]
+                    B --> C[Identify Symptoms]
+                    C --> D[OSI Layer Analysis]
+                    D --> E[Physical Layer]
+                    D --> F[Data Link Layer]
+                    D --> G[Network Layer]
+                    D --> H[Transport Layer]
+                    E --> I[Isolate Problem]
+                    F --> I
+                    G --> I
+                    H --> I
+                    I --> J[Test Hypothesis]
+                    J --> K[Implement Solution]
+                    K --> L[Verify Resolution]
+                    
+                    style A fill:#0288D1
+                    style D fill:#03A9F4
+                    style K fill:#4CAF50
+            </div>
+
+            <div class="example-box">
+                <strong>Troubleshooting Impact:</strong>
+                Systematic network troubleshooting reduces mean time to resolution (MTTR) significantly. Following 
+                a structured methodology prevents random testing, reduces troubleshooting time, and improves success 
+                rates. In AI clusters, network issues can halt distributed training, making efficient troubleshooting 
+                critical for maintaining productivity.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Network Troubleshooting))
+                    Methodology
+                      Information Gathering
+                      Problem Isolation
+                      OSI Layer Analysis
+                      Hypothesis Testing
+                    InfiniBand Troubleshooting
+                      Link Status
+                      Subnet Manager
+                      Routing Issues
+                      Performance
+                    Ethernet Troubleshooting
+                      Connectivity
+                      Performance
+                      Configuration
+                      QoS Issues
+                    Diagnostic Tools
+                      InfiniBand Tools
+                      Ethernet Tools
+                      Performance Tools
+                      Monitoring Tools
+            </div>
+        </section>
+
+        <section id="methodology" class="section">
+            <h2>Troubleshooting Methodology</h2>
+            <p>
+                A systematic troubleshooting methodology ensures efficient problem resolution. Follow a structured 
+                approach from problem identification to solution verification.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Network Issue] --> B[Gather Information]
+                    B --> C[Symptoms]
+                    B --> D[Scope]
+                    B --> E[Timeline]
+                    B --> F[Error Messages]
+                    C --> G[Isolate Problem]
+                    D --> G
+                    E --> G
+                    F --> G
+                    G --> H{OSI Layer?}
+                    H -->|Layer 1| I[Physical Layer]
+                    H -->|Layer 2| J[Data Link Layer]
+                    H -->|Layer 3| K[Network Layer]
+                    H -->|Layer 4| L[Transport Layer]
+                    I --> M[Check Cables/Ports]
+                    J --> N[Check Switches/VLANs]
+                    K --> O[Check Routing/IP]
+                    L --> P[Check TCP/UDP]
+                    M --> Q[Form Hypothesis]
+                    N --> Q
+                    O --> Q
+                    P --> Q
+                    Q --> R[Test Hypothesis]
+                    R --> S{Issue Resolved?}
+                    S -->|No| Q
+                    S -->|Yes| T[Document Solution]
+                    
+                    style A fill:#0288D1
+                    style T fill:#4CAF50
+                    style H fill:#FF9800
+                    style S fill:#FF9800
+            </div>
+
+            <div class="methodology-card">
+                <h3><span class="step-number">1</span>Information Gathering</h3>
+                <p>Collect comprehensive information about the network issue:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Symptoms:</strong> What is the observed problem? (No connectivity, slow performance, packet loss)</li>
+                    <li><strong>Scope:</strong> Is the issue affecting one node, multiple nodes, or the entire cluster?</li>
+                    <li><strong>Timeline:</strong> When did the issue start? Was it sudden or gradual?</li>
+                    <li><strong>Context:</strong> What changed recently? (Hardware changes, configuration changes, software updates)</li>
+                    <li><strong>Error Messages:</strong> Collect all error messages and log entries</li>
+                    <li><strong>Affected Services:</strong> Which services or applications are impacted?</li>
+                </ul>
+            </div>
+
+            <div class="methodology-card">
+                <h3><span class="step-number">2</span>Problem Isolation</h3>
+                <p>Isolate the problem to identify the root cause:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Single Node vs Multiple Nodes:</strong> Determine if issue is node-specific or cluster-wide</li>
+                    <li><strong>Network Segment:</strong> Identify which network segment is affected (management, data, storage)</li>
+                    <li><strong>OSI Layer:</strong> Determine which OSI layer is experiencing issues</li>
+                    <li><strong>Hardware vs Software:</strong> Determine if issue is hardware or software related</li>
+                    <li><strong>Reproducibility:</strong> Determine if issue is reproducible or intermittent</li>
+                </ul>
+            </div>
+
+            <div class="methodology-card">
+                <h3><span class="step-number">3</span>OSI Layer Analysis</h3>
+                <p>Analyze the problem using the OSI model layers:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Layer 1 (Physical):</strong> Cables, connectors, ports, link status</li>
+                    <li><strong>Layer 2 (Data Link):</strong> MAC addresses, VLANs, switches, link aggregation</li>
+                    <li><strong>Layer 3 (Network):</strong> IP addresses, routing, subnets, gateways</li>
+                    <li><strong>Layer 4 (Transport):</strong> TCP/UDP, ports, connections, flow control</li>
+                    <li><strong>Layer 5-7 (Upper Layers):</strong> Applications, protocols, services</li>
+                </ul>
+            </div>
+
+            <div class="methodology-card">
+                <h3><span class="step-number">4</span>Hypothesis Formation and Testing</h3>
+                <p>Form and test hypotheses systematically:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>List possible causes ranked by likelihood</li>
+                    <li>Test one hypothesis at a time</li>
+                    <li>Use diagnostic tools to gather evidence</li>
+                    <li>Document test results</li>
+                    <li>Start with simplest solutions first</li>
+                </ul>
+            </div>
+
+            <div class="methodology-card">
+                <h3><span class="step-number">5</span>Solution Implementation and Verification</h3>
+                <p>Implement solution and verify resolution:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Plan the solution approach</li>
+                    <li>Implement solution in controlled manner</li>
+                    <li>Verify solution resolves the issue</li>
+                    <li>Monitor for recurrence</li>
+                    <li>Document the solution for future reference</li>
+                </ul>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    Start[Start Troubleshooting] --> Gather[Gather Information]
+                    Gather --> Isolate[Isolate Problem]
+                    Isolate --> OSI[OSI Layer Analysis]
+                    OSI --> Physical[Physical Layer Check]
+                    OSI --> DataLink[Data Link Layer Check]
+                    OSI --> Network[Network Layer Check]
+                    OSI --> Transport[Transport Layer Check]
+                    Physical --> Hypothesis[Form Hypothesis]
+                    DataLink --> Hypothesis
+                    Network --> Hypothesis
+                    Transport --> Hypothesis
+                    Hypothesis --> Test[Test Hypothesis]
+                    Test -->|Confirmed| Solution[Implement Solution]
+                    Test -->|Rejected| Hypothesis
+                    Solution --> Verify[Verify Resolution]
+                    Verify -->|Success| Document[Document Solution]
+                    Verify -->|Failure| Hypothesis
+                    Document --> End[End]
+                    
+                    style Start fill:#0288D1
+                    style Solution fill:#4CAF50
+                    style End fill:#2196F3
+            </div>
+        </section>
+
+        <section id="osi-model" class="section">
+            <h2>OSI Model-Based Troubleshooting</h2>
+            <p>
+                Using the OSI model provides a structured approach to network troubleshooting. Each layer has 
+                specific checks and diagnostic procedures.
+            </p>
+
+            <div class="concept-card">
+                <h3>Layer 1: Physical Layer</h3>
+                <p><strong>Checks:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Verify cable connections (InfiniBand, Ethernet)</li>
+                    <li>Check link status (link up/down)</li>
+                    <li>Inspect cables for damage</li>
+                    <li>Verify port status on switches</li>
+                    <li>Check transceiver/module status</li>
+                    <li>Verify power to network equipment</li>
+                </ul>
+                <div class="command-box">
+# Check link status (InfiniBand)
+ibstat
+iblinkinfo
+
+# Check link status (Ethernet)
+ip link show
+ethtool [interface]
+
+# Check port status
+# InfiniBand: ibswitches, ibhosts
+# Ethernet: switch management interface
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Layer 2: Data Link Layer</h3>
+                <p><strong>Checks:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Verify MAC address assignment</li>
+                    <li>Check VLAN configuration</li>
+                    <li>Verify switch port configuration</li>
+                    <li>Check link aggregation (LACP) status</li>
+                    <li>Verify InfiniBand LID assignment</li>
+                    <li>Check for MAC address conflicts</li>
+                </ul>
+                <div class="command-box">
+# Check MAC addresses
+ip link show
+ifconfig
+
+# Check VLAN configuration
+ip -d link show
+bridge vlan show
+
+# Check InfiniBand LID assignment
+ibstat
+ibhosts
+
+# Check link aggregation
+ip link show bond0
+cat /proc/net/bonding/bond0
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Layer 3: Network Layer</h3>
+                <p><strong>Checks:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Verify IP address assignment</li>
+                    <li>Check routing tables</li>
+                    <li>Test connectivity (ping)</li>
+                    <li>Verify subnet configuration</li>
+                    <li>Check default gateway</li>
+                    <li>Verify InfiniBand GID assignment</li>
+                </ul>
+                <div class="command-box">
+# Check IP configuration
+ip addr show
+ip route show
+
+# Test connectivity
+ping [target_ip]
+ping6 [target_ipv6]
+
+# Check routing
+ip route get [destination]
+traceroute [destination]
+
+# Check InfiniBand GID
+ibstat -g
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Layer 4: Transport Layer</h3>
+                <p><strong>Checks:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Verify TCP/UDP connectivity</li>
+                    <li>Check port availability</li>
+                    <li>Test RDMA connectivity (InfiniBand)</li>
+                    <li>Check firewall rules</li>
+                    <li>Verify connection state</li>
+                </ul>
+                <div class="command-box">
+# Test TCP connectivity
+telnet [host] [port]
+nc -zv [host] [port]
+
+# Test RDMA connectivity (InfiniBand)
+ibping [target_lid]
+ib_write_bw [target]
+
+# Check listening ports
+netstat -tuln
+ss -tuln
+
+# Check firewall
+iptables -L
+firewall-cmd --list-all
+                </div>
+            </div>
+        </section>
+
+        <section id="infiniband" class="section">
+            <h2>InfiniBand Troubleshooting</h2>
+            <p>
+                InfiniBand troubleshooting requires understanding InfiniBand-specific components and diagnostic tools. 
+                Common issues include link problems, subnet manager issues, routing problems, and performance degradation.
+            </p>
+
+            <div class="concept-card">
+                <h3>Link Status Issues</h3>
+                <p><strong>Symptoms:</strong> No connectivity, link down, degraded performance</p>
+                <p><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Check physical connections (cables, connectors)</li>
+                    <li>Verify link status: <code>ibstat</code></li>
+                    <li>Check link width and speed: <code>ibstat -v</code></li>
+                    <li>Verify port state: <code>iblinkinfo</code></li>
+                    <li>Check for link errors: <code>ibstat -s</code></li>
+                    <li>Test with different cables/ports</li>
+                    <li>Check switch port status</li>
+                </ol>
+                <div class="command-box">
+# Check InfiniBand link status
+ibstat
+ibstat -v
+
+# Check link information
+iblinkinfo
+
+# Check port state
+ibstat -s
+
+# Check for errors
+ibstat -e
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Subnet Manager Issues</h3>
+                <p><strong>Symptoms:</strong> Devices not discovered, LID assignment failures, routing problems</p>
+                <p><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Verify subnet manager is running: <code>systemctl status opensm</code></li>
+                    <li>Check subnet manager logs</li>
+                    <li>Verify LID assignment: <code>ibstat</code></li>
+                    <li>Check GID assignment: <code>ibstat -g</code></li>
+                    <li>Restart subnet manager if needed</li>
+                    <li>Check for multiple subnet managers (conflict)</li>
+                </ol>
+                <div class="command-box">
+# Check subnet manager status
+systemctl status opensm
+opensm -D
+
+# Check LID assignment
+ibstat | grep -i lid
+
+# Check GID assignment
+ibstat -g
+
+# View subnet manager logs
+tail -f /var/log/opensm.log
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Performance Issues</h3>
+                <p><strong>Symptoms:</strong> Low bandwidth, high latency, degraded performance</p>
+                <p><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Measure bandwidth: <code>ib_write_bw</code></li>
+                    <li>Measure latency: <code>ib_write_lat</code></li>
+                    <li>Check link speed and width</li>
+                    <li>Verify routing paths: <code>ibtracert</code></li>
+                    <li>Check for congestion</li>
+                    <li>Verify SHARP configuration (if used)</li>
+                    <li>Check UFM for fabric-wide issues</li>
+                </ol>
+                <div class="command-box">
+# Measure bandwidth
+ib_write_bw [target]
+
+# Measure latency
+ib_write_lat [target]
+
+# Trace route
+ibtracert [target_lid]
+
+# Check fabric topology
+ibnetdiscover
+
+# Use UFM for comprehensive analysis
+# (UFM provides detailed performance metrics)
+                </div>
+            </div>
+        </section>
+
+        <section id="ethernet" class="section">
+            <h2>Ethernet Troubleshooting</h2>
+            <p>
+                Ethernet troubleshooting in AI infrastructure focuses on connectivity, performance, configuration, 
+                and QoS issues. Common problems include link failures, performance degradation, and configuration errors.
+            </p>
+
+            <div class="concept-card">
+                <h3>Connectivity Issues</h3>
+                <p><strong>Symptoms:</strong> No connectivity, intermittent connectivity, link down</p>
+                <p><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Check link status: <code>ip link show</code></li>
+                    <li>Verify interface is up: <code>ip link set [interface] up</code></li>
+                    <li>Check cable connections</li>
+                    <li>Test connectivity: <code>ping [target]</code></li>
+                    <li>Verify IP configuration: <code>ip addr show</code></li>
+                    <li>Check routing: <code>ip route show</code></li>
+                    <li>Verify switch port status</li>
+                </ol>
+                <div class="command-box">
+# Check link status
+ip link show
+ethtool [interface]
+
+# Bring interface up
+ip link set [interface] up
+
+# Test connectivity
+ping -c 4 [target_ip]
+
+# Check IP configuration
+ip addr show [interface]
+
+# Check routing
+ip route show
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Performance Issues</h3>
+                <p><strong>Symptoms:</strong> Low throughput, high latency, packet loss</p>
+                <p><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Measure bandwidth: <code>iperf3</code></li>
+                    <li>Check for packet loss: <code>ping -f</code></li>
+                    <li>Verify link speed: <code>ethtool [interface]</code></li>
+                    <li>Check for errors: <code>ethtool -S [interface]</code></li>
+                    <li>Monitor interface statistics</li>
+                    <li>Check for congestion</li>
+                    <li>Verify QoS configuration</li>
+                </ol>
+                <div class="command-box">
+# Measure bandwidth
+iperf3 -c [server] -t 60
+
+# Check for packet loss
+ping -f -c 1000 [target]
+
+# Check link speed and errors
+ethtool [interface]
+ethtool -S [interface]
+
+# Monitor interface statistics
+watch -n 1 'cat /proc/net/dev'
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Configuration Issues</h3>
+                <p><strong>Symptoms:</strong> Incorrect IP, routing problems, VLAN issues</p>
+                <p><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Verify IP configuration</li>
+                    <li>Check subnet mask</li>
+                    <li>Verify default gateway</li>
+                    <li>Check VLAN configuration</li>
+                    <li>Verify DNS configuration</li>
+                    <li>Check network configuration files</li>
+                </ol>
+                <div class="command-box">
+# Check IP configuration
+ip addr show
+ip route show
+
+# Check DNS
+cat /etc/resolv.conf
+nslookup [hostname]
+
+# Check network configuration
+# NetworkManager: nmcli connection show
+# systemd-networkd: networkctl status
+                </div>
+            </div>
+        </section>
+
+        <section id="tools" class="section">
+            <h2>Diagnostic Tools</h2>
+            <p>
+                Effective network troubleshooting requires appropriate diagnostic tools. Use tools specific to 
+                InfiniBand and Ethernet networks for comprehensive diagnostics.
+            </p>
+
+            <div class="concept-card">
+                <h3>InfiniBand Diagnostic Tools</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>ibstat:</strong> Display InfiniBand device status</li>
+                    <li><strong>ibping:</strong> Test InfiniBand connectivity</li>
+                    <li><strong>iblinkinfo:</strong> Display link information</li>
+                    <li><strong>ibnetdiscover:</strong> Discover fabric topology</li>
+                    <li><strong>ibtracert:</strong> Trace InfiniBand routes</li>
+                    <li><strong>ib_write_bw:</strong> Measure bandwidth</li>
+                    <li><strong>ib_write_lat:</strong> Measure latency</li>
+                    <li><strong>ibhosts/ibswitches:</strong> List hosts/switches</li>
+                    <li><strong>UFM:</strong> Unified Fabric Manager for comprehensive monitoring</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Ethernet Diagnostic Tools</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>ip/ifconfig:</strong> Interface configuration and status</li>
+                    <li><strong>ethtool:</strong> Ethernet device settings and statistics</li>
+                    <li><strong>ping:</strong> Test connectivity</li>
+                    <li><strong>traceroute:</strong> Trace network path</li>
+                    <li><strong>iperf3:</strong> Measure bandwidth</li>
+                    <li><strong>netstat/ss:</strong> Network connections and statistics</li>
+                    <li><strong>tcpdump:</strong> Packet capture and analysis</li>
+                    <li><strong>wireshark:</strong> Protocol analysis</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Performance Monitoring Tools</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>iftop:</strong> Real-time bandwidth monitoring</li>
+                    <li><strong>nload:</strong> Network traffic monitor</li>
+                    <li><strong>vnstat:</strong> Network statistics</li>
+                    <li><strong>UFM:</strong> InfiniBand fabric monitoring</li>
+                    <li><strong>Prometheus/Grafana:</strong> Network metrics collection and visualization</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="common-issues" class="section">
+            <h2>Common Network Issues and Solutions</h2>
+            <p>
+                Understanding common network issues and their solutions helps resolve problems quickly. Many 
+                issues follow predictable patterns.
+            </p>
+
+            <div class="concept-card">
+                <h3>Issue: No Connectivity</h3>
+                <p><strong>Possible Causes:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Physical layer problems (cables, connectors)</li>
+                    <li>Interface down</li>
+                    <li>Incorrect IP configuration</li>
+                    <li>Routing problems</li>
+                    <li>Firewall blocking</li>
+                </ul>
+                <p><strong>Solutions:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Check physical connections</li>
+                    <li>Bring interface up: <code>ip link set [interface] up</code></li>
+                    <li>Verify IP configuration</li>
+                    <li>Check routing tables</li>
+                    <li>Verify firewall rules</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Issue: Slow Performance</h3>
+                <p><strong>Possible Causes:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Link speed limited</li>
+                    <li>Network congestion</li>
+                    <li>Packet loss</li>
+                    <li>Incorrect routing</li>
+                    <li>QoS misconfiguration</li>
+                </ul>
+                <p><strong>Solutions:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Verify link speed: <code>ethtool [interface]</code></li>
+                    <li>Check for congestion</li>
+                    <li>Investigate packet loss</li>
+                    <li>Optimize routing</li>
+                    <li>Review QoS configuration</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Issue: Intermittent Connectivity</h3>
+                <p><strong>Possible Causes:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Loose cable connections</li>
+                    <li>Faulty cables or connectors</li>
+                    <li>Switch port issues</li>
+                    <li>Link aggregation problems</li>
+                    <li>Driver issues</li>
+                </ul>
+                <p><strong>Solutions:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Reseat cables</li>
+                    <li>Replace faulty cables</li>
+                    <li>Check switch port status</li>
+                    <li>Verify link aggregation configuration</li>
+                    <li>Update drivers</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Troubleshooting Best Practices:</strong>
+                1. Document everything (symptoms, tests, results)<br>
+                2. Test one variable at a time<br>
+                3. Start with physical layer (Layer 1)<br>
+                4. Use systematic OSI model approach<br>
+                5. Use appropriate diagnostic tools<br>
+                6. Consult documentation and knowledge bases<br>
+                7. Escalate when stuck<br>
+                8. Learn from resolved issues<br>
+                9. Maintain network documentation<br>
+                10. Implement monitoring to prevent issues
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Network Troubleshooting Methodologies | Systematic Approach to Network Issue Resolution</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

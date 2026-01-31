@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>116. Performance Tuning for AI Workloads: Optimizing AI Application Performance</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #F57C00;
+    --secondary-color: #FB8C00;
+    --accent-color: #FF9800;
+    --bg-color: #FFF3E0;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #FFB74D;
+    --shadow: 0 2px 8px rgba(245, 124, 0, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #F57C00, #FB8C00);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.tuning-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.tuning-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFF3E0, #FFB74D);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #FF9800;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #FFB74D;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>116. Performance Tuning for AI Workloads</h1>
+        <p class="subtitle">Optimizing AI Application Performance</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#profiling" class="nav-link">Profiling</a>
+        <a href="#gpu-tuning" class="nav-link">GPU Tuning</a>
+        <a href="#data-tuning" class="nav-link">Data Pipeline</a>
+        <a href="#model-tuning" class="nav-link">Model Optimization</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Performance Tuning Overview</h2>
+            <p>
+                Performance tuning optimizes AI workloads to achieve maximum performance. Tuning involves profiling 
+                applications, identifying bottlenecks, and applying optimizations. Key areas include GPU utilization, 
+                data pipeline efficiency, model optimization, and system-level tuning. Understanding performance 
+                tuning enables optimization of AI workloads for maximum throughput and efficiency.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[AI Workload] --> B[Profiling]
+                    B --> C[Identify Bottlenecks]
+                    C --> D[GPU Bottleneck]
+                    C --> E[Data Bottleneck]
+                    C --> F[Model Bottleneck]
+                    C --> G[System Bottleneck]
+                    D --> H[GPU Tuning]
+                    E --> I[Data Pipeline Tuning]
+                    F --> J[Model Optimization]
+                    G --> K[System Tuning]
+                    H --> L[Measure Improvement]
+                    I --> L
+                    J --> L
+                    K --> L
+                    
+                    style A fill:#F57C00
+                    style C fill:#FB8C00
+                    style L fill:#4CAF50
+            </div>
+
+            <div class="example-box">
+                <strong>Performance Tuning Impact:</strong>
+                Effective performance tuning can improve AI workload performance by 2-10x or more. Proper tuning 
+                maximizes GPU utilization, reduces training time, improves inference latency, and optimizes resource 
+                usage. Systematic tuning ensures optimal performance across different workloads.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Performance Tuning))
+                    Profiling
+                      Application Profiling
+                      GPU Profiling
+                      System Profiling
+                    GPU Tuning
+                      Memory Optimization
+                      Kernel Optimization
+                      Multi-GPU Tuning
+                    Data Pipeline
+                      Data Loading
+                      Preprocessing
+                      Caching
+                    Model Optimization
+                      Mixed Precision
+                      Model Pruning
+                      Quantization
+            </div>
+        </section>
+
+        <section id="profiling" class="section">
+            <h2>Application Profiling</h2>
+            <p>
+                Profiling identifies performance bottlenecks in AI workloads. Use profiling tools to measure execution 
+                time, GPU utilization, and resource usage.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Start Performance Tuning] --> B[Profile Application]
+                    B --> C[Identify Bottleneck]
+                    C --> D{Bottleneck Type?}
+                    D -->|GPU| E[GPU Optimization]
+                    D -->|Data Pipeline| F[Data Pipeline Optimization]
+                    D -->|Model| G[Model Optimization]
+                    D -->|System| H[System Optimization]
+                    E --> I[Measure Improvement]
+                    F --> I
+                    G --> I
+                    H --> I
+                    I --> J{Target Met?}
+                    J -->|No| B
+                    J -->|Yes| K[Tuning Complete]
+                    
+                    style A fill:#F57C00
+                    style K fill:#4CAF50
+                    style D fill:#FF9800
+                    style J fill:#FF9800
+            </div>
+
+            <div class="tuning-card">
+                <h3>NVIDIA Nsight Systems</h3>
+                <p>Profile entire application execution:</p>
+                
+                <p style="margin-top: 20px;"><strong>Profile Application:</strong></p>
+                <div class="command-box">
+# Profile Python application
+nsys profile \
+    --trace=cuda,nvtx,osrt \
+    --output=profile.nsys-rep \
+    python train.py
+
+# View profile report
+nsys-ui profile.nsys-rep
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Command Line Analysis:</strong></p>
+                <div class="command-box">
+# Generate statistics report
+nsys stats \
+    --report gputrace \
+    --report cputrace \
+    profile.nsys-rep
+                </div>
+            </div>
+
+            <div class="tuning-card">
+                <h3>NVIDIA Nsight Compute</h3>
+                <p>Profile individual CUDA kernels:</p>
+                
+                <p style="margin-top: 20px;"><strong>Kernel Profiling:</strong></p>
+                <div class="command-box">
+# Profile specific kernel
+ncu \
+    --set full \
+    --export profile.ncu-rep \
+    python train.py
+
+# View kernel analysis
+ncu-ui profile.ncu-rep
+                </div>
+            </div>
+
+            <div class="tuning-card">
+                <h3>PyTorch Profiler</h3>
+                <p>Profile PyTorch applications:</p>
+                
+                <p style="margin-top: 20px;"><strong>Python Profiling Code:</strong></p>
+                <div class="command-box">
+import torch
+from torch.profiler import profile, record_function, ProfilerActivity
+
+with profile(
+    activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+    record_shapes=True,
+    profile_memory=True
+) as prof:
+    with record_function("model_inference"):
+        output = model(input)
+
+# Print profiling results
+print(prof.key_averages().table(sort_by="cuda_time_total"))
+                </div>
+            </div>
+        </section>
+
+        <section id="gpu-tuning" class="section">
+            <h2>GPU Performance Tuning</h2>
+            <p>
+                Optimize GPU utilization and performance through memory management, kernel optimization, and 
+                multi-GPU tuning.
+            </p>
+
+            <div class="concept-card">
+                <h3>GPU Memory Optimization</h3>
+                <p>Optimize GPU memory usage:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Memory Pooling:</strong> Reuse memory allocations</li>
+                    <li><strong>Gradient Checkpointing:</strong> Trade compute for memory</li>
+                    <li><strong>Mixed Precision:</strong> Use FP16 to reduce memory</li>
+                    <li><strong>Memory Fragmentation:</strong> Minimize fragmentation</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>PyTorch Memory Optimization:</strong></p>
+                <div class="command-box">
+# Enable memory efficient attention
+torch.backends.cuda.enable_flash_sdp(True)
+
+# Use gradient checkpointing
+from torch.utils.checkpoint import checkpoint
+
+# Mixed precision training
+from torch.cuda.amp import autocast, GradScaler
+scaler = GradScaler()
+
+with autocast():
+    output = model(input)
+    loss = criterion(output, target)
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Kernel Optimization</h3>
+                <p>Optimize CUDA kernel execution:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Kernel Fusion:</strong> Combine operations</li>
+                    <li><strong>Tensor Cores:</strong> Use Tensor Cores for matrix operations</li>
+                    <li><strong>Memory Coalescing:</strong> Optimize memory access patterns</li>
+                    <li><strong>Occupancy:</strong> Maximize GPU occupancy</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Multi-GPU Tuning</h3>
+                <p>Optimize multi-GPU performance:</p>
+                
+                <p style="margin-top: 20px;"><strong>Data Parallel Optimization:</strong></p>
+                <div class="command-box">
+# Optimize DataParallel
+model = torch.nn.DataParallel(
+    model,
+    device_ids=[0, 1, 2, 3],
+    dim=0
+)
+
+# Use DistributedDataParallel for better performance
+model = torch.nn.parallel.DistributedDataParallel(
+    model,
+    device_ids=[local_rank],
+    find_unused_parameters=False
+)
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Communication Optimization:</strong></p>
+                <div class="command-box">
+# Optimize all-reduce operations
+torch.distributed.init_process_group(
+    backend='nccl',
+    init_method='env://'
+)
+
+# Use gradient accumulation to reduce communication
+accumulation_steps = 4
+for i, batch in enumerate(dataloader):
+    loss = model(batch) / accumulation_steps
+    loss.backward()
+    if (i + 1) % accumulation_steps == 0:
+        optimizer.step()
+        optimizer.zero_grad()
+                </div>
+            </div>
+        </section>
+
+        <section id="data-tuning" class="section">
+            <h2>Data Pipeline Optimization</h2>
+            <p>
+                Optimize data loading and preprocessing to prevent data pipeline bottlenecks. Efficient data 
+                pipelines ensure GPUs are fully utilized.
+            </p>
+
+            <div class="tuning-card">
+                <h3>Data Loading Optimization</h3>
+                <p>Optimize data loading performance:</p>
+                
+                <p style="margin-top: 20px;"><strong>PyTorch DataLoader Optimization:</strong></p>
+                <div class="command-box">
+from torch.utils.data import DataLoader
+
+dataloader = DataLoader(
+    dataset,
+    batch_size=32,
+    num_workers=8,
+    pin_memory=True,
+    prefetch_factor=2,
+    persistent_workers=True
+)
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Data Prefetching:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Use multiple worker processes</li>
+                    <li>Enable pin_memory for faster CPU-GPU transfer</li>
+                    <li>Set appropriate prefetch_factor</li>
+                    <li>Use persistent_workers to avoid worker restart overhead</li>
+                </ul>
+            </div>
+
+            <div class="tuning-card">
+                <h3>Data Preprocessing Optimization</h3>
+                <p>Optimize data preprocessing:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GPU Preprocessing:</strong> Move preprocessing to GPU when possible</li>
+                    <li><strong>DALI:</strong> Use NVIDIA DALI for accelerated preprocessing</li>
+                    <li><strong>Caching:</strong> Cache preprocessed data</li>
+                    <li><strong>Parallel Processing:</strong> Process data in parallel</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>NVIDIA DALI Example:</strong></p>
+                <div class="command-box">
+from nvidia.dali import pipeline_def
+import nvidia.dali.fn as fn
+import nvidia.dali.types as types
+
+@pipeline_def
+def image_pipeline():
+    images, labels = fn.readers.file(
+        file_root="/data/images",
+        random_shuffle=True
+    )
+    images = fn.decoders.image(
+        images,
+        device="mixed",
+        output_type=types.RGB
+    )
+    images = fn.resize(
+        images,
+        resize_x=224,
+        resize_y=224
+    )
+    return images, labels
+                </div>
+            </div>
+        </section>
+
+        <section id="model-tuning" class="section">
+            <h2>Model Optimization</h2>
+            <p>
+                Optimize model architecture and execution for better performance. Model optimization includes mixed 
+                precision, pruning, quantization, and TensorRT optimization.
+            </p>
+
+            <div class="concept-card">
+                <h3>Mixed Precision Training</h3>
+                <p>Use FP16 for faster training:</p>
+                
+                <p style="margin-top: 20px;"><strong>PyTorch Mixed Precision:</strong></p>
+                <div class="command-box">
+from torch.cuda.amp import autocast, GradScaler
+
+scaler = GradScaler()
+
+for batch in dataloader:
+    optimizer.zero_grad()
+    
+    with autocast():
+        output = model(batch['input'])
+        loss = criterion(output, batch['target'])
+    
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>TensorRT Optimization</h3>
+                <p>Optimize inference with TensorRT:</p>
+                
+                <p style="margin-top: 20px;"><strong>TensorRT Conversion:</strong></p>
+                <div class="command-box">
+import tensorrt as trt
+
+# Convert PyTorch model to TensorRT
+# (Simplified example - actual conversion requires more steps)
+# Use torch2trt or TensorRT Python API for conversion
+                </div>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Performance Tuning Best Practices</h2>
+            <p>
+                Follow best practices for effective performance tuning.
+            </p>
+
+            <div class="concept-card">
+                <h3>Tuning Methodology</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Profile before optimizing</li>
+                    <li>Identify the biggest bottleneck first</li>
+                    <li>Make one change at a time</li>
+                    <li>Measure impact of each change</li>
+                    <li>Iterate based on results</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Common Optimizations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Enable mixed precision training</li>
+                    <li>Optimize data loading with multiple workers</li>
+                    <li>Use gradient accumulation for larger effective batch sizes</li>
+                    <li>Enable Tensor Cores for matrix operations</li>
+                    <li>Use distributed training for multi-GPU</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Performance Tuning Checklist:</strong>
+                1. Profile application to identify bottlenecks<br>
+                2. Optimize data loading pipeline<br>
+                3. Enable mixed precision training<br>
+                4. Optimize GPU memory usage<br>
+                5. Tune multi-GPU communication<br>
+                6. Optimize model architecture<br>
+                7. Use TensorRT for inference<br>
+                8. Measure and validate improvements<br>
+                9. Document optimizations<br>
+                10. Monitor performance over time
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Performance Tuning for AI Workloads | Optimizing AI Application Performance</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

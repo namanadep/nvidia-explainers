@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>51. Network Topologies: Fat-tree, Torus, Dragonfly+</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #D32F2F;
+    --secondary-color: #F44336;
+    --accent-color: #EF5350;
+    --bg-color: #FFEBEE;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #FFCDD2;
+    --shadow: 0 2px 8px rgba(211, 47, 47, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #D32F2F, #F44336);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.topology-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.topology-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #FFCDD2;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>51. Network Topologies</h1>
+        <p class="subtitle">Fat-tree, Torus, Dragonfly+: Designing AI Network Infrastructure</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#fat-tree" class="nav-link">Fat-tree</a>
+        <a href="#torus" class="nav-link">Torus</a>
+        <a href="#dragonfly" class="nav-link">Dragonfly+</a>
+        <a href="#comparison" class="nav-link">Comparison</a>
+        <a href="#selection" class="nav-link">Selection</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Network Topology Overview</h2>
+            <p>
+                Network topology defines how nodes and switches are interconnected in a network, determining 
+                communication paths, bandwidth availability, and scalability characteristics. Different topologies 
+                offer different trade-offs in terms of cost, performance, scalability, and complexity. For AI and 
+                HPC workloads, topology selection is critical as it directly impacts communication performance, 
+                which can significantly affect overall application performance. Understanding topology characteristics 
+                helps design networks optimized for specific workload requirements.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Network Topology] --> B[Fat-tree<br/>Non-blocking]
+                    A --> C[Torus<br/>Low Diameter]
+                    A --> D[Dragonfly+<br/>Scalable]
+                    
+                    B --> B1[High Bandwidth<br/>Low Latency]
+                    C --> C1[Efficient Routing<br/>Good Scaling]
+                    D --> D1[Cost Effective<br/>Large Scale]
+                    
+                    style A fill:#D32F2F
+                    style B fill:#F44336
+                    style C fill:#EF5350
+                    style D fill:#E57373
+            </div>
+
+            <div class="example-box">
+                <strong>Topology Impact:</strong>
+                Network topology determines how nodes and switches are interconnected, affecting communication paths, 
+                bandwidth availability, latency, and scalability. Fat-tree provides non-blocking connectivity with 
+                multiple paths, Torus provides efficient routing with low diameter, and Dragonfly+ provides cost-effective 
+                scaling for large deployments. Each topology offers different trade-offs in cost, performance, and 
+                scalability suited to different workload requirements.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Network Topologies))
+                    Fat-Tree
+                      Non-Blocking
+                      Multiple Paths
+                      Full Bisection Bandwidth
+                    Torus
+                      Low Diameter
+                      Efficient Routing
+                      Structured Communication
+                    Dragonfly+
+                      Cost-Effective Scaling
+                      Large Deployments
+                      Hierarchical Structure
+                    Selection
+                      Performance Requirements
+                      Scale Requirements
+                      Cost Considerations
+            </div>
+        </section>
+
+        <section id="fat-tree" class="section">
+            <h2>Fat-tree Topology</h2>
+            <p>
+                Fat-tree is a non-blocking topology that provides full bisection bandwidth and low latency. It uses 
+                a hierarchical structure with multiple levels of switches, where bandwidth increases at higher levels 
+                (hence "fat" tree). This topology is widely used in AI clusters and HPC systems where high bandwidth 
+                and low latency are critical.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Leaf Switches] --> B[Spine Switches Level 1]
+                    B --> C[Spine Switches Level 2]
+                    C --> D[Core Switches]
+                    
+                    A --> A1[Node 1]
+                    A --> A2[Node 2]
+                    A --> A3[Node 3]
+                    A --> A4[Node 4]
+                    
+                    style A fill:#D32F2F
+                    style B fill:#F44336
+                    style C fill:#EF5350
+                    style D fill:#E57373
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Fat-tree Characteristics] --> B[Non-Blocking<br/>Full Bisection Bandwidth]
+                    A --> C[Low Latency<br/>Short Paths]
+                    A --> D[Oversubscription<br/>1:1 Ratio]
+                    A --> E[Scalability<br/>Thousands of Nodes]
+                    A --> F[Cost<br/>Higher Switch Requirements]
+                    
+                    style A fill:#D32F2F
+                    style B fill:#F44336
+                    style C fill:#EF5350
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Fat-tree Structure] --> B[Leaf Switches<br/>Connect Nodes]
+                    A --> C[Spine Switches<br/>Inter-Leaf Connectivity]
+                    A --> D[Multiple Levels<br/>Hierarchical]
+                    A --> E[Bandwidth Scaling<br/>Increases Up Tree]
+                    
+                    B --> F[Complete Topology<br/>High Performance]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#D32F2F
+                    style F fill:#F44336
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Fat-tree Use Cases] --> B[AI Training Clusters<br/>High Bandwidth]
+                    A --> C[HPC Systems<br/>Low Latency]
+                    A --> D[DGX Systems<br/>DGX Deployments]
+                    A --> E[Performance-Critical<br/>Maximum Performance]
+                    
+                    style A fill:#D32F2F
+                    style B fill:#F44336
+                    style C fill:#EF5350
+                    style D fill:#E57373
+                    style E fill:#EF9A9A
+                </div>
+        </section>
+
+        <section id="torus" class="section">
+            <h2>Torus Topology</h2>
+            <p>
+                Torus topology arranges nodes in a multi-dimensional grid where edges wrap around, creating a torus 
+                shape. This topology provides low diameter (shortest path between any two nodes) and efficient routing, 
+                making it suitable for workloads with structured communication patterns common in scientific computing.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Node] --> B[Node]
+                    B --> C[Node]
+                    C --> D[Node]
+                    D --> A
+                    
+                    A --> E[Node]
+                    B --> F[Node]
+                    C --> G[Node]
+                    D --> H[Node]
+                    
+                    E --> F
+                    F --> G
+                    G --> H
+                    H --> E
+                    
+                    style A fill:#D32F2F
+                    style B fill:#F44336
+                    style C fill:#EF5350
+                    style D fill:#E57373
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Torus Characteristics] --> B[Low Diameter<br/>Short Paths]
+                    A --> C[Efficient Routing<br/>Simple Algorithms]
+                    A --> D[Oversubscription<br/>Possible]
+                    A --> E[Scalability<br/>Large Sizes]
+                    A --> F[Cost<br/>Moderate]
+                    
+                    style A fill:#D32F2F
+                    style B fill:#F44336
+                    style C fill:#EF5350
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Torus Dimensions] --> B[2D Torus<br/>2D Grid]
+                    A --> C[3D Torus<br/>3D Grid]
+                    A --> D[Higher Dimensions<br/>Extended]
+                    A --> E[Wraparound<br/>Torus Shape]
+                    
+                    style A fill:#D32F2F
+                    style B fill:#F44336
+                    style C fill:#EF5350
+                    style D fill:#E57373
+                    style E fill:#EF9A9A
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Torus Use Cases] --> B[Scientific Computing<br/>Structured Patterns]
+                    A --> C[Domain Decomposition<br/>Spatial Locality]
+                    A --> D[HPC Applications<br/>Matching Topology]
+                    A --> E[Cost-Conscious<br/>Cost Consideration]
+                    
+                    style A fill:#D32F2F
+                    style B fill:#F44336
+                    style C fill:#EF5350
+                    style D fill:#E57373
+                    style E fill:#EF9A9A
+                </div>
+        </section>
+
+        <section id="dragonfly" class="section">
+            <h2>Dragonfly+ Topology</h2>
+            <p>
+                Dragonfly+ is a hierarchical topology designed for cost-effective scaling to very large systems. 
+                It groups nodes into groups, groups into supergroups, creating a multi-level hierarchy. This topology 
+                minimizes switch count while maintaining good performance, making it cost-effective for large-scale 
+                deployments.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Group 1] --> B[Supergroup 1]
+                    C[Group 2] --> B
+                    D[Group 3] --> B
+                    
+                    E[Group 4] --> F[Supergroup 2]
+                    G[Group 5] --> F
+                    H[Group 6] --> F
+                    
+                    B --> I[Inter-Supergroup Links]
+                    F --> I
+                    
+                    style A fill:#D32F2F
+                    style B fill:#F44336
+                    style I fill:#EF5350
+            </div>
+
+            <div class="topology-card">
+                <h3>Dragonfly+ Characteristics</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Cost Effective:</strong> Minimizes switch count</li>
+                    <li><strong>Scalable:</strong> Scales to very large systems</li>
+                    <li><strong>Oversubscription:</strong> Can have oversubscription</li>
+                    <li><strong>Hierarchical:</strong> Multi-level hierarchy</li>
+                    <li><strong>Adaptive Routing:</strong> Benefits from adaptive routing</li>
+                </ul>
+            </div>
+
+            <div class="topology-card">
+                <h3>Dragonfly+ Structure</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Groups:</strong> Local clusters of nodes</li>
+                    <li><strong>Supergroups:</strong> Clusters of groups</li>
+                    <li><strong>Intra-Group:</strong> High-bandwidth within groups</li>
+                    <li><strong>Inter-Group:</strong> Lower bandwidth between groups</li>
+                </ul>
+            </div>
+
+            <div class="topology-card">
+                <h3>Dragonfly+ Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Large-Scale Systems:</strong> Very large clusters</li>
+                    <li><strong>Cost-Conscious:</strong> When cost is important</li>
+                    <li><strong>Workload Locality:</strong> Workloads with locality</li>
+                    <li><strong>SuperPOD Scale:</strong> Large-scale AI deployments</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="comparison" class="section">
+            <h2>Topology Comparison</h2>
+            <p>
+                Comparing network topologies helps understand their trade-offs and select the appropriate topology 
+                for specific requirements.
+            </p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Characteristic</th>
+                        <th>Fat-tree</th>
+                        <th>Torus</th>
+                        <th>Dragonfly+</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Bisection Bandwidth</strong></td>
+                        <td>Full (non-blocking)</td>
+                        <td>Variable</td>
+                        <td>Variable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Latency</strong></td>
+                        <td>Low</td>
+                        <td>Low-Medium</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Oversubscription</strong></td>
+                        <td>1:1 (none)</td>
+                        <td>Can have</td>
+                        <td>Can have</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scalability</strong></td>
+                        <td>Good (thousands)</td>
+                        <td>Good (thousands)</td>
+                        <td>Excellent (tens of thousands)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cost</strong></td>
+                        <td>High</td>
+                        <td>Medium</td>
+                        <td>Low-Medium</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Complexity</strong></td>
+                        <td>Medium</td>
+                        <td>Low</td>
+                        <td>Medium-High</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Best For</strong></td>
+                        <td>Performance-critical</td>
+                        <td>Structured workloads</td>
+                        <td>Large-scale, cost-conscious</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="topology-card">
+                <h3>Oversubscription Ratio</h3>
+                <p>Oversubscription ratio indicates bandwidth sharing:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>1:1 (Non-blocking):</strong> Full bandwidth available (Fat-tree)</li>
+                    <li><strong>2:1:</strong> Bandwidth shared between 2 nodes</li>
+                    <li><strong>3:1:</strong> Bandwidth shared between 3 nodes</li>
+                    <li><strong>Higher Ratios:</strong> More sharing, lower cost</li>
+                </ul>
+            </div>
+
+            <div class="topology-card">
+                <h3>Blocking vs Non-Blocking</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Non-Blocking:</strong> Full bandwidth always available (Fat-tree)</li>
+                    <li><strong>Blocking:</strong> Bandwidth may be limited under certain conditions</li>
+                    <li><strong>Impact:</strong> Non-blocking provides better worst-case performance</li>
+                    <li><strong>Cost:</strong> Non-blocking requires more switches</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="selection" class="section">
+            <h2>Topology Selection</h2>
+            <p>
+                Selecting the appropriate network topology depends on workload requirements, scale, budget, and 
+                performance objectives.
+            </p>
+
+            <div class="topology-card">
+                <h3>Choose Fat-tree When:</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Performance Critical:</strong> Need maximum performance</li>
+                    <li><strong>High Bandwidth:</strong> Require full bisection bandwidth</li>
+                    <li><strong>Low Latency:</strong> Need lowest possible latency</li>
+                    <li><strong>Budget Available:</strong> Can afford higher cost</li>
+                    <li><strong>AI Training:</strong> Distributed training workloads</li>
+                </ul>
+            </div>
+
+            <div class="topology-card">
+                <h3>Choose Torus When:</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Structured Workloads:</strong> Workloads with structured communication</li>
+                    <li><strong>Cost-Conscious:</strong> Need cost-effective solution</li>
+                    <li><strong>HPC Applications:</strong> Scientific computing workloads</li>
+                    <li><strong>Moderate Scale:</strong> Medium to large scale</li>
+                </ul>
+            </div>
+
+            <div class="topology-card">
+                <h3>Choose Dragonfly+ When:</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Very Large Scale:</strong> Tens of thousands of nodes</li>
+                    <li><strong>Cost-Conscious:</strong> Minimize switch count</li>
+                    <li><strong>Workload Locality:</strong> Workloads with locality</li>
+                    <li><strong>SuperPOD Scale:</strong> Large-scale AI deployments</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Selection Guidance:</strong>
+                For most AI training clusters, Fat-tree provides the best performance with full bisection bandwidth 
+                and low latency. For very large-scale deployments where cost is a concern, Dragonfly+ offers a good 
+                balance. Torus is suitable for HPC workloads with structured communication patterns. Consider workload 
+                characteristics, scale requirements, and budget when selecting topology.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Network Topologies Guide | Fat-tree, Torus, Dragonfly+</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

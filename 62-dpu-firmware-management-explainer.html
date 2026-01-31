@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>62. DPU Firmware Management: BFB and Firmware Updates</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #7B1FA2;
+    --secondary-color: #9C27B0;
+    --accent-color: #BA68C8;
+    --bg-color: #F3E5F5;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #CE93D8;
+    --shadow: 0 2px 8px rgba(123, 31, 162, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #7B1FA2, #9C27B0);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.command-box {
+    background: #263238;
+    color: #CE93D8;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #CE93D8;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>62. DPU Firmware Management</h1>
+        <p class="subtitle">BlueField Bundle (BFB) and Firmware Updates</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#bfb" class="nav-link">BlueField Bundle</a>
+        <a href="#firmware-updates" class="nav-link">Firmware Updates</a>
+        <a href="#version-control" class="nav-link">Version Control</a>
+        <a href="#bfver" class="nav-link">bfver Command</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>DPU Firmware Management Overview</h2>
+            <p>
+                DPU firmware management involves installing, updating, and managing firmware on BlueField DPUs. 
+                Firmware includes the DPU's boot firmware, network adapter firmware, and other low-level software. 
+                BlueField Bundle (BFB) is a comprehensive firmware package that includes the DPU operating system, 
+                drivers, and firmware components. Proper firmware management ensures DPUs run with the latest features, 
+                bug fixes, and security updates, maintaining optimal performance and reliability.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[DPU Firmware] --> B[Boot Firmware]
+                    A --> C[Network Firmware]
+                    A --> D[System Firmware]
+                    
+                    E[BlueField Bundle] --> F[OS Image]
+                    E --> G[Firmware]
+                    E --> H[Drivers]
+                    E --> I[Configuration]
+                    
+                    style A fill:#7B1FA2
+                    style E fill:#9C27B0
+            </div>
+
+            <div class="example-box">
+                <strong>Firmware Management:</strong>
+                DPU firmware management ensures the DPU runs with the latest firmware, features, and fixes. BlueField 
+                Bundle (BFB) is a complete firmware package that includes the operating system, firmware, drivers, 
+                and configuration needed to run the DPU. BFB provides a complete, tested software stack similar to 
+                a Linux distribution that includes OS, drivers, and applications.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((DPU Firmware Management))
+                    BlueField Bundle
+                      Complete Package
+                      OS & Firmware
+                      Drivers & Configuration
+                    Management
+                      Version Tracking
+                      Updates
+                      Testing
+                    Best Practices
+                      Regular Updates
+                      Non-Production Testing
+                      Version Documentation
+            </div>
+        </section>
+
+        <section id="bfb" class="section">
+            <h2>BlueField Bundle (BFB)</h2>
+            <p>
+                BlueField Bundle (BFB) is a comprehensive firmware package that includes the DPU operating system, 
+                firmware, drivers, and configuration. BFB provides a complete, tested software stack for BlueField DPUs.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[BFB Components] --> B[Operating System<br/>DPU OS Image]
+                    A --> C[Firmware<br/>Boot & Device]
+                    A --> D[Drivers<br/>Device Drivers]
+                    A --> E[Configuration<br/>Default Config]
+                    A --> F[Tools<br/>Management Tools]
+                    
+                    style A fill:#7B1FA2
+                    style B fill:#9C27B0
+                    style C fill:#BA68C8
+                    style D fill:#CE93D8
+                    style E fill:#E1BEE7
+                    style F fill:#F3E5F5
+                </div>
+
+            <div class="concept-card">
+                <h3>BFB Installation</h3>
+                <p>Install BFB on DPU:</p>
+                <div class="command-box">
+# Download BFB image<br>
+# Transfer to DPU via RShim<br>
+scp bfb_image.bfb root@192.168.100.2:/tmp/<br>
+<br>
+# Install BFB<br>
+bfb-install /tmp/bfb_image.bfb<br>
+<br>
+# Reboot DPU<br>
+reboot
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[BFB Benefits] --> B[Complete Stack<br/>Tested Software]
+                    A --> C[Compatibility<br/>Component Compatible]
+                    A --> D[Ease of Use<br/>Simple Installation]
+                    A --> E[Reliability<br/>Tested & Validated]
+                    
+                    style A fill:#7B1FA2
+                    style B fill:#9C27B0
+                    style C fill:#BA68C8
+                    style D fill:#CE93D8
+                    style E fill:#E1BEE7
+                </div>
+        </section>
+
+        <section id="firmware-updates" class="section">
+            <h2>Firmware Updates</h2>
+            <p>
+                Firmware updates install new firmware versions on DPUs, providing bug fixes, security updates, and 
+                new features. Updates can be performed for individual firmware components or complete BFB updates.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Current Firmware] --> B[Download Update]
+                    B --> C[Verify Update]
+                    C --> D[Install Update]
+                    D --> E[Verify Installation]
+                    E --> F[Updated Firmware]
+                    
+                    style A fill:#7B1FA2
+                    style F fill:#9C27B0
+            </div>
+
+            <div class="concept-card">
+                <h3>Update Process</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Backup:</strong> Backup current configuration</li>
+                    <li><strong>Download:</strong> Download firmware update</li>
+                    <li><strong>Verify:</strong> Verify firmware integrity</li>
+                    <li><strong>Install:</strong> Install firmware update</li>
+                    <li><strong>Reboot:</strong> Reboot DPU if needed</li>
+                    <li><strong>Verify:</strong> Verify update success</li>
+                </ol>
+            </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Update Methods] --> B[BFB Update<br/>Complete Update]
+                    A --> C[Component Update<br/>Individual Component]
+                    A --> D[Network Update<br/>Via Network]
+                    A --> E[Local Update<br/>From Local File]
+                    
+                    style A fill:#7B1FA2
+                    style B fill:#9C27B0
+                    style C fill:#BA68C8
+                    style D fill:#CE93D8
+                    style E fill:#E1BEE7
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Update Best Practices] --> B[Test First<br/>Non-Production]
+                    A --> C[Backup<br/>Before Update]
+                    A --> D[Document<br/>Update Process]
+                    A --> E[Verify<br/>After Update]
+                    A --> F[Rollback Plan<br/>Have Plan]
+                    
+                    style A fill:#7B1FA2
+                    style B fill:#9C27B0
+                    style C fill:#BA68C8
+                    style D fill:#CE93D8
+                    style E fill:#E1BEE7
+                    style F fill:#F3E5F5
+                </div>
+        </section>
+
+        <section id="version-control" class="section">
+            <h2>Version Control</h2>
+            <p>
+                Version control involves tracking firmware versions across DPU deployments, ensuring consistency 
+                and enabling proper update management.
+            </p>
+
+            <div class="concept-card">
+                <h3>Version Tracking</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Version Numbers:</strong> Track firmware version numbers</li>
+                    <li><strong>Deployment Records:</strong> Record deployed versions</li>
+                    <li><strong>Change Logs:</strong> Maintain change logs</li>
+                    <li><strong>Compatibility:</strong> Track compatibility requirements</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Version Management</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Standardization:</strong> Standardize versions across deployments</li>
+                    <li><strong>Testing:</strong> Test versions before deployment</li>
+                    <li><strong>Rollout:</strong> Plan staged rollouts</li>
+                    <li><strong>Monitoring:</strong> Monitor version status</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Version Compatibility</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Component Compatibility:</strong> Ensure component compatibility</li>
+                    <li><strong>API Compatibility:</strong> Check API compatibility</li>
+                    <li><strong>Feature Compatibility:</strong> Verify feature compatibility</li>
+                    <li><strong>Documentation:</strong> Review compatibility documentation</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="bfver" class="section">
+            <h2>bfver Command</h2>
+            <p>
+                The `bfver` command displays firmware version information for BlueField DPUs, helping track 
+                installed firmware versions and identify update needs.
+            </p>
+
+            <div class="concept-card">
+                <h3>bfver Usage</h3>
+                <p>Check firmware versions:</p>
+                <div class="command-box">
+# Check firmware version<br>
+bfver<br>
+<br>
+# Detailed version information<br>
+bfver -v<br>
+<br>
+# Check specific component<br>
+bfver --component network
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Version Information</h3>
+                <p>bfver displays:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Boot Firmware:</strong> Boot firmware version</li>
+                    <li><strong>Network Firmware:</strong> Network adapter firmware</li>
+                    <li><strong>System Firmware:</strong> System firmware version</li>
+                    <li><strong>BFB Version:</strong> BFB package version</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Version Comparison</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Current vs Latest:</strong> Compare current vs latest versions</li>
+                    <li><strong>Update Planning:</strong> Plan updates based on versions</li>
+                    <li><strong>Compatibility Check:</strong> Check version compatibility</li>
+                    <li><strong>Documentation:</strong> Document version information</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Firmware Management Best Practices:</strong>
+                Regular firmware updates ensure DPUs have the latest features, bug fixes, and security updates. 
+                Use bfver to track firmware versions, plan updates carefully, test updates in non-production first, 
+                and maintain version documentation. Proper firmware management ensures reliable, secure, and 
+                high-performance DPU operation.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>DPU Firmware Management Guide | BFB and Firmware Updates</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

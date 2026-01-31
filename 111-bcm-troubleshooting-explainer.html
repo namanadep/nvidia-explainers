@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>111. BCM Troubleshooting: Diagnosing and Resolving Base Command Manager Issues</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #C62828;
+    --secondary-color: #D32F2F;
+    --accent-color: #E53935;
+    --bg-color: #FFEBEE;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #FFCDD2;
+    --shadow: 0 2px 8px rgba(198, 40, 40, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #C62828, #D32F2F);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.troubleshooting-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.troubleshooting-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #E53935;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #FFCDD2;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>111. BCM Troubleshooting</h1>
+        <p class="subtitle">Systematic Approach to Base Command Manager Issue Resolution</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#methodology" class="nav-link">Methodology</a>
+        <a href="#service-issues" class="nav-link">Service Issues</a>
+        <a href="#node-issues" class="nav-link">Node Issues</a>
+        <a href="#image-issues" class="nav-link">Image Issues</a>
+        <a href="#network-issues" class="nav-link">Network Issues</a>
+        <a href="#logs" class="nav-link">Logs & Diagnostics</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>BCM Troubleshooting Overview</h2>
+            <p>
+                Base Command Manager (BCM) troubleshooting requires systematic diagnosis of cluster management issues. 
+                Effective troubleshooting ensures reliable cluster operations, prevents downtime, and maintains optimal 
+                cluster performance. Common BCM issues include service failures, node connectivity problems, image 
+                management issues, and configuration errors. A structured approach using BCM-specific tools and logs 
+                enables efficient problem resolution.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[BCM Issue] --> B[Gather Information]
+                    B --> C[Identify Symptoms]
+                    C --> D[Component Analysis]
+                    D --> E[BCM Services]
+                    D --> F[Node Management]
+                    D --> G[Image Management]
+                    D --> H[Network]
+                    E --> I[Isolate Problem]
+                    F --> I
+                    G --> I
+                    H --> I
+                    I --> J[Test Hypothesis]
+                    J --> K[Implement Solution]
+                    K --> L[Verify Resolution]
+                    
+                    style A fill:#C62828
+                    style D fill:#D32F2F
+                    style K fill:#4CAF50
+            </div>
+
+            <div class="example-box">
+                <strong>Troubleshooting Impact:</strong>
+                BCM issues can prevent cluster operations, block job scheduling, or cause node failures. Systematic 
+                troubleshooting reduces cluster downtime and ensures reliable operations. Proper diagnosis prevents 
+                cascading failures and maintains cluster availability.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((BCM Troubleshooting))
+                    Methodology
+                      Information Gathering
+                      Problem Isolation
+                      Component Analysis
+                      Solution Implementation
+                    Service Issues
+                      BCM Service Failures
+                      Database Issues
+                      API Problems
+                    Node Issues
+                      Node Discovery
+                      Node Provisioning
+                      Node Connectivity
+                    Image Issues
+                      Image Creation
+                      Image Deployment
+                      Image Distribution
+                    Network Issues
+                      Management Network
+                      Data Network
+                      Service Communication
+            </div>
+        </section>
+
+        <section id="methodology" class="section">
+            <h2>Troubleshooting Methodology</h2>
+            <p>
+                Follow a systematic methodology for BCM troubleshooting, similar to other infrastructure troubleshooting 
+                but focused on BCM-specific components and tools.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[BCM Issue Reported] --> B[Gather Information]
+                    B --> C[Symptoms]
+                    B --> D[Scope]
+                    B --> E[Timeline]
+                    B --> F[Error Messages]
+                    C --> G[Identify Component]
+                    D --> G
+                    E --> G
+                    F --> G
+                    G --> H{Service Issue?}
+                    G --> I{Node Issue?}
+                    G --> J{Image Issue?}
+                    G --> K{Network Issue?}
+                    H --> L[Check BCM Services]
+                    I --> M[Check Node Status]
+                    J --> N[Check Image Status]
+                    K --> O[Check Network]
+                    L --> P[Isolate Problem]
+                    M --> P
+                    N --> P
+                    O --> P
+                    P --> Q[Test Hypothesis]
+                    Q --> R{Issue Resolved?}
+                    R -->|No| B
+                    R -->|Yes| S[Document Solution]
+                    
+                    style A fill:#C62828
+                    style S fill:#4CAF50
+                    style H fill:#FF9800
+                    style I fill:#FF9800
+                    style J fill:#FF9800
+                    style K fill:#FF9800
+                    style R fill:#FF9800
+            </div>
+
+            <div class="concept-card">
+                <h3>Step 1: Information Gathering</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Symptoms:</strong> What is the observed problem? (Service down, nodes not discovered, image deployment fails)</li>
+                    <li><strong>Scope:</strong> Is the issue affecting one node, multiple nodes, or entire cluster?</li>
+                    <li><strong>Timeline:</strong> When did the issue start? Was it sudden or gradual?</li>
+                    <li><strong>Context:</strong> What changed recently? (Configuration, software updates, hardware changes)</li>
+                    <li><strong>Error Messages:</strong> Collect all error messages from BCM logs and CMSH</li>
+                    <li><strong>Affected Operations:</strong> Which BCM operations are impacted?</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Step 2: BCM Component Analysis</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>BCM Services:</strong> Check BCM service status and health</li>
+                    <li><strong>Database:</strong> Verify BCM database connectivity and integrity</li>
+                    <li><strong>Node Management:</strong> Check node discovery and provisioning</li>
+                    <li><strong>Image Management:</strong> Verify image operations</li>
+                    <li><strong>Network:</strong> Check management and data network connectivity</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Step 3: Problem Isolation</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Test on different nodes to isolate node-specific issues</li>
+                    <li>Verify BCM service status on control node</li>
+                    <li>Check network connectivity between components</li>
+                    <li>Review BCM logs for error patterns</li>
+                    <li>Test BCM operations to reproduce issue</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="service-issues" class="section">
+            <h2>BCM Service Issues</h2>
+            <p>
+                BCM service issues prevent cluster management operations. Common problems include service failures, 
+                database connectivity issues, and API problems.
+            </p>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: BCM Service Not Running</h3>
+                <p><strong>Symptoms:</strong> BCM commands fail, cluster management unavailable</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check BCM service status</li>
+                    <li>Review service logs</li>
+                    <li>Verify service dependencies</li>
+                    <li>Check system resources</li>
+                    <li>Restart service if needed</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Service Status:</strong></p>
+                <div class="command-box">
+# Check BCM service status
+systemctl status bcm
+systemctl status bcm-db
+
+# Check if services are enabled
+systemctl is-enabled bcm
+systemctl is-enabled bcm-db
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Start BCM Services:</strong></p>
+                <div class="command-box">
+# Start BCM services
+systemctl start bcm
+systemctl start bcm-db
+
+# Enable services to start on boot
+systemctl enable bcm
+systemctl enable bcm-db
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Service Logs:</strong></p>
+                <div class="command-box">
+# View BCM service logs
+journalctl -u bcm -f
+journalctl -u bcm-db -f
+
+# Check recent errors
+journalctl -u bcm --since "1 hour ago" | grep -i error
+                </div>
+            </div>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Database Connectivity Problems</h3>
+                <p><strong>Symptoms:</strong> BCM cannot connect to database, operations fail</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Verify database service is running</li>
+                    <li>Check database connectivity</li>
+                    <li>Verify database credentials</li>
+                    <li>Check database logs</li>
+                    <li>Test database connection</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Database Service:</strong></p>
+                <div class="command-box">
+# Check database service status
+systemctl status postgresql
+# or
+systemctl status mariadb
+
+# Check database connectivity
+psql -U bcm -d bcmdb -h localhost
+# or
+mysql -u bcm -p -h localhost bcmdb
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Database Logs:</strong></p>
+                <div class="command-box">
+# PostgreSQL logs
+tail -f /var/log/postgresql/postgresql-*.log
+
+# MariaDB logs
+tail -f /var/log/mariadb/mariadb.log
+                </div>
+            </div>
+        </section>
+
+        <section id="node-issues" class="section">
+            <h2>Node Management Issues</h2>
+            <p>
+                Node management issues prevent proper cluster operations. Common problems include node discovery 
+                failures, provisioning problems, and connectivity issues.
+            </p>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Nodes Not Discovered</h3>
+                <p><strong>Symptoms:</strong> Nodes not appearing in BCM, cannot manage nodes</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check node network connectivity</li>
+                    <li>Verify PXE boot configuration</li>
+                    <li>Check DHCP configuration</li>
+                    <li>Review BCM discovery logs</li>
+                    <li>Manually trigger node discovery</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Node List:</strong></p>
+                <div class="command-box">
+# List nodes in BCM
+cmsh -c "device show"
+
+# Check node status
+cmsh -c "device show [node_name]"
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Network Connectivity:</strong></p>
+                <div class="command-box">
+# Test connectivity to node
+ping [node_ip]
+
+# Check if node responds to management network
+ssh [node_ip] "echo connected"
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check PXE Boot Configuration:</strong></p>
+                <div class="command-box">
+# Check DHCP configuration for PXE
+cat /etc/dhcp/dhcpd.conf | grep -A 10 "next-server"
+
+# Check TFTP server
+systemctl status tftpd-hpa
+# or
+systemctl status tftp
+                </div>
+            </div>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Node Provisioning Fails</h3>
+                <p><strong>Symptoms:</strong> Nodes cannot be provisioned, provisioning hangs or fails</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check image availability</li>
+                    <li>Verify network connectivity</li>
+                    <li>Check provisioning logs</li>
+                    <li>Verify node hardware</li>
+                    <li>Check image distribution</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Image Availability:</strong></p>
+                <div class="command-box">
+# List available images
+cmsh -c "image show"
+
+# Check image status
+cmsh -c "image show [image_name]"
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Provisioning Logs:</strong></p>
+                <div class="command-box">
+# Check BCM provisioning logs
+tail -f /var/log/bcm/provisioning.log
+
+# Check node-specific logs
+cmsh -c "device show [node_name]; device log"
+                </div>
+            </div>
+        </section>
+
+        <section id="image-issues" class="section">
+            <h2>Image Management Issues</h2>
+            <p>
+                Image management issues prevent proper node provisioning and software deployment. Common problems 
+                include image creation failures, deployment problems, and distribution issues.
+            </p>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Image Creation Fails</h3>
+                <p><strong>Symptoms:</strong> Cannot create images, image creation errors</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check disk space for image storage</li>
+                    <li>Verify source system availability</li>
+                    <li>Check image creation logs</li>
+                    <li>Verify permissions</li>
+                    <li>Check for conflicting operations</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Disk Space:</strong></p>
+                <div class="command-box">
+# Check available disk space
+df -h /var/lib/bcm/images
+
+# Check image storage location
+cmsh -c "config show" | grep image
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Image Creation Logs:</strong></p>
+                <div class="command-box">
+# Check image creation logs
+tail -f /var/log/bcm/image-creation.log
+
+# Check for errors
+grep -i error /var/log/bcm/image-creation.log
+                </div>
+            </div>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Image Deployment Fails</h3>
+                <p><strong>Symptoms:</strong> Images cannot be deployed to nodes, deployment errors</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Verify image exists and is valid</li>
+                    <li>Check network connectivity to nodes</li>
+                    <li>Verify node is in correct state</li>
+                    <li>Check image distribution status</li>
+                    <li>Review deployment logs</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Image Status:</strong></p>
+                <div class="command-box">
+# Check image details
+cmsh -c "image show [image_name]; image status"
+
+# Verify image integrity
+cmsh -c "image verify [image_name]"
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Image Distribution:</strong></p>
+                <div class="command-box">
+# Check image distribution status
+cmsh -c "image show [image_name]; image distribution"
+
+# Force image distribution
+cmsh -c "image distribute [image_name]"
+                </div>
+            </div>
+        </section>
+
+        <section id="network-issues" class="section">
+            <h2>Network Connectivity Issues</h2>
+            <p>
+                Network issues prevent BCM from communicating with nodes and managing the cluster. Common problems 
+                include management network failures and service communication issues.
+            </p>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Cannot Communicate with Nodes</h3>
+                <p><strong>Symptoms:</strong> BCM cannot reach nodes, node operations fail</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Test network connectivity to nodes</li>
+                    <li>Check management network configuration</li>
+                    <li>Verify firewall rules</li>
+                    <li>Check network interface status</li>
+                    <li>Review network logs</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Test Connectivity:</strong></p>
+                <div class="command-box">
+# Test connectivity to node
+ping [node_ip]
+
+# Test SSH connectivity
+ssh [node_ip] "hostname"
+
+# Test specific ports
+telnet [node_ip] 22
+nc -zv [node_ip] 22
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Network Configuration:</strong></p>
+                <div class="command-box">
+# Check management network interface
+ip addr show [mgmt_interface]
+
+# Check routing
+ip route show
+ip route get [node_ip]
+                </div>
+            </div>
+        </section>
+
+        <section id="logs" class="section">
+            <h2>BCM Logs and Diagnostics</h2>
+            <p>
+                BCM provides comprehensive logging and diagnostic tools for troubleshooting. Understanding log locations 
+                and diagnostic commands is essential for effective troubleshooting.
+            </p>
+
+            <div class="concept-card">
+                <h3>BCM Log Locations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Service Logs:</strong> <code>/var/log/bcm/</code></li>
+                    <li><strong>System Logs:</strong> <code>journalctl -u bcm</code></li>
+                    <li><strong>Database Logs:</strong> <code>/var/log/postgresql/</code> or <code>/var/log/mariadb/</code></li>
+                    <li><strong>Node Logs:</strong> Available through CMSH</li>
+                    <li><strong>Provisioning Logs:</strong> <code>/var/log/bcm/provisioning.log</code></li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>BCM Diagnostic Commands</h3>
+                <p style="margin-top: 15px;"><strong>Check BCM Status:</strong></p>
+                <div class="command-box">
+# Check overall BCM status
+cmsh -c "status"
+
+# Check cluster health
+cmsh -c "health"
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Component Status:</strong></p>
+                <div class="command-box">
+# Check all devices
+cmsh -c "device show"
+
+# Check all images
+cmsh -c "image show"
+
+# Check all categories
+cmsh -c "category show"
+                </div>
+
+                <p style="margin-top: 20px;"><strong>View Logs via CMSH:</strong></p>
+                <div class="command-box">
+# View device logs
+cmsh -c "device show [node_name]; device log"
+
+# View image logs
+cmsh -c "image show [image_name]; image log"
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Common BCM Commands for Troubleshooting</h3>
+                <div class="command-box">
+# Check BCM version and configuration
+cmsh -c "config show"
+
+# Check node connectivity
+cmsh -c "device show [node_name]; device ping"
+
+# Force node refresh
+cmsh -c "device show [node_name]; device refresh"
+
+# Check image distribution
+cmsh -c "image show [image_name]; image distribution"
+
+# View recent errors
+cmsh -c "device show; device log" | grep -i error
+                </div>
+            </div>
+
+            <div class="example-box">
+                <strong>BCM Troubleshooting Checklist:</strong>
+                1. Check BCM service status<br>
+                2. Verify database connectivity<br>
+                3. Check network connectivity to nodes<br>
+                4. Review BCM logs for errors<br>
+                5. Verify node discovery<br>
+                6. Check image availability and status<br>
+                7. Test BCM operations<br>
+                8. Isolate the problem component<br>
+                9. Implement solution<br>
+                10. Verify resolution and monitor
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>BCM Troubleshooting | Systematic Approach to Base Command Manager Issue Resolution</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

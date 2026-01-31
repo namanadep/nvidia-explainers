@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>76. User and Group Management: Access Control</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #AD1457;
+    --secondary-color: #C2185B;
+    --accent-color: #E91E63;
+    --bg-color: #FCE4EC;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #F8BBD0;
+    --shadow: 0 2px 8px rgba(173, 20, 87, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #AD1457, #C2185B);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.command-box {
+    background: #263238;
+    color: #F8BBD0;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FCE4EC, #F8BBD0);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #F8BBD0;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>76. User and Group Management</h1>
+        <p class="subtitle">Access Control and Security for Cluster Management</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#user-management" class="nav-link">User Management</a>
+        <a href="#group-management" class="nav-link">Group Management</a>
+        <a href="#permissions" class="nav-link">Permissions</a>
+        <a href="#security" class="nav-link">Security</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>User and Group Management Overview</h2>
+            <p>
+                User and group management provides access control for cluster resources, enabling secure multi-user 
+                access and resource allocation. Effective user and group management ensures users have appropriate 
+                access to cluster resources while maintaining security and isolation. Management includes creating users, 
+                setting passwords, organizing users into groups, managing permissions, and implementing security 
+                best practices. Proper user and group management is essential for multi-tenant clusters and secure 
+                cluster operations.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Cluster Access] --> B[User Authentication]
+                    B --> C[Group Membership]
+                    C --> D[Permissions]
+                    D --> E[Resource Access]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style E fill:#E91E63
+            </div>
+
+            <div class="example-box">
+                <strong>Access Control:</strong>
+                User and group management is like managing access to a building - users are like people who need access, 
+                groups are like departments or roles, and permissions determine what each person can do. Proper management 
+                ensures people have the access they need while maintaining security and preventing unauthorized access.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((User & Group Management))
+                    User Management
+                      User Creation
+                      Password Management
+                      User Permissions
+                    Group Management
+                      Group Creation
+                      Group Membership
+                      Group Permissions
+                    Security
+                      Access Control
+                      Multi-Tenant Support
+                      Security Best Practices
+            </div>
+        </section>
+
+        <section id="user-management" class="section">
+            <h2>User Management</h2>
+            <p>
+                User management involves creating, configuring, and managing user accounts for cluster access. This 
+                includes user creation, password management, and user configuration.
+            </p>
+
+            <div class="concept-card">
+                <h3>User Creation</h3>
+                <div class="command-box">
+# Create user<br>
+sudo useradd -m -s /bin/bash username<br>
+<br>
+# Create user with specific UID<br>
+sudo useradd -u 1001 -m username<br>
+<br>
+# Create user with home directory<br>
+sudo useradd -m -d /home/username username
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Password Management</h3>
+                <div class="command-box">
+# Set password<br>
+sudo passwd username<br>
+<br>
+# Force password change<br>
+sudo passwd -e username<br>
+<br>
+# Lock account<br>
+sudo passwd -l username<br>
+<br>
+# Unlock account<br>
+sudo passwd -u username
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[User Configuration] --> B[Home Directory<br/>Configure Directory]
+                    A --> C[Shell<br/>Set Default Shell]
+                    A --> D[Groups<br/>Assign to Groups]
+                    A --> E[Quotas<br/>Set Resource Quotas]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+                    style D fill:#F06292
+                    style E fill:#F8BBD0
+                </div>
+        </section>
+
+        <section id="group-management" class="section">
+            <h2>Group Management</h2>
+            <p>
+                Group management involves creating and managing user groups, enabling efficient permission management 
+                and resource allocation.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Group: Researchers] --> B[User 1]
+                    A --> C[User 2]
+                    A --> D[User 3]
+                    
+                    E[Group: Developers] --> F[User 4]
+                    E --> G[User 5]
+                    
+                    style A fill:#AD1457
+                    style E fill:#C2185B
+            </div>
+
+            <div class="concept-card">
+                <h3>Group Creation</h3>
+                <div class="command-box">
+# Create group<br>
+sudo groupadd groupname<br>
+<br>
+# Create group with specific GID<br>
+sudo groupadd -g 1001 groupname<br>
+<br>
+# Add user to group<br>
+sudo usermod -a -G groupname username
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Group Management] --> B[Add Users<br/>Add to Groups]
+                    A --> C[Remove Users<br/>Remove from Groups]
+                    A --> D[Group Membership<br/>Manage Membership]
+                    A --> E[Group Policies<br/>Apply Policies]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+                    style D fill:#F06292
+                    style E fill:#F8BBD0
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Group Types] --> B[Primary Group<br/>User's Primary]
+                    A --> C[Secondary Groups<br/>Additional Memberships]
+                    A --> D[Role-Based<br/>Based on Roles]
+                    A --> E[Project-Based<br/>Based on Projects]
+                    
+                    style A fill:#AD1457
+                    style B fill:#C2185B
+                    style C fill:#E91E63
+                    style D fill:#F06292
+                    style E fill:#F8BBD0
+                </div>
+        </section>
+
+        <section id="permissions" class="section">
+            <h2>Permissions Management</h2>
+            <p>
+                Permissions management controls access to cluster resources, ensuring users and groups have appropriate 
+                access while maintaining security.
+            </p>
+
+            <div class="concept-card">
+                <h3>File Permissions</h3>
+                <div class="command-box">
+# Set permissions<br>
+chmod 755 file<br>
+chmod u+x file<br>
+chmod g+w file<br>
+<br>
+# Set ownership<br>
+chown user:group file<br>
+<br>
+# Set group ownership<br>
+chgrp groupname file
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Directory Permissions</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Read:</strong> List directory contents</li>
+                    <li><strong>Write:</strong> Create/delete files</li>
+                    <li><strong>Execute:</strong> Access directory</li>
+                    <li><strong>Sticky Bit:</strong> Restrict deletion</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Resource Permissions</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Compute Access:</strong> Access to compute resources</li>
+                    <li><strong>Storage Access:</strong> Access to storage</li>
+                    <li><strong>Network Access:</strong> Access to network resources</li>
+                    <li><strong>Quota Limits:</strong> Resource quota limits</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="security" class="section">
+            <h2>Security Best Practices</h2>
+            <p>
+                Security best practices ensure secure user and group management, protecting cluster resources and data.
+            </p>
+
+            <div class="concept-card">
+                <h3>Password Security</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Strong Passwords:</strong> Enforce strong password policies</li>
+                    <li><strong>Password Expiration:</strong> Set password expiration</li>
+                    <li><strong>Password History:</strong> Prevent password reuse</li>
+                    <li><strong>Multi-Factor Auth:</strong> Use multi-factor authentication</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Access Control</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Least Privilege:</strong> Grant minimum necessary access</li>
+                    <li><strong>Regular Review:</strong> Regularly review user access</li>
+                    <li><strong>Account Management:</strong> Disable unused accounts</li>
+                    <li><strong>Audit Logging:</strong> Enable audit logging</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Group Security</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Group Membership:</strong> Review group membership regularly</li>
+                    <li><strong>Group Policies:</strong> Apply security policies to groups</li>
+                    <li><strong>Isolation:</strong> Isolate groups as needed</li>
+                    <li><strong>Documentation:</strong> Document group purposes</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Security Strategy:</strong>
+                Implement security best practices by enforcing strong password policies, using multi-factor authentication, 
+                applying least privilege principles, regularly reviewing user access, disabling unused accounts, and enabling 
+                audit logging. Organize users into groups for efficient permission management, apply security policies at 
+                group level, and document access control policies. Proper user and group management ensures secure cluster 
+                operations while enabling efficient resource access.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>User and Group Management Guide | Access Control</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

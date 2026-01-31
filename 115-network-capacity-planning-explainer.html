@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>115. Network Capacity Planning: Planning Network Infrastructure for AI Workloads</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #00695C;
+    --secondary-color: #00796B;
+    --accent-color: #00897B;
+    --bg-color: #E0F2F1;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #80CBC4;
+    --shadow: 0 2px 8px rgba(0, 105, 92, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #00695C, #00796B);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.planning-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.planning-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E0F2F1, #80CBC4);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #00897B;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #80CBC4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>115. Network Capacity Planning</h1>
+        <p class="subtitle">Planning Network Infrastructure for AI Workloads</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#requirements" class="nav-link">Requirements</a>
+        <a href="#bandwidth" class="nav-link">Bandwidth Planning</a>
+        <a href="#topology" class="nav-link">Topology Design</a>
+        <a href="#scalability" class="nav-link">Scalability</a>
+        <a href="#monitoring" class="nav-link">Monitoring</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Network Capacity Planning Overview</h2>
+            <p>
+                Network capacity planning ensures sufficient network bandwidth and infrastructure to support AI 
+                workloads. Proper planning prevents network bottlenecks, ensures optimal performance, and enables 
+                scalability. Capacity planning involves analyzing workload requirements, calculating bandwidth 
+                needs, designing network topologies, and planning for growth. Understanding capacity planning 
+                enables proper network infrastructure design for AI clusters.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Capacity Planning] --> B[Requirements Analysis]
+                    A --> C[Bandwidth Calculation]
+                    A --> D[Topology Design]
+                    A --> E[Scalability Planning]
+                    B --> F[Workload Analysis]
+                    B --> G[Traffic Patterns]
+                    C --> H[Link Capacity]
+                    C --> I[Oversubscription]
+                    D --> J[Network Topology]
+                    D --> K[Redundancy]
+                    E --> L[Growth Planning]
+                    E --> M[Upgrade Path]
+                    
+                    style A fill:#00695C
+                    style B fill:#00796B
+                    style C fill:#00897B
+            </div>
+
+            <div class="example-box">
+                <strong>Capacity Planning Impact:</strong>
+                Proper network capacity planning prevents bottlenecks, ensures optimal performance, and enables 
+                scalability. Inadequate planning leads to network congestion, poor performance, and inability to 
+                scale. Effective planning ensures network infrastructure meets current and future requirements.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Network Capacity Planning))
+                    Requirements Analysis
+                      Workload Analysis
+                      Traffic Patterns
+                      Performance Requirements
+                    Bandwidth Planning
+                      Link Capacity
+                      Oversubscription Ratios
+                      Burst Handling
+                    Topology Design
+                      Network Topology
+                      Redundancy
+                      Path Selection
+                    Scalability
+                      Growth Planning
+                      Upgrade Paths
+                      Future-Proofing
+            </div>
+        </section>
+
+        <section id="requirements" class="section">
+            <h2>Requirements Analysis</h2>
+            <p>
+                Analyze workload requirements to determine network capacity needs. Understanding requirements 
+                enables proper network sizing and design.
+            </p>
+
+            <div class="planning-card">
+                <h3>Workload Analysis</h3>
+                <p>Analyze AI workload network requirements:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Training Workloads:</strong> High bandwidth, all-to-all communication</li>
+                    <li><strong>Inference Workloads:</strong> Lower bandwidth, client-server patterns</li>
+                    <li><strong>Data Movement:</strong> Large dataset transfers, checkpointing</li>
+                    <li><strong>Storage Access:</strong> High-bandwidth storage I/O</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Example: Distributed Training Requirements</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>All-reduce operations require high bandwidth</li>
+                    <li>Gradient synchronization needs low latency</li>
+                    <li>Checkpointing requires burst bandwidth</li>
+                    <li>Data loading needs sustained bandwidth</li>
+                </ul>
+            </div>
+
+            <div class="planning-card">
+                <h3>Traffic Patterns</h3>
+                <p>Understand network traffic patterns:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>All-to-All:</strong> Every node communicates with every other node</li>
+                    <li><strong>Tree Patterns:</strong> Hierarchical communication (reduce operations)</li>
+                    <li><strong>Point-to-Point:</strong> Direct node-to-node communication</li>
+                    <li><strong>Burst Traffic:</strong> Sudden increases in traffic</li>
+                </ul>
+            </div>
+
+            <div class="planning-card">
+                <h3>Performance Requirements</h3>
+                <p>Define performance requirements:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Bandwidth:</strong> Required throughput (Gbps per node)</li>
+                    <li><strong>Latency:</strong> Maximum acceptable latency (microseconds)</li>
+                    <li><strong>Jitter:</strong> Acceptable latency variation</li>
+                    <li><strong>Packet Loss:</strong> Maximum acceptable packet loss rate</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="bandwidth" class="section">
+            <h2>Bandwidth Planning</h2>
+            <p>
+                Calculate bandwidth requirements based on workload analysis. Proper bandwidth planning ensures 
+                sufficient capacity for AI workloads.
+            </p>
+
+            <div class="concept-card">
+                <h3>Bandwidth Calculation</h3>
+                <p>Calculate required bandwidth:</p>
+                
+                <p style="margin-top: 20px;"><strong>Per-Node Bandwidth:</strong></p>
+                <div class="command-box">
+# Calculate bandwidth per node
+# Example: 8 GPUs per node, each GPU needs 200 Gbps
+GPUs_per_node = 8
+Bandwidth_per_GPU = 200  # Gbps
+Total_per_node = GPUs_per_node * Bandwidth_per_GPU
+# = 8 * 200 = 1600 Gbps per node
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Cluster Bandwidth:</strong></p>
+                <div class="command-box">
+# Calculate total cluster bandwidth
+Nodes = 64
+Bandwidth_per_node = 1600  # Gbps
+Total_cluster = Nodes * Bandwidth_per_node
+# = 64 * 1600 = 102,400 Gbps
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Oversubscription Ratios</h3>
+                <p>Plan oversubscription for cost optimization:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Leaf-Spine:</strong> Typical oversubscription 3:1 to 5:1</li>
+                    <li><strong>Fat-Tree:</strong> No oversubscription (1:1)</li>
+                    <li><strong>Consider Workload:</strong> All-to-all requires lower oversubscription</li>
+                    <li><strong>Burst Handling:</strong> Plan for burst traffic</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Oversubscription Example:</strong></p>
+                <div class="command-box">
+# Calculate oversubscription
+# Leaf switches: 32 ports * 200 Gbps = 6,400 Gbps
+# Spine uplinks: 4 ports * 800 Gbps = 3,200 Gbps
+# Oversubscription = 6,400 / 3,200 = 2:1
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Link Capacity Planning</h3>
+                <p>Plan link capacities for different network segments:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Server Links:</strong> 200 Gbps or 400 Gbps per node</li>
+                    <li><strong>Leaf-Spine Links:</strong> 400 Gbps or 800 Gbps</li>
+                    <li><strong>Spine-Spine Links:</strong> 800 Gbps for large clusters</li>
+                    <li><strong>Storage Links:</strong> Plan for storage I/O requirements</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="topology" class="section">
+            <h2>Network Topology Design</h2>
+            <p>
+                Design network topology based on capacity requirements. Topology choice impacts bandwidth, latency, 
+                and scalability.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Capacity Planning Start] --> B[Analyze Workload Requirements]
+                    B --> C[Calculate Bandwidth Needs]
+                    C --> D[Choose Topology]
+                    D --> E{All-to-All Communication?}
+                    E -->|Yes| F[Fat-Tree Topology]
+                    E -->|No| G{Moderate Bandwidth?}
+                    G -->|Yes| H[Leaf-Spine Topology]
+                    G -->|No| I[Other Topology]
+                    F --> J[No Oversubscription]
+                    H --> K[3:1 to 5:1 Oversubscription]
+                    J --> L[Plan Redundancy]
+                    K --> L
+                    I --> L
+                    L --> M[Validate Capacity]
+                    M --> N{Capacity Sufficient?}
+                    N -->|No| C
+                    N -->|Yes| O[Capacity Planning Complete]
+                    
+                    style A fill:#00695C
+                    style O fill:#4CAF50
+                    style E fill:#FF9800
+                    style G fill:#FF9800
+                    style N fill:#FF9800
+            </div>
+
+            <div class="planning-card">
+                <h3>Fat-Tree Topology</h3>
+                <p>Fat-tree provides full bisection bandwidth:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>No Oversubscription:</strong> Full bandwidth between any nodes</li>
+                    <li><strong>Scalability:</strong> Scales to large clusters</li>
+                    <li><strong>Cost:</strong> Higher cost due to more switches</li>
+                    <li><strong>Use Case:</strong> All-to-all communication, high bandwidth</li>
+                </ul>
+            </div>
+
+            <div class="planning-card">
+                <h3>Leaf-Spine Topology</h3>
+                <p>Leaf-spine provides cost-effective scaling:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Oversubscription:</strong> Typical 3:1 to 5:1</li>
+                    <li><strong>Scalability:</strong> Scales well with spine expansion</li>
+                    <li><strong>Cost:</strong> Lower cost than fat-tree</li>
+                    <li><strong>Use Case:</strong> Moderate bandwidth requirements</li>
+                </ul>
+            </div>
+
+            <div class="planning-card">
+                <h3>Redundancy Planning</h3>
+                <p>Plan for network redundancy:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Multiple Paths:</strong> Redundant paths between nodes</li>
+                    <li><strong>Link Redundancy:</strong> Multiple links per connection</li>
+                    <li><strong>Switch Redundancy:</strong> Redundant switches at each level</li>
+                    <li><strong>Failover:</strong> Automatic failover on failure</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="scalability" class="section">
+            <h2>Scalability Planning</h2>
+            <p>
+                Plan for network scalability to accommodate growth. Scalability planning ensures network can grow 
+                with cluster expansion.
+            </p>
+
+            <div class="concept-card">
+                <h3>Growth Planning</h3>
+                <p>Plan for cluster growth:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Initial Capacity:</strong> Plan for initial cluster size</li>
+                    <li><strong>Growth Projections:</strong> Estimate future growth</li>
+                    <li><strong>Expansion Path:</strong> Plan for adding nodes</li>
+                    <li><strong>Bandwidth Growth:</strong> Plan for increased bandwidth needs</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Upgrade Paths</h3>
+                <p>Plan upgrade paths for network infrastructure:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Link Upgrades:</strong> Upgrade link speeds (200G → 400G)</li>
+                    <li><strong>Switch Upgrades:</strong> Upgrade switch capacity</li>
+                    <li><strong>Topology Evolution:</strong> Evolve topology as needed</li>
+                    <li><strong>Technology Adoption:</strong> Adopt new technologies</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="monitoring" class="section">
+            <h2>Network Monitoring</h2>
+            <p>
+                Monitor network capacity and utilization to validate planning and identify bottlenecks. Monitoring 
+                enables proactive capacity management.
+            </p>
+
+            <div class="concept-card">
+                <h3>Capacity Monitoring</h3>
+                <p>Monitor network capacity metrics:</p>
+                
+                <p style="margin-top: 20px;"><strong>Key Metrics:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Link Utilization:</strong> Percentage of link capacity used</li>
+                    <li><strong>Port Utilization:</strong> Switch port utilization</li>
+                    <li><strong>Bandwidth Usage:</strong> Total bandwidth consumption</li>
+                    <li><strong>Congestion:</strong> Network congestion indicators</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Monitoring Tools:</strong></p>
+                <div class="command-box">
+# Use network monitoring tools
+# InfiniBand: ibnetdiscover, iblinkinfo
+iblinkinfo
+
+# Ethernet: SNMP, sFlow, NetFlow
+snmpwalk -v 2c -c public [switch_ip] ifInOctets
+
+# Network analysis tools
+iftop -i [interface]
+nload [interface]
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Capacity Validation</h3>
+                <p>Validate capacity planning:</p>
+                
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Compare planned vs. actual utilization</li>
+                    <li>Identify bottlenecks</li>
+                    <li>Validate oversubscription ratios</li>
+                    <li>Plan capacity upgrades</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Capacity Planning Best Practices</h2>
+            <p>
+                Follow best practices for network capacity planning to ensure optimal network design.
+            </p>
+
+            <div class="concept-card">
+                <h3>Planning Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Analyze workload requirements thoroughly</li>
+                    <li>Plan for peak usage, not average</li>
+                    <li>Consider burst traffic patterns</li>
+                    <li>Plan for growth and scalability</li>
+                    <li>Validate planning with monitoring</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Design Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Choose topology based on requirements</li>
+                    <li>Plan appropriate oversubscription</li>
+                    <li>Design for redundancy</li>
+                    <li>Plan upgrade paths</li>
+                    <li>Document capacity planning decisions</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Capacity Planning Checklist:</strong>
+                1. Analyze workload requirements<br>
+                2. Calculate bandwidth needs<br>
+                3. Plan network topology<br>
+                4. Design for redundancy<br>
+                5. Plan for scalability<br>
+                6. Calculate oversubscription<br>
+                7. Plan upgrade paths<br>
+                8. Implement monitoring<br>
+                9. Validate capacity planning<br>
+                10. Review and adjust as needed
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Network Capacity Planning | Planning Network Infrastructure for AI Workloads</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

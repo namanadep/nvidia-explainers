@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>82. CUDA Toolkit: The Foundation of GPU Computing</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #00695C;
+    --secondary-color: #00897B;
+    --accent-color: #26A69A;
+    --bg-color: #E0F2F1;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #80CBC4;
+    --shadow: 0 2px 8px rgba(0, 105, 92, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #00695C, #00897B);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.command-box {
+    background: #263238;
+    color: #80CBC4;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E0F2F1, #B2DFDB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #80CBC4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>82. CUDA Toolkit</h1>
+        <p class="subtitle">The Foundation of GPU Computing</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#programming-model" class="nav-link">Programming Model</a>
+        <a href="#components" class="nav-link">Components</a>
+        <a href="#installation" class="nav-link">Installation</a>
+        <a href="#workflow" class="nav-link">Development Workflow</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>CUDA Toolkit Overview</h2>
+            <p>
+                The CUDA Toolkit is NVIDIA's comprehensive development environment for GPU-accelerated computing. It provides 
+                everything needed to develop, compile, and optimize applications that leverage GPU parallel processing. The 
+                CUDA Toolkit includes compilers, libraries, development tools, and runtime components that enable developers 
+                to harness the power of GPUs for general-purpose computing. Understanding CUDA is essential for GPU 
+                programming, AI development, and high-performance computing applications.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[CUDA Toolkit] --> B[Compiler<br/>nvcc]
+                    A --> C[Libraries<br/>cuBLAS, cuDNN, etc.]
+                    A --> D[Runtime<br/>CUDA Runtime]
+                    A --> E[Tools<br/>Nsight, Profiler]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style C fill:#26A69A
+                    style D fill:#4DB6AC
+                    style E fill:#80CBC4
+            </div>
+
+            <div class="example-box">
+                <strong>The Foundation:</strong>
+                CUDA Toolkit is a complete development kit for GPU programming. It includes the compiler (nvcc) that 
+                converts code to GPU instructions, libraries (cuBLAS, cuDNN, etc.) providing optimized implementations 
+                for common operations, runtime (CUDA runtime) that executes GPU code, and development tools (debuggers, 
+                profilers) for application development. CUDA Toolkit provides all components needed to build and deploy 
+                GPU-accelerated applications.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((CUDA Toolkit))
+                    Components
+                      Compiler
+                        nvcc
+                      Libraries
+                        cuBLAS
+                        cuDNN
+                        cuSPARSE
+                      Runtime
+                        CUDA Runtime
+                      Tools
+                        Debuggers
+                        Profilers
+                    Use Cases
+                      GPU Programming
+                      AI Development
+                      HPC Applications
+            </div>
+        </section>
+
+        <section id="programming-model" class="section">
+            <h2>CUDA Programming Model</h2>
+            <p>
+                The CUDA programming model enables developers to write parallel programs that execute on GPUs. It extends 
+                C/C++ with GPU-specific constructs and provides a hierarchical execution model.
+            </p>
+
+            <div class="concept-card">
+                <h3>Key Concepts</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Kernels:</strong> Functions that execute on GPU</li>
+                    <li><strong>Threads:</strong> Individual execution units</li>
+                    <li><strong>Blocks:</strong> Groups of threads</li>
+                    <li><strong>Grids:</strong> Collections of blocks</li>
+                    <li><strong>Memory Hierarchy:</strong> Global, shared, local memory</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Execution Model</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Host Code:</strong> CPU code that launches kernels</li>
+                    <li><strong>Device Code:</strong> GPU code (kernels)</li>
+                    <li><strong>Parallel Execution:</strong> Thousands of threads execute simultaneously</li>
+                    <li><strong>Synchronization:</strong> Coordinate thread execution</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Memory Model</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Global Memory:</strong> Accessible by all threads</li>
+                    <li><strong>Shared Memory:</strong> Fast memory shared within block</li>
+                    <li><strong>Local Memory:</strong> Per-thread private memory</li>
+                    <li><strong>Registers:</strong> Fastest, per-thread storage</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="components" class="section">
+            <h2>CUDA Toolkit Components</h2>
+            <p>
+                The CUDA Toolkit includes essential components for GPU development, from compilers to libraries and tools.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[CUDA Toolkit] --> B[Compiler<br/>nvcc]
+                    A --> C[Libraries]
+                    A --> D[Runtime]
+                    A --> E[Tools]
+                    
+                    C --> F[cuBLAS]
+                    C --> G[cuDNN]
+                    C --> H[cuSPARSE]
+                    
+                    style A fill:#00695C
+                    style B fill:#00897B
+                    style C fill:#26A69A
+            </div>
+
+            <div class="concept-card">
+                <h3>Compiler (nvcc)</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>CUDA Compiler:</strong> Compiles CUDA C/C++ code</li>
+                    <li><strong>Host/Device:</strong> Separates host and device code</li>
+                    <li><strong>PTX Generation:</strong> Generates intermediate representation</li>
+                    <li><strong>Binary Generation:</strong> Creates GPU binaries</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>CUDA Libraries</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>cuBLAS:</strong> Basic Linear Algebra Subroutines</li>
+                    <li><strong>cuDNN:</strong> Deep Neural Network library</li>
+                    <li><strong>cuSPARSE:</strong> Sparse matrix operations</li>
+                    <li><strong>cuFFT:</strong> Fast Fourier Transform</li>
+                    <li><strong>Thrust:</strong> C++ template library</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Development Tools</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Nsight Systems:</strong> System-wide performance analysis</li>
+                    <li><strong>Nsight Compute:</strong> Kernel-level profiling</li>
+                    <li><strong>Nsight Graphics:</strong> Graphics debugging</li>
+                    <li><strong>CUDA-GDB:</strong> GPU debugging</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="installation" class="section">
+            <h2>CUDA Toolkit Installation</h2>
+            <p>
+                Installing CUDA Toolkit involves downloading the appropriate version, installing drivers, and configuring 
+                the development environment.
+            </p>
+
+            <div class="concept-card">
+                <h3>Installation Steps</h3>
+                <div class="command-box">
+# Download CUDA Toolkit<br>
+# Visit: https://developer.nvidia.com/cuda-downloads<br>
+<br>
+# Install CUDA Toolkit<br>
+sudo sh cuda_*.run<br>
+<br>
+# Set environment variables<br>
+export PATH=/usr/local/cuda/bin:$PATH<br>
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH<br>
+<br>
+# Verify installation<br>
+nvcc --version
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Version Compatibility</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GPU Compute Capability:</strong> Check GPU compatibility</li>
+                    <li><strong>Driver Version:</strong> Ensure compatible driver</li>
+                    <li><strong>OS Compatibility:</strong> Verify OS support</li>
+                    <li><strong>Framework Compatibility:</strong> Match framework requirements</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Installation Verification</h3>
+                <div class="command-box">
+# Check CUDA version<br>
+nvcc --version<br>
+<br>
+# Check GPU<br>
+nvidia-smi<br>
+<br>
+# Compile test program<br>
+nvcc hello.cu -o hello<br>
+./hello
+                </div>
+            </div>
+        </section>
+
+        <section id="workflow" class="section">
+            <h2>CUDA Development Workflow</h2>
+            <p>
+                The CUDA development workflow involves writing, compiling, debugging, and optimizing GPU-accelerated 
+                applications.
+            </p>
+
+            <div class="concept-card">
+                <h3>Development Process</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Write Code:</strong> Write CUDA C/C++ code</li>
+                    <li><strong>Compile:</strong> Compile with nvcc</li>
+                    <li><strong>Debug:</strong> Debug with CUDA-GDB or Nsight</li>
+                    <li><strong>Profile:</strong> Profile with Nsight tools</li>
+                    <li><strong>Optimize:</strong> Optimize based on profiling</li>
+                </ol>
+            </div>
+
+            <div class="concept-card">
+                <h3>Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Memory Management:</strong> Properly manage GPU memory</li>
+                    <li><strong>Error Checking:</strong> Check CUDA errors</li>
+                    <li><strong>Optimization:</strong> Optimize memory access patterns</li>
+                    <li><strong>Profiling:</strong> Profile before optimizing</li>
+                    <li><strong>Documentation:</strong> Document kernel behavior</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Common Patterns</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Data Transfer:</strong> Minimize host-device transfers</li>
+                    <li><strong>Kernel Launch:</strong> Optimize grid/block dimensions</li>
+                    <li><strong>Memory Coalescing:</strong> Optimize memory access</li>
+                    <li><strong>Shared Memory:</strong> Use shared memory effectively</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>CUDA Development:</strong>
+                Develop CUDA applications by writing kernels that execute on GPU, compiling with nvcc, debugging with 
+                CUDA-GDB or Nsight, profiling with Nsight tools, and optimizing based on profiling results. Use CUDA 
+                libraries (cuBLAS, cuDNN) for common operations, manage memory efficiently, and follow best practices 
+                for optimal performance. CUDA Toolkit provides the foundation for GPU-accelerated computing.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>CUDA Toolkit Guide | The Foundation of GPU Computing</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

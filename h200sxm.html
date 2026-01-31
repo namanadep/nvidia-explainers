@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H200SXM GPU VM Explainer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #0073E6;
+    --secondary-color: #00A8E8;
+    --accent-color: #FF6B35;
+    --success-color: #00C853;
+    --bg-color: #FFFFFF;
+    --card-bg: #F8F9FA;
+    --light-bg: #F0F4F8;
+    --text-color: #1A1A1A;
+    --text-muted: #6C757D;
+    --border-color: #E0E0E0;
+    --shadow: 0 2px 8px rgba(0, 115, 230, 0.1);
+    --shadow-hover: 0 4px 16px rgba(0, 115, 230, 0.15);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    text-align: center;
+    padding: 30px 40px;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+
+.nav-link:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+
+.nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+
+main {
+    width: 100%;
+    padding: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+
+.section h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 8px;
+}
+
+.section h3 {
+    font-size: 1.5rem;
+    margin: 20px 0 12px;
+    color: var(--secondary-color);
+}
+
+.section h4 {
+    font-size: 1.2rem;
+    margin: 15px 0 10px;
+    color: var(--text-color);
+}
+
+.section p {
+    margin-bottom: 15px;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-color);
+}
+
+.specs-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.spec-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.spec-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-hover);
+}
+
+.spec-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: var(--text-muted);
+}
+
+.spec-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.spec-detail {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.architecture-diagram,
+.memory-visualization,
+.performance-chart,
+.mig-visualization,
+.vgpu-visualization {
+    margin: 20px 0;
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.architecture-components {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.component-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.component-card:hover {
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.component-card h3 {
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.interactive-controls {
+    display: flex;
+    gap: 30px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.control-group input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-color);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 115, 230, 0.3);
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    background: var(--secondary-color);
+}
+
+.control-group input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 115, 230, 0.3);
+}
+
+.precision-selector,
+.use-case-selector {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.precision-btn,
+.usecase-btn {
+    padding: 10px 20px;
+    background: white;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+}
+
+.precision-btn:hover,
+.usecase-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
+}
+
+.precision-btn.active,
+.usecase-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.performance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.performance-table th,
+.performance-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.performance-table th {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+.performance-table tr:hover {
+    background: var(--light-bg);
+}
+
+.virtualization-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    background: white;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+}
+
+.tab-btn:hover {
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.tab-btn.active {
+    background: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+}
+
+.tab-content {
+    display: none;
+    margin-top: 30px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.mig-controls,
+.vgpu-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.mig-controls label,
+.vgpu-controls label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.vgpu-controls select {
+    padding: 10px 15px;
+    background: white;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.vgpu-controls select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 115, 230, 0.1);
+}
+
+.usecase-content {
+    display: none;
+    margin-top: 30px;
+}
+
+.usecase-content.active {
+    display: block;
+}
+
+.usecase-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.metric {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.metric:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.memory-details,
+.mig-details,
+.vgpu-details,
+.compute-details {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.memory-details ul,
+.mig-details ul,
+.vgpu-details ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.memory-details li,
+.mig-details li,
+.vgpu-details li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.memory-details li:last-child,
+.mig-details li:last-child,
+.vgpu-details li:last-child {
+    border-bottom: none;
+}
+
+.memory-details strong,
+.mig-details strong,
+.vgpu-details strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.example-box {
+    background: var(--light-bg);
+    border-left: 4px solid var(--primary-color);
+    padding: 15px 20px;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 8px;
+}
+
+footer {
+    text-align: center;
+    padding: 30px 40px;
+    margin-top: 0;
+    background: var(--light-bg);
+    border-top: 2px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+footer p {
+    margin: 10px 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (max-width: 1200px) {
+    .specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .architecture-components {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+
+    .section h2 {
+        font-size: 1.5rem;
+    }
+
+    .specs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .interactive-controls {
+        flex-direction: column;
+    }
+    
+    
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>H200SXM GPU VM EXPLAINER</h1>
+            <p class="subtitle">Learn how the world's most powerful AI GPU works - made simple!</p>
+        </header>
+
+        <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+            <a href="#overview" class="nav-link active">Overview</a>
+            <a href="#architecture" class="nav-link">Architecture</a>
+            <a href="#memory" class="nav-link">Memory</a>
+            <a href="#compute" class="nav-link">Compute</a>
+            <a href="#virtualization" class="nav-link">Virtualization</a>
+            <a href="#use-cases" class="nav-link">Use Cases</a>
+        </nav>
+    <div class="main-content-wrapper">
+        <main>
+            <!-- Overview Section -->
+            <section id="overview" class="section">
+                <h2>What is the H200SXM GPU?</h2>
+                <p>
+                    Think of the H200SXM GPU as a super-powered brain for computers. Just like your brain processes 
+                    millions of thoughts simultaneously, this GPU can handle massive AI tasks at incredible speeds. 
+                    It's like having thousands of computers working together in one chip!
+                </p>
+                <div class="example-box">
+                    <strong>Real-World Example:</strong>
+                    Training ChatGPT or similar AI models requires processing billions of words. The H200 can do this 
+                    so fast that what used to take weeks now takes days. It's like upgrading from a bicycle to a 
+                    rocket ship!
+                </div>
+                <p>
+                    The H200 is built for data centers (think of huge server rooms) and can be split into multiple 
+                    virtual GPUs. Imagine a pizza - you can share one large pizza (the GPU) with multiple people 
+                    (virtual machines), and each person gets their own slice with guaranteed portions!
+                </p>
+                
+                <div class="specs-grid">
+                    <div class="spec-card">
+                        <h3>Memory</h3>
+                        <div class="spec-value">141 GB</div>
+                        <div class="spec-detail">HBM3e</div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>Memory Bandwidth</h3>
+                        <div class="spec-value">4.8 TB/s</div>
+                        <div class="spec-detail">Peak Bandwidth</div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>Tensor Performance</h3>
+                        <div class="spec-value">3,958 TFLOPS</div>
+                        <div class="spec-detail">FP8 Precision</div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>NVLink Bandwidth</h3>
+                        <div class="spec-value">900 GB/s</div>
+                        <div class="spec-detail">Per GPU</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Architecture Section -->
+            <section id="architecture" class="section">
+                <h2>H200SXM GPU Architecture</h2>
+                <p>
+                    The H200 SXM GPU is built on the Hopper architecture, which introduces several key innovations 
+                    for AI and HPC workloads. The architecture consists of several key components that work together 
+                    to deliver exceptional performance.
+                </p>
+
+                <div class="architecture-diagram">
+                    <svg id="architecture-svg" width="100%" height="400"></svg>
+                </div>
+
+                <div class="architecture-components">
+                    <div class="component-card">
+                        <h3>1. Streaming Multiprocessors (SMs) - The Workers</h3>
+                        <p>
+                            Think of SMs as teams of workers in a factory. Each team can handle thousands of tasks 
+                            at the same time. The H200 has many such teams working in parallel, making it incredibly fast.
+                        </p>
+                        <div class="example-box">
+                            <strong>Example:</strong> Like having 100 chefs cooking different dishes simultaneously in a 
+                            restaurant kitchen, each SM handles different parts of the AI computation.
+                        </div>
+                    </div>
+                    <div class="component-card">
+                        <h3>2. Tensor Cores - The Speed Boosters</h3>
+                        <p>
+                            These are special units that do math super fast. They can work with different levels of 
+                            precision - like using rough calculations for speed or precise calculations for accuracy.
+                        </p>
+                        <div class="example-box">
+                            <strong>Example:</strong> Like a calculator that can switch between "quick estimate" mode 
+                            (FP8) and "exact calculation" mode (FP32) depending on what you need.
+                        </div>
+                    </div>
+                    <div class="component-card">
+                        <h3>3. HBM3e Memory - The Super Fast Storage</h3>
+                        <p>
+                            141GB of ultra-fast memory - that's like having 141,000 high-quality photos stored in 
+                            memory that can be accessed instantly. The 4.8TB/s speed means it can transfer data 
+                            equivalent to 1,000 high-definition movies per second!
+                        </p>
+                    </div>
+                    <div class="component-card">
+                        <h3>4. NVLink - The Super Highway</h3>
+                        <p>
+                            When multiple GPUs work together, NVLink is like a super-fast highway connecting them. 
+                            It's 900GB/s - imagine transferring 900 full-length movies between GPUs every second!
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Memory Section -->
+            <section id="memory" class="section">
+                <h2>HBM3e Memory System - The Super Fast Brain</h2>
+                <p>
+                    The H200 has 141GB of the fastest memory available. Think of it like having a massive, 
+                    super-fast notebook that can store and retrieve information instantly. This is crucial for AI 
+                    because AI models need to remember billions of pieces of information at once.
+                </p>
+                <div class="example-box">
+                    <strong>Real-World Comparison:</strong> If regular computer memory is like a library where you 
+                    have to walk to get books, HBM3e is like having every book you need instantly appear in your 
+                    hands. The 4.8TB/s bandwidth is like reading 4,800 books per second!
+                </div>
+
+                <div class="interactive-controls">
+                    <div class="control-group">
+                        <label for="memory-usage">Memory Usage: <span id="memory-value">50</span>%</label>
+                        <input type="range" id="memory-usage" min="0" max="100" value="50">
+                    </div>
+                    <div class="control-group">
+                        <label for="bandwidth-util">Bandwidth Utilization: <span id="bandwidth-value">60</span>%</label>
+                        <input type="range" id="bandwidth-util" min="0" max="100" value="60">
+                    </div>
+                </div>
+
+                <div class="memory-visualization">
+                    <svg id="memory-svg" width="100%" height="300"></svg>
+                </div>
+
+                <div class="memory-details">
+                    <h3>Why This Memory is Special</h3>
+                    <ul>
+                        <li><strong>141GB Capacity:</strong> Can store entire AI models in memory - like keeping a 
+                        complete encyclopedia set in your head instead of going to the library!</li>
+                        <li><strong>4.8TB/s Speed:</strong> Data moves so fast it's like downloading 1,000 HD movies 
+                        in one second</li>
+                        <li><strong>HBM3e Technology:</strong> The latest and greatest - like having the newest, 
+                        fastest smartphone</li>
+                        <li><strong>Error Correction:</strong> Automatically fixes mistakes - like having a spell-checker 
+                        that never misses errors</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Compute Section -->
+            <section id="compute" class="section">
+                <h2>Compute Performance - How Fast Can It Think?</h2>
+                <p>
+                    The H200 can do math at different levels of precision - think of it like choosing between 
+                    "quick estimate" or "exact calculation" depending on what you need. The smarter it gets, 
+                    the faster it works!
+                </p>
+                <div class="example-box">
+                    <strong>Simple Explanation:</strong> Imagine you're calculating a tip at a restaurant. You could 
+                    do a quick mental estimate (FP8 - super fast) or use exact math (FP64 - slower but precise). 
+                    The H200 can do 3,958 trillion calculations per second in "quick mode"!
+                </div>
+
+                <div class="precision-selector">
+                    <button class="precision-btn active" data-precision="fp8">FP8</button>
+                    <button class="precision-btn" data-precision="fp16">FP16</button>
+                    <button class="precision-btn" data-precision="bf16">BFLOAT16</button>
+                    <button class="precision-btn" data-precision="tf32">TF32</button>
+                    <button class="precision-btn" data-precision="fp32">FP32</button>
+                    <button class="precision-btn" data-precision="fp64">FP64</button>
+                </div>
+
+                <div class="performance-chart">
+                    <svg id="performance-svg" width="100%" height="350"></svg>
+                </div>
+
+                <div class="compute-details">
+                    <h3>Performance by Precision - What Each Mode Does</h3>
+                    <table class="performance-table">
+                        <thead>
+                            <tr>
+                                <th>Mode</th>
+                                <th>Speed (TFLOPS)</th>
+                                <th>Best For</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FP8</strong> - Super Fast Mode</td>
+                                <td>3,958</td>
+                                <td>Training AI models quickly (like ChatGPT)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FP16</strong> - Fast Mode</td>
+                                <td>1,979</td>
+                                <td>Balanced speed and accuracy for AI</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TF32</strong> - Smart Mode</td>
+                                <td>989</td>
+                                <td>AI training with automatic precision switching</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FP32</strong> - Standard Mode</td>
+                                <td>67</td>
+                                <td>Scientific calculations, weather prediction</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FP64</strong> - Precise Mode</td>
+                                <td>34</td>
+                                <td>Ultra-precise calculations (like space missions)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Virtualization Section -->
+            <section id="virtualization" class="section">
+                <h2>Virtualization: Sharing One GPU with Many</h2>
+                <p>
+                    Imagine you have one powerful GPU, but multiple people or applications need to use it. 
+                    Virtualization lets you split it up fairly, like sharing a pizza where everyone gets their 
+                    guaranteed slice! The H200 supports two ways to do this: MIG and vGPU.
+                </p>
+                <div class="example-box">
+                    <strong>Real-World Example:</strong> Like an apartment building where one powerful generator 
+                    (the GPU) can power multiple apartments (virtual machines), and each apartment gets guaranteed 
+                    electricity without affecting others.
+                </div>
+
+                <div class="virtualization-tabs">
+                    <button class="tab-btn active" data-tab="mig">Multi-Instance GPU (MIG)</button>
+                    <button class="tab-btn" data-tab="vgpu">Virtual GPU (vGPU)</button>
+                </div>
+
+                <div class="tab-content active" id="mig-content">
+                    <h3>Multi-Instance GPU (MIG) - Permanent Partitions</h3>
+                    <p>
+                        MIG splits one GPU into up to 7 separate, isolated GPUs. Each gets its own guaranteed 
+                        resources - like cutting a cake into slices where each slice is completely separate.
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> Like a building with 7 separate apartments, each with its own 
+                        guaranteed electricity, water, and space. One apartment can't affect another, and each 
+                        knows exactly what resources it has.
+                    </div>
+                    
+                    <div class="mig-controls">
+                        <label for="mig-instances">Number of MIG Instances: <span id="mig-count">1</span></label>
+                        <input type="range" id="mig-instances" min="1" max="7" value="1">
+                    </div>
+
+                    <div class="mig-visualization">
+                        <svg id="mig-svg" width="100%" height="300"></svg>
+                    </div>
+
+                    <div class="mig-details">
+                        <h4>How MIG Works - Like Dividing a Pizza</h4>
+                        <ul>
+                            <li><strong>1 slice (141GB):</strong> The whole pizza - maximum power for one big task</li>
+                            <li><strong>2 slices (70GB each):</strong> Share between two applications</li>
+                            <li><strong>3 slices (47GB each):</strong> Perfect for three different AI models</li>
+                            <li><strong>7 slices (18GB each):</strong> Maximum sharing - 7 separate GPUs in one!</li>
+                            <li>Each slice is completely isolated - like having separate kitchens</li>
+                            <li>Guaranteed performance - you always know what you're getting</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="vgpu-content">
+                    <h3>Virtual GPU (vGPU) - Flexible Sharing</h3>
+                    <p>
+                        vGPU lets multiple virtual machines share one physical GPU by taking turns. It's like 
+                        time-sharing a car - different people use it at different times, and everyone gets fair access.
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> Like a shared workspace where multiple people can use the same 
+                        powerful computer, but they take turns. The system ensures everyone gets fair time and 
+                        their work is completely separate.
+                    </div>
+
+                    <div class="vgpu-controls">
+                        <label for="vgpu-vms">Number of VMs: <span id="vm-count">2</span></label>
+                        <input type="range" id="vgpu-vms" min="1" max="8" value="2">
+                        <label for="vgpu-profile">vGPU Profile: <span id="profile-name">vGPU-20GB</span></label>
+                        <select id="vgpu-profile">
+                            <option value="20">vGPU-20GB</option>
+                            <option value="40">vGPU-40GB</option>
+                            <option value="60">vGPU-60GB</option>
+                            <option value="80">vGPU-80GB</option>
+                        </select>
+                    </div>
+
+                    <div class="vgpu-visualization">
+                        <svg id="vgpu-svg" width="100%" height="300"></svg>
+                    </div>
+
+                    <div class="vgpu-details">
+                        <h4>Why vGPU is Useful</h4>
+                        <ul>
+                            <li><strong>Share Resources:</strong> Multiple VMs can use one GPU - like carpooling!</li>
+                            <li><strong>Flexible Allocation:</strong> Give more memory to VMs that need it</li>
+                            <li><strong>Move VMs:</strong> Can move a VM to a different server without stopping it</li>
+                            <li><strong>Works Everywhere:</strong> Compatible with VMware, Citrix, and other systems</li>
+                            <li><strong>Fair Sharing:</strong> Everyone gets equal time - no one hogs the GPU</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Use Cases Section -->
+            <section id="use-cases" class="section">
+                <h2>Use Cases</h2>
+                <p>
+                    The H200 SXM GPU is designed for a wide range of demanding workloads. Explore different 
+                    use cases to see how the GPU's capabilities are utilized.
+                </p>
+
+                <div class="use-case-selector">
+                    <button class="usecase-btn active" data-usecase="llm">Large Language Models</button>
+                    <button class="usecase-btn" data-usecase="hpc">HPC & Scientific Computing</button>
+                    <button class="usecase-btn" data-usecase="inference">AI Inference</button>
+                    <button class="usecase-btn" data-usecase="multimodal">Multimodal AI</button>
+                </div>
+
+                <div class="usecase-content active" id="llm-content">
+                    <h3>Training AI Chatbots (Like ChatGPT)</h3>
+                    <p>
+                        The H200 is perfect for training large language models - the AI that powers chatbots, 
+                        translation, and writing assistants. It can handle models with billions of parameters 
+                        (think of parameters as the AI's knowledge points).
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> Training ChatGPT requires processing millions of books worth of text. 
+                        The H200 can do this 3x faster than previous GPUs - what took 3 months now takes 1 month!
+                    </div>
+                    <div class="usecase-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Model Size</div>
+                            <div class="metric-value">Up to 175B+ parameters</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Training Speed</div>
+                            <div class="metric-value">3x faster</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Memory</div>
+                            <div class="metric-value">141GB HBM3e</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="usecase-content" id="hpc-content">
+                    <h3>Scientific Research & Weather Prediction</h3>
+                    <p>
+                        Scientists use the H200 for complex calculations like predicting weather, simulating 
+                        climate change, or modeling how drugs work. These need ultra-precise calculations, 
+                        and the H200 delivers!
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> Weather forecasting requires calculating millions of variables 
+                        (temperature, pressure, wind) for every location on Earth. The H200 can do these calculations 
+                        so fast that we can predict weather days in advance with high accuracy!
+                    </div>
+                    <div class="usecase-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Precision Mode</div>
+                            <div class="metric-value">34 TFLOPS</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Data Speed</div>
+                            <div class="metric-value">4.8 TB/s</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">GPU Connection</div>
+                            <div class="metric-value">900 GB/s</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="usecase-content" id="inference-content">
+                    <h3>Running AI Models in Real-Time</h3>
+                    <p>
+                        Once an AI model is trained, it needs to answer questions quickly (inference). The H200 
+                        can run up to 7 different AI models simultaneously, answering questions in milliseconds!
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> When you ask ChatGPT a question, it needs to respond instantly. 
+                        The H200 can handle thousands of such questions per second, and with MIG, it can run 
+                        multiple different AI models at the same time - like having 7 different experts ready 
+                        to answer!
+                    </div>
+                    <div class="usecase-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Models at Once</div>
+                            <div class="metric-value">Up to 7</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Response Speed</div>
+                            <div class="metric-value">1,979 TFLOPS</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Answer Time</div>
+                            <div class="metric-value">Less than 1ms</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="usecase-content" id="multimodal-content">
+                    <h3>AI That Understands Images, Video & Text</h3>
+                    <p>
+                        Modern AI can understand not just text, but also images and videos. The H200's massive 
+                        memory lets it process ultra-high-resolution images and videos in real-time.
+                    </p>
+                    <div class="example-box">
+                        <strong>Example:</strong> AI that can describe what's in a photo, generate images from text, 
+                        or understand video content. The H200 can process 8K videos (ultra-high definition) in 
+                        real-time - that's like analyzing 33 million pixels per frame instantly!
+                    </div>
+                    <div class="usecase-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Video Quality</div>
+                            <div class="metric-value">4K/8K real-time</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Image Quality</div>
+                            <div class="metric-value">Up to 8K</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">AI Complexity</div>
+                            <div class="metric-value">Billions of parameters</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+                </main>
+
+                </div>
+</div>
+
+    <footer>
+            <p>H200SXM GPU VM Explainer - Interactive Visualization</p>
+            <p>Based on NVIDIA H200 SXM GPU specifications and architecture</p>
+        </footer>
+    </div>
+
+    <script>
+// Performance data by precision
+const performanceData = {
+    fp8: { value: 3958, color: '#0073E6' },
+    fp16: { value: 1979, color: '#00A8E8' },
+    bf16: { value: 1979, color: '#00A8E8' },
+    tf32: { value: 989, color: '#FF6B35' },
+    fp32: { value: 67, color: '#FFA500' },
+    fp64: { value: 34, color: '#6C757D' }
+};
+
+// Initialize visualizations when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeArchitectureDiagram();
+    initializeMemoryVisualization();
+    initializePerformanceChart();
+    initializeMIGVisualization();
+    initializeVGPUVisualization();
+    setupInteractivity();
+    setupSmoothScrolling();
+});
+
+// Architecture Diagram
+function initializeArchitectureDiagram() {
+    const svg = d3.select('#architecture-svg');
+    const width = 1000;
+    const height = 400;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    // Clear previous content
+    svg.selectAll('*').remove();
+
+    // Define gradients
+    const defs = svg.append('defs');
+    const gradient = defs.append('linearGradient')
+        .attr('id', 'gpuGradient')
+        .attr('x1', '0%')
+        .attr('y1', '0%')
+        .attr('x2', '100%')
+        .attr('y2', '100%');
+    gradient.append('stop').attr('offset', '0%').attr('stop-color', '#0073E6');
+    gradient.append('stop').attr('offset', '100%').attr('stop-color', '#00A8E8');
+
+    // Main GPU rectangle
+    const gpuRect = svg.append('rect')
+        .attr('x', 50)
+        .attr('y', 50)
+        .attr('width', width - 100)
+        .attr('height', height - 100)
+        .attr('fill', 'url(#gpuGradient)')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 3)
+        .attr('rx', 10)
+        .attr('opacity', 0.15);
+
+    // Streaming Multiprocessors
+    const smCount = 12;
+    const smWidth = (width - 200) / 4;
+    const smHeight = (height - 200) / 3;
+
+    for (let i = 0; i < smCount; i++) {
+        const row = Math.floor(i / 4);
+        const col = i % 4;
+        const x = 100 + col * (smWidth + 20);
+        const y = 100 + row * (smHeight + 20);
+
+        const smGroup = svg.append('g');
+        
+        smGroup.append('rect')
+            .attr('x', x)
+            .attr('y', y)
+            .attr('width', smWidth)
+            .attr('height', smHeight)
+            .attr('fill', '#F8F9FA')
+            .attr('stroke', '#0073E6')
+            .attr('stroke-width', 2)
+            .attr('rx', 5)
+            .on('mouseover', function() {
+                d3.select(this).attr('fill', '#E3F2FD');
+            })
+            .on('mouseout', function() {
+                d3.select(this).attr('fill', '#F8F9FA');
+            });
+
+        smGroup.append('text')
+            .attr('x', x + smWidth / 2)
+            .attr('y', y + smHeight / 2 - 10)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#0073E6')
+            .attr('font-size', '14px')
+            .attr('font-weight', 'bold')
+            .text(`SM ${i + 1}`);
+
+        smGroup.append('text')
+            .attr('x', x + smWidth / 2)
+            .attr('y', y + smHeight / 2 + 10)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6C757D')
+            .attr('font-size', '12px')
+            .text('Tensor Cores');
+    }
+
+    // HBM3e Memory
+    const memoryY = height - 80;
+    svg.append('rect')
+        .attr('x', 100)
+        .attr('y', memoryY)
+        .attr('width', width - 200)
+        .attr('height', 30)
+        .attr('fill', '#FF6B35')
+        .attr('stroke', '#FF6B35')
+        .attr('stroke-width', 2)
+        .attr('rx', 5);
+
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', memoryY + 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('141GB HBM3e Memory (4.8 TB/s)');
+
+    // NVLink connections
+    const nvlinkY = 30;
+    svg.append('line')
+        .attr('x1', 50)
+        .attr('y1', nvlinkY)
+        .attr('x2', width - 50)
+        .attr('y2', nvlinkY)
+        .attr('stroke', '#00A8E8')
+        .attr('stroke-width', 4)
+        .attr('stroke-dasharray', '5,5');
+
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', nvlinkY - 10)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#00A8E8')
+        .attr('font-size', '14px')
+        .attr('font-weight', 'bold')
+        .text('NVLink Interconnect (900 GB/s)');
+}
+
+// Memory Visualization
+function initializeMemoryVisualization() {
+    const svg = d3.select('#memory-svg');
+    const width = 900;
+    const height = 300;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updateMemoryVisualization(50, 60);
+}
+
+function updateMemoryVisualization(usagePercent, bandwidthPercent) {
+    const svg = d3.select('#memory-svg');
+    const width = 900;
+    const height = 300;
+    
+    svg.selectAll('*').remove();
+
+    // Memory bars
+    const barWidth = 40;
+    const barSpacing = 20;
+    const startX = 100;
+    const baseY = height - 50;
+    const maxHeight = 200;
+
+    // Total memory bar
+    const totalBar = svg.append('g');
+    totalBar.append('rect')
+        .attr('x', startX)
+        .attr('y', baseY - maxHeight)
+        .attr('width', barWidth * 2)
+        .attr('height', maxHeight)
+        .attr('fill', '#E0E0E0')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 2)
+        .attr('rx', 5);
+
+    totalBar.append('rect')
+        .attr('x', startX)
+        .attr('y', baseY - (maxHeight * usagePercent / 100))
+        .attr('width', barWidth * 2)
+        .attr('height', maxHeight * usagePercent / 100)
+        .attr('fill', '#0073E6')
+        .attr('rx', 5)
+        .attr('opacity', 0.9);
+
+    totalBar.append('text')
+        .attr('x', startX + barWidth)
+        .attr('y', baseY - maxHeight - 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#0073E6')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('141 GB Total');
+
+    totalBar.append('text')
+        .attr('x', startX + barWidth)
+        .attr('y', baseY + 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '14px')
+        .text(`${usagePercent}% Used`);
+
+    // Bandwidth visualization
+    const bandwidthX = startX + barWidth * 3 + 100;
+    const bandwidthBar = svg.append('g');
+    
+    bandwidthBar.append('rect')
+        .attr('x', bandwidthX)
+        .attr('y', baseY - maxHeight)
+        .attr('width', barWidth * 2)
+        .attr('height', maxHeight)
+        .attr('fill', '#E0E0E0')
+        .attr('stroke', '#00A8E8')
+        .attr('stroke-width', 2)
+        .attr('rx', 5);
+
+    bandwidthBar.append('rect')
+        .attr('x', bandwidthX)
+        .attr('y', baseY - (maxHeight * bandwidthPercent / 100))
+        .attr('width', barWidth * 2)
+        .attr('height', maxHeight * bandwidthPercent / 100)
+        .attr('fill', '#00A8E8')
+        .attr('rx', 5)
+        .attr('opacity', 0.9);
+
+    bandwidthBar.append('text')
+        .attr('x', bandwidthX + barWidth)
+        .attr('y', baseY - maxHeight - 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#00A8E8')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('4.8 TB/s Peak');
+
+    bandwidthBar.append('text')
+        .attr('x', bandwidthX + barWidth)
+        .attr('y', baseY + 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '14px')
+        .text(`${bandwidthPercent}% Utilized`);
+
+    // Memory modules visualization
+    const moduleCount = 6;
+    const moduleWidth = 80;
+    const moduleHeight = 60;
+    const moduleStartX = bandwidthX + barWidth * 3 + 100;
+    const moduleStartY = baseY - maxHeight;
+
+    for (let i = 0; i < moduleCount; i++) {
+        const moduleX = moduleStartX + (i % 3) * (moduleWidth + 10);
+        const moduleY = moduleStartY + Math.floor(i / 3) * (moduleHeight + 10);
+
+        const module = svg.append('g');
+        module.append('rect')
+            .attr('x', moduleX)
+            .attr('y', moduleY)
+            .attr('width', moduleWidth)
+            .attr('height', moduleHeight)
+            .attr('fill', i < Math.floor(moduleCount * usagePercent / 100) ? '#FF6B35' : '#F8F9FA')
+            .attr('stroke', '#0073E6')
+            .attr('stroke-width', 1)
+            .attr('rx', 3);
+
+        module.append('text')
+            .attr('x', moduleX + moduleWidth / 2)
+            .attr('y', moduleY + moduleHeight / 2)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#1A1A1A')
+            .attr('font-size', '12px')
+            .text(`HBM${i + 1}`);
+    }
+}
+
+// Performance Chart
+function initializePerformanceChart() {
+    const svg = d3.select('#performance-svg');
+    const width = 1000;
+    const height = 350;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updatePerformanceChart('fp8');
+}
+
+function updatePerformanceChart(precision) {
+    const svg = d3.select('#performance-svg');
+    const width = 1000;
+    const height = 350;
+    
+    svg.selectAll('*').remove();
+
+    const data = performanceData[precision];
+    const maxValue = 4000;
+    const barWidth = 200;
+    const barHeight = (data.value / maxValue) * (height - 100);
+    const barX = (width - barWidth) / 2;
+    const barY = height - 50 - barHeight;
+
+    // Background bar
+    svg.append('rect')
+        .attr('x', barX)
+        .attr('y', height - 50 - (maxValue / maxValue) * (height - 100))
+        .attr('width', barWidth)
+        .attr('height', (maxValue / maxValue) * (height - 100))
+        .attr('fill', '#E0E0E0')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 2)
+        .attr('rx', 10);
+
+    // Performance bar
+    svg.append('rect')
+        .attr('x', barX)
+        .attr('y', barY)
+        .attr('width', barWidth)
+        .attr('height', barHeight)
+        .attr('fill', data.color)
+        .attr('rx', 10)
+        .attr('opacity', 0.9)
+        .transition()
+        .duration(1000)
+        .attr('opacity', 1);
+
+    // Value label
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', barY - 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', data.color)
+        .attr('font-size', '48px')
+        .attr('font-weight', 'bold')
+        .text(`${data.value.toLocaleString()} TFLOPS`);
+
+    // Precision label
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', barY - 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '24px')
+        .attr('font-weight', 'bold')
+        .text(`${precision.toUpperCase()} Precision`);
+
+    // Comparison bars
+    const comparisons = [
+        { label: 'FP64', value: 34, color: '#6C757D' },
+        { label: 'FP32', value: 67, color: '#FFA500' },
+        { label: 'TF32', value: 989, color: '#FF6B35' },
+        { label: 'FP16', value: 1979, color: '#00A8E8' },
+        { label: 'FP8', value: 3958, color: '#0073E6' }
+    ];
+
+    const compBarWidth = 60;
+    const compSpacing = 20;
+    const compStartX = (width - (comparisons.length * (compBarWidth + compSpacing) - compSpacing)) / 2;
+    const compBaseY = height - 200;
+
+    comparisons.forEach((comp, i) => {
+        const compX = compStartX + i * (compBarWidth + compSpacing);
+        const compHeight = (comp.value / maxValue) * 100;
+
+        const compGroup = svg.append('g');
+        
+        compGroup.append('rect')
+            .attr('x', compX)
+            .attr('y', compBaseY - compHeight)
+            .attr('width', compBarWidth)
+            .attr('height', compHeight)
+            .attr('fill', comp.color)
+            .attr('opacity', comp.label === precision.toUpperCase() ? 1 : 0.5)
+            .attr('rx', 5);
+
+        compGroup.append('text')
+            .attr('x', compX + compBarWidth / 2)
+            .attr('y', compBaseY + 20)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#1A1A1A')
+            .attr('font-size', '12px')
+            .text(comp.label);
+
+        compGroup.append('text')
+            .attr('x', compX + compBarWidth / 2)
+            .attr('y', compBaseY - compHeight - 5)
+            .attr('text-anchor', 'middle')
+            .attr('fill', comp.color)
+            .attr('font-size', '10px')
+            .text(comp.value);
+    });
+}
+
+// MIG Visualization
+function initializeMIGVisualization() {
+    const svg = d3.select('#mig-svg');
+    const width = 1000;
+    const height = 300;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updateMIGVisualization(1);
+}
+
+function updateMIGVisualization(instanceCount) {
+    const svg = d3.select('#mig-svg');
+    const width = 1000;
+    const height = 300;
+    
+    svg.selectAll('*').remove();
+
+    const totalMemory = 141;
+    const memoryPerInstance = totalMemory / instanceCount;
+    const instanceWidth = (width - 200) / instanceCount;
+    const instanceHeight = height - 100;
+    const startX = 100;
+    const startY = 50;
+
+    // Full GPU outline
+    svg.append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width - 200)
+        .attr('height', instanceHeight)
+        .attr('fill', 'none')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 3)
+        .attr('stroke-dasharray', '5,5')
+        .attr('rx', 10);
+
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', startY - 20)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#0073E6')
+        .attr('font-size', '18px')
+        .attr('font-weight', 'bold')
+        .text(`H200 GPU (141 GB Total)`);
+
+    // MIG Instances
+    for (let i = 0; i < instanceCount; i++) {
+        const instanceX = startX + i * instanceWidth;
+        const instanceGroup = svg.append('g');
+
+        instanceGroup.append('rect')
+            .attr('x', instanceX)
+            .attr('y', startY)
+            .attr('width', instanceWidth - 5)
+            .attr('height', instanceHeight)
+            .attr('fill', `hsl(${200 + i * 20}, 70%, 85%)`)
+            .attr('stroke', '#0073E6')
+            .attr('stroke-width', 2)
+            .attr('rx', 5)
+            .attr('opacity', 0.9);
+
+        instanceGroup.append('text')
+            .attr('x', instanceX + instanceWidth / 2 - 2.5)
+            .attr('y', startY + 30)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#0073E6')
+            .attr('font-size', '16px')
+            .attr('font-weight', 'bold')
+            .text(`MIG Instance ${i + 1}`);
+
+        instanceGroup.append('text')
+            .attr('x', instanceX + instanceWidth / 2 - 2.5)
+            .attr('y', startY + 60)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#1A1A1A')
+            .attr('font-size', '14px')
+            .text(`${memoryPerInstance.toFixed(1)} GB`);
+
+        instanceGroup.append('text')
+            .attr('x', instanceX + instanceWidth / 2 - 2.5)
+            .attr('y', startY + 90)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6C757D')
+            .attr('font-size', '12px')
+            .text('Dedicated Compute');
+
+        instanceGroup.append('text')
+            .attr('x', instanceX + instanceWidth / 2 - 2.5)
+            .attr('y', startY + 110)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6C757D')
+            .attr('font-size', '12px')
+            .text('Hardware Isolated');
+    }
+}
+
+// vGPU Visualization
+function initializeVGPUVisualization() {
+    const svg = d3.select('#vgpu-svg');
+    const width = 1000;
+    const height = 300;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updateVGPUVisualization(2, 20);
+}
+
+function updateVGPUVisualization(vmCount, profileGB) {
+    const svg = d3.select('#vgpu-svg');
+    const width = 1000;
+    const height = 300;
+    
+    svg.selectAll('*').remove();
+
+    const totalMemory = 141;
+    const vmWidth = (width - 300) / vmCount;
+    const vmHeight = 120;
+    const startX = 100;
+    const startY = 50;
+
+    // Physical GPU
+    svg.append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width - 200)
+        .attr('height', 80)
+        .attr('fill', '#F8F9FA')
+        .attr('stroke', '#0073E6')
+        .attr('stroke-width', 3)
+        .attr('rx', 10);
+
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', startY + 45)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#0073E6')
+        .attr('font-size', '18px')
+        .attr('font-weight', 'bold')
+        .text(`Physical H200 GPU (141 GB)`);
+
+    // VMs
+    const vmStartY = startY + 120;
+    for (let i = 0; i < vmCount; i++) {
+        const vmX = startX + i * vmWidth;
+        const vmGroup = svg.append('g');
+
+        // Connection line
+        svg.append('line')
+            .attr('x1', vmX + vmWidth / 2)
+            .attr('y1', startY + 80)
+            .attr('x2', vmX + vmWidth / 2)
+            .attr('y2', vmStartY)
+            .attr('stroke', '#00A8E8')
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '3,3');
+
+        vmGroup.append('rect')
+            .attr('x', vmX)
+            .attr('y', vmStartY)
+            .attr('width', vmWidth - 10)
+            .attr('height', vmHeight)
+            .attr('fill', '#F8F9FA')
+            .attr('stroke', '#00A8E8')
+            .attr('stroke-width', 2)
+            .attr('rx', 5);
+
+        vmGroup.append('text')
+            .attr('x', vmX + vmWidth / 2 - 5)
+            .attr('y', vmStartY + 30)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#00A8E8')
+            .attr('font-size', '16px')
+            .attr('font-weight', 'bold')
+            .text(`VM ${i + 1}`);
+
+        vmGroup.append('text')
+            .attr('x', vmX + vmWidth / 2 - 5)
+            .attr('y', vmStartY + 55)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#1A1A1A')
+            .attr('font-size', '14px')
+            .text(`vGPU-${profileGB}GB`);
+
+        vmGroup.append('text')
+            .attr('x', vmX + vmWidth / 2 - 5)
+            .attr('y', vmStartY + 80)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6C757D')
+            .attr('font-size', '12px')
+            .text('Time-sliced');
+
+        vmGroup.append('text')
+            .attr('x', vmX + vmWidth / 2 - 5)
+            .attr('y', vmStartY + 100)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6C757D')
+            .attr('font-size', '12px')
+            .text('Shared Resources');
+    }
+}
+
+// Setup Interactivity
+function setupInteractivity() {
+    // Memory controls
+    const memorySlider = document.getElementById('memory-usage');
+    const bandwidthSlider = document.getElementById('bandwidth-util');
+    const memoryValue = document.getElementById('memory-value');
+    const bandwidthValue = document.getElementById('bandwidth-value');
+
+    memorySlider.addEventListener('input', function() {
+        const value = this.value;
+        memoryValue.textContent = value;
+        updateMemoryVisualization(parseInt(value), parseInt(bandwidthSlider.value));
+    });
+
+    bandwidthSlider.addEventListener('input', function() {
+        const value = this.value;
+        bandwidthValue.textContent = value;
+        updateMemoryVisualization(parseInt(memorySlider.value), parseInt(value));
+    });
+
+    // Precision selector
+    const precisionButtons = document.querySelectorAll('.precision-btn');
+    precisionButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            precisionButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const precision = this.dataset.precision;
+            updatePerformanceChart(precision);
+        });
+    });
+
+    // MIG controls
+    const migSlider = document.getElementById('mig-instances');
+    const migCount = document.getElementById('mig-count');
+    migSlider.addEventListener('input', function() {
+        const value = this.value;
+        migCount.textContent = value;
+        updateMIGVisualization(parseInt(value));
+    });
+
+    // vGPU controls
+    const vgpuSlider = document.getElementById('vgpu-vms');
+    const vgpuProfile = document.getElementById('vgpu-profile');
+    const vmCount = document.getElementById('vm-count');
+    const profileName = document.getElementById('profile-name');
+
+    vgpuSlider.addEventListener('input', function() {
+        const value = this.value;
+        vmCount.textContent = value;
+        updateVGPUVisualization(parseInt(value), parseInt(vgpuProfile.value));
+    });
+
+    vgpuProfile.addEventListener('change', function() {
+        const value = this.value;
+        profileName.textContent = `vGPU-${value}GB`;
+        updateVGPUVisualization(parseInt(vgpuSlider.value), parseInt(value));
+    });
+
+    // Tab switching
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            tabButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const tabName = this.dataset.tab;
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-content`).classList.add('active');
+        });
+    });
+
+    // Use case selector
+    const usecaseButtons = document.querySelectorAll('.usecase-btn');
+    usecaseButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            usecaseButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const usecase = this.dataset.usecase;
+            document.querySelectorAll('.usecase-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${usecase}-content`).classList.add('active');
+        });
+    });
+}
+
+// Smooth scrolling for navigation
+function setupSmoothScrolling() {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Remove active class from all links
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            const targetId = this.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            }
+        });
+    });
+    
+    // Highlight active nav link on scroll
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (window.pageYOffset >= sectionTop - 100) {
+                current = section.getAttribute('id');
+            }
+
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+    });
+}
+
+// Update visualizations on window resize
+window.addEventListener('resize', function() {
+    // Reinitialize visualizations to adapt to new size
+    initializeArchitectureDiagram();
+    initializeMemoryVisualization();
+    initializePerformanceChart();
+    initializeMIGVisualization();
+    initializeVGPUVisualization();
+});
+    </script>
+</body>
+</html>
+

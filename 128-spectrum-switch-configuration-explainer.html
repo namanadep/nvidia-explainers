@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>128. Spectrum Switch Configuration: NVIDIA Spectrum Switch Setup and Management</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #1A237E;
+    --secondary-color: #283593;
+    --accent-color: #3949AB;
+    --bg-color: #E8EAF6;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #9FA8DA;
+    --shadow: 0 2px 8px rgba(26, 35, 126, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #1A237E, #283593);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.config-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.config-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E8EAF6, #9FA8DA);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #3949AB;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #9FA8DA;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>128. Spectrum Switch Configuration</h1>
+        <p class="subtitle">NVIDIA Spectrum Switch Setup and Management</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#initial-setup" class="nav-link">Initial Setup</a>
+        <a href="#vlan-configuration" class="nav-link">VLAN Configuration</a>
+        <a href="#qos-configuration" class="nav-link">QoS Configuration</a>
+        <a href="#management" class="nav-link">Management</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Spectrum Switch Configuration Overview</h2>
+            <p>
+                NVIDIA Spectrum switches provide high-performance Ethernet switching for AI infrastructure. Proper 
+                switch configuration ensures optimal performance, security, and manageability. Configuration includes 
+                initial setup, VLAN configuration, QoS settings, and management interfaces. Understanding Spectrum 
+                switch configuration enables efficient network management and optimal performance.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Spectrum Switch Config] --> B[Initial Setup]
+                    A --> C[VLAN Configuration]
+                    A --> D[QoS Configuration]
+                    A --> E[Management]
+                    B --> F[Switch Initialization]
+                    B --> G[IP Configuration]
+                    C --> H[VLAN Creation]
+                    C --> I[Port Assignment]
+                    D --> J[Traffic Classes]
+                    D --> K[Bandwidth Limits]
+                    E --> L[CLI Access]
+                    E --> M[SNMP/API]
+                    
+                    style A fill:#1A237E
+                    style B fill:#283593
+                    style C fill:#3949AB
+            </div>
+
+            <div class="example-box">
+                <strong>Switch Configuration Impact:</strong>
+                Proper Spectrum switch configuration ensures optimal network performance, enables traffic 
+                prioritization, and provides network segmentation. Correct VLAN and QoS configuration improves 
+                network efficiency and supports AI workload requirements.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Spectrum Switch Config))
+                    Initial Setup
+                      Switch Initialization
+                      IP Configuration
+                      Management Access
+                    VLAN Configuration
+                      VLAN Creation
+                      Port Assignment
+                      Trunk Configuration
+                    QoS Configuration
+                      Traffic Classes
+                      Bandwidth Limits
+                      Priority Queues
+                    Management
+                      CLI Access
+                      SNMP Configuration
+                      API Access
+            </div>
+        </section>
+
+        <section id="initial-setup" class="section">
+            <h2>Initial Switch Setup</h2>
+            <p>
+                Perform initial setup of Spectrum switches including initialization, IP configuration, and basic 
+                settings. Initial setup establishes management connectivity and basic switch operation.
+            </p>
+
+            <div class="config-card">
+                <h3>Switch Initialization</h3>
+                <p>Initialize switch for first-time setup:</p>
+                
+                <p style="margin-top: 20px;"><strong>Initial Configuration Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Connect to switch console</li>
+                    <li>Complete initial setup wizard</li>
+                    <li>Set admin password</li>
+                    <li>Configure management IP</li>
+                    <li>Set hostname</li>
+                    <li>Configure time/NTP</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Basic Configuration Commands:</strong></p>
+                <div class="command-box">
+# Connect to switch (via console or SSH)
+# Initial configuration commands
+
+# Set hostname
+switch(config)# hostname spectrum-switch-01
+
+# Configure management IP
+switch(config)# interface mgmt0
+switch(config-if)# ip address 192.168.1.10/24
+switch(config-if)# exit
+
+# Set admin password
+switch(config)# username admin password [password]
+
+# Configure NTP
+switch(config)# ntp server [ntp-server]
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Management Access</h3>
+                <p>Configure management access:</p>
+                
+                <p style="margin-top: 20px;"><strong>SSH Configuration:</strong></p>
+                <div class="command-box">
+# Enable SSH
+switch(config)# feature ssh
+
+# Configure SSH access
+switch(config)# ssh key rsa 2048
+switch(config)# ssh server enable
+                </div>
+
+                <p style="margin-top: 20px;"><strong>SNMP Configuration:</strong></p>
+                <div class="command-box">
+# Enable SNMP
+switch(config)# feature snmp
+
+# Configure SNMP community
+switch(config)# snmp-server community public ro
+switch(config)# snmp-server community private rw
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Switch Power On] --> B[Connect Console]
+                    B --> C[Initial Setup Wizard]
+                    C --> D[Set Admin Password]
+                    D --> E[Configure Management IP]
+                    E --> F[Set Hostname]
+                    F --> G[Configure NTP]
+                    G --> H[Enable Management]
+                    H --> I[Switch Ready]
+                    
+                    style A fill:#1A237E
+                    style I fill:#4CAF50
+                </div>
+        </section>
+
+        <section id="vlan-configuration" class="section">
+            <h2>VLAN Configuration</h2>
+            <p>
+                Configure VLANs (Virtual LANs) for network segmentation. VLAN configuration enables logical network 
+                separation and improves security and performance.
+            </p>
+
+            <div class="config-card">
+                <h3>VLAN Creation</h3>
+                <p>Create VLANs for network segmentation:</p>
+                
+                <p style="margin-top: 20px;"><strong>Create VLAN:</strong></p>
+                <div class="command-box">
+# Create VLAN
+switch(config)# vlan 100
+switch(config-vlan)# name ai-training
+switch(config-vlan)# exit
+
+# Create multiple VLANs
+switch(config)# vlan 101
+switch(config-vlan)# name ai-inference
+switch(config-vlan)# exit
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Verify VLAN Configuration:</strong></p>
+                <div class="command-box">
+# Show VLANs
+switch# show vlan
+
+# Show VLAN details
+switch# show vlan id 100
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Port Assignment</h3>
+                <p>Assign ports to VLANs:</p>
+                
+                <p style="margin-top: 20px;"><strong>Access Port Configuration:</strong></p>
+                <div class="command-box">
+# Configure access port (single VLAN)
+switch(config)# interface ethernet 1/1
+switch(config-if)# switchport mode access
+switch(config-if)# switchport access vlan 100
+switch(config-if)# exit
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Trunk Port Configuration:</strong></p>
+                <div class="command-box">
+# Configure trunk port (multiple VLANs)
+switch(config)# interface ethernet 1/10
+switch(config-if)# switchport mode trunk
+switch(config-if)# switchport trunk allowed vlan 100,101,102
+switch(config-if)# exit
+                </div>
+            </div>
+        </section>
+
+        <section id="qos-configuration" class="section">
+            <h2>QoS Configuration</h2>
+            <p>
+                Configure Quality of Service (QoS) for traffic prioritization and bandwidth management. QoS 
+                configuration ensures critical traffic gets priority and bandwidth limits are enforced.
+            </p>
+
+            <div class="concept-card">
+                <h3>QoS Traffic Classes</h3>
+                <p>Configure QoS traffic classes:</p>
+                
+                <p style="margin-top: 20px;"><strong>QoS Configuration:</strong></p>
+                <div class="command-box">
+# Enable QoS
+switch(config)# qos
+
+# Configure traffic class
+switch(config)# class-map type qos match-all high-priority
+switch(config-cmap-qos)# match dscp 46
+switch(config-cmap-qos)# exit
+
+# Configure policy map
+switch(config)# policy-map type qos ai-traffic
+switch(config-pmap-qos)# class high-priority
+switch(config-pmap-qos-class)# priority percent 50
+switch(config-pmap-qos-class)# exit
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Bandwidth Limits</h3>
+                <p>Configure bandwidth limits for traffic classes:</p>
+                
+                <p style="margin-top: 20px;"><strong>Bandwidth Configuration:</strong></p>
+                <div class="command-box">
+# Configure bandwidth limits
+switch(config-pmap-qos)# class class-default
+switch(config-pmap-qos-class)# bandwidth percent 50
+switch(config-pmap-qos-class)# exit
+switch(config-pmap-qos)# exit
+
+# Apply policy to interface
+switch(config)# interface ethernet 1/1
+switch(config-if)# service-policy type qos input ai-traffic
+switch(config-if)# exit
+                </div>
+            </div>
+        </section>
+
+        <section id="management" class="section">
+            <h2>Switch Management</h2>
+            <p>
+                Manage Spectrum switches through CLI, SNMP, and management interfaces. Effective management enables 
+                monitoring, configuration, and troubleshooting.
+            </p>
+
+            <div class="config-card">
+                <h3>CLI Management</h3>
+                <p>Access switch via CLI:</p>
+                
+                <p style="margin-top: 20px;"><strong>CLI Access:</strong></p>
+                <div class="command-box">
+# SSH to switch
+ssh admin@[switch-ip]
+
+# Access switch CLI
+# Commands are similar to Cisco NX-OS
+
+# Show switch information
+switch# show version
+switch# show inventory
+switch# show running-config
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>SNMP Management</h3>
+                <p>Configure SNMP for monitoring:</p>
+                
+                <p style="margin-top: 20px;"><strong>SNMP Configuration:</strong></p>
+                <div class="command-box">
+# Enable SNMP
+switch(config)# feature snmp
+
+# Configure SNMP v2c
+switch(config)# snmp-server community public ro
+switch(config)# snmp-server community private rw
+
+# Configure SNMP v3
+switch(config)# snmp-server user admin auth sha [password] priv aes-128 [password]
+switch(config)# snmp-server host [monitoring-server] version 3 auth admin
+                </div>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Switch Configuration Best Practices</h2>
+            <p>
+                Follow best practices for effective Spectrum switch configuration.
+            </p>
+
+            <div class="concept-card">
+                <h3>Configuration Best Practices</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Document all configuration changes</li>
+                    <li>Use consistent naming conventions</li>
+                    <li>Backup configuration before changes</li>
+                    <li>Test configuration in non-production</li>
+                    <li>Use version control for configurations</li>
+                    <li>Monitor switch performance</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Switch Configuration Checklist:</strong>
+                1. Complete initial setup<br>
+                2. Configure management IP<br>
+                3. Set up SSH access<br>
+                4. Configure VLANs<br>
+                5. Assign ports to VLANs<br>
+                6. Configure QoS<br>
+                7. Set up SNMP monitoring<br>
+                8. Backup configuration<br>
+                9. Document configuration<br>
+                10. Test and verify
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Spectrum Switch Configuration | NVIDIA Spectrum Switch Setup and Management</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

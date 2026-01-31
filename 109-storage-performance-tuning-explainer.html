@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>109. Storage Performance Tuning: Optimization Techniques for AI Workloads</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #00796B;
+    --secondary-color: #009688;
+    --accent-color: #26A69A;
+    --bg-color: #E0F2F1;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #80CBC4;
+    --shadow: 0 2px 8px rgba(0, 121, 107, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #00796B, #009688);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.tuning-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.tuning-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E0F2F1, #80CBC4);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #26A69A;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #80CBC4;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>109. Storage Performance Tuning</h1>
+        <p class="subtitle">Optimization Techniques for AI Workload Storage Performance</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#filesystem" class="nav-link">Filesystem Tuning</a>
+        <a href="#io-tuning" class="nav-link">I/O Tuning</a>
+        <a href="#caching" class="nav-link">Caching Strategies</a>
+        <a href="#lustre" class="nav-link">Lustre Optimization</a>
+        <a href="#nfs" class="nav-link">NFS Optimization</a>
+        <a href="#monitoring" class="nav-link">Monitoring</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Storage Performance Tuning Overview</h2>
+            <p>
+                Storage performance tuning optimizes I/O operations for AI workloads, reducing data loading bottlenecks 
+                and improving training efficiency. Effective tuning involves filesystem optimization, I/O parameter 
+                adjustment, caching strategies, and workload-specific optimizations. Proper storage tuning can improve 
+                training throughput by 20-50% by reducing I/O wait times and maximizing storage bandwidth utilization.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Storage Performance] --> B[Filesystem Tuning]
+                    A --> C[I/O Tuning]
+                    A --> D[Caching]
+                    A --> E[Workload Optimization]
+                    B --> F[Mount Options]
+                    B --> G[Filesystem Parameters]
+                    C --> H[Block Size]
+                    C --> I[Queue Depth]
+                    D --> J[Page Cache]
+                    D --> K[Application Cache]
+                    E --> L[Access Patterns]
+                    E --> M[Data Layout]
+                    
+                    style A fill:#00796B
+                    style B fill:#009688
+                    style C fill:#26A69A
+            </div>
+
+            <div class="example-box">
+                <strong>Performance Impact:</strong>
+                Storage I/O bottlenecks can reduce GPU utilization from 90% to 30% during training. Proper tuning 
+                reduces I/O wait times, increases throughput, and ensures GPUs remain busy processing data. A well-tuned 
+                storage system can support 2-3x more concurrent training jobs.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Storage Performance Tuning))
+                    Filesystem Tuning
+                      Mount Options
+                      Filesystem Parameters
+                      Block Size Optimization
+                    I/O Tuning
+                      Block Size
+                      Queue Depth
+                      I/O Scheduler
+                    Caching Strategies
+                      Page Cache
+                      Application Cache
+                      Prefetching
+                    Lustre Optimization
+                      Stripe Configuration
+                      OST Selection
+                      Client Tuning
+                    NFS Optimization
+                      Mount Options
+                      NFS Version
+                      Client Tuning
+            </div>
+        </section>
+
+        <section id="filesystem" class="section">
+            <h2>Filesystem Tuning</h2>
+            <p>
+                Filesystem tuning optimizes how the operating system interacts with storage devices. Proper mount 
+                options and filesystem parameters significantly impact I/O performance.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Storage Performance Tuning] --> B[Identify Bottleneck]
+                    B --> C{Bottleneck Type?}
+                    C -->|Filesystem| D[Filesystem Tuning]
+                    C -->|I/O| E[I/O Tuning]
+                    C -->|Cache| F[Cache Optimization]
+                    C -->|Network Storage| G[Lustre/NFS Tuning]
+                    D --> H[Mount Options]
+                    D --> I[Filesystem Parameters]
+                    E --> J[Block Size]
+                    E --> K[Queue Depth]
+                    F --> L[Page Cache]
+                    F --> M[Application Cache]
+                    G --> N[Stripe Config]
+                    G --> O[Mount Options]
+                    H --> P[Measure Performance]
+                    I --> P
+                    J --> P
+                    K --> P
+                    L --> P
+                    M --> P
+                    N --> P
+                    O --> P
+                    P --> Q{Target Met?}
+                    Q -->|No| B
+                    Q -->|Yes| R[Tuning Complete]
+                    
+                    style A fill:#00796B
+                    style R fill:#4CAF50
+                    style C fill:#FF9800
+                    style Q fill:#FF9800
+            </div>
+
+            <div class="tuning-card">
+                <h3>Mount Options for Performance</h3>
+                <p>Optimize mount options for AI workloads:</p>
+                
+                <p style="margin-top: 20px;"><strong>Lustre Filesystem:</strong></p>
+                <div class="command-box">
+# Optimized mount options for Lustre
+mount -t lustre -o noatime,nodiratime,flock [server]:/[fs] /mnt/lustre
+                </div>
+
+                <p style="margin-top: 20px;"><strong>NFS Filesystem:</strong></p>
+                <div class="command-box">
+# Optimized mount options for NFS
+mount -t nfs \
+  -o rsize=1048576 \
+  -o wsize=1048576 \
+  -o hard \
+  -o intr \
+  -o noatime \
+  -o nodiratime \
+  [server]:/export /mnt/nfs
+
+# Options explained:
+# rsize/wsize: 1MB read/write size for high bandwidth
+# hard: Retry on server failure
+# intr: Allow interruptible operations
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Local ext4 Filesystem:</strong></p>
+                <div class="command-box">
+# Optimized mount options for local ext4
+mount -o noatime \
+      -o nodiratime \
+      -o data=writeback \
+      -o barrier=0 \
+      /dev/sda1 /mnt/data
+
+# Options explained:
+# noatime, nodiratime: Disable access time updates (reduces metadata writes)
+# data=writeback: Faster writes
+# barrier=0: Disable barriers (use with caution, requires UPS)
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Common Performance Options:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li><code>noatime, nodiratime</code>: Disable access time updates (reduces metadata writes)</li>
+                    <li><code>data=writeback</code>: Faster writes for ext4</li>
+                    <li><code>barrier=0</code>: Disable barriers (use with caution, requires UPS)</li>
+                    <li><code>rsize/wsize</code>: Read/write size for NFS (set to 1MB for high bandwidth)</li>
+                </ul>
+            </div>
+
+            <div class="tuning-card">
+                <h3>Filesystem Parameters</h3>
+                <p>Tune filesystem-specific parameters:</p>
+                
+                <p style="margin-top: 20px;"><strong>ext4 Tuning:</strong></p>
+                <div class="command-box">
+# Enable writeback mode for faster writes
+tune2fs -o journal_data_writeback /dev/sda1
+
+# Disable journal for read-heavy workloads (improves performance)
+tune2fs -O ^has_journal /dev/sda1
+
+# Check current ext4 parameters
+tune2fs -l /dev/sda1
+                </div>
+
+                <p style="margin-top: 20px;"><strong>XFS Tuning:</strong></p>
+                <div class="command-box">
+# Configure external log device for better performance
+xfs_admin -l internal,logdev=/dev/sdb1 /dev/sda1
+
+# Check current XFS parameters
+xfs_info /mnt/xfs
+                </div>
+            </div>
+
+            <div class="tuning-card">
+                <h3>/etc/fstab Configuration</h3>
+                <p>Configure persistent mount options in /etc/fstab:</p>
+                
+                <p style="margin-top: 20px;"><strong>Lustre Filesystem Entry:</strong></p>
+                <div class="command-box">
+# Lustre filesystem with performance optimizations
+[server]:/[fs] /mnt/lustre lustre noatime,nodiratime,flock 0 0
+                </div>
+
+                <p style="margin-top: 20px;"><strong>NFS Filesystem Entry:</strong></p>
+                <div class="command-box">
+# NFS filesystem with 1MB read/write size
+# Format: server:export mount_point nfs options dump pass
+[server]:/export /mnt/nfs nfs \
+  rsize=1048576,\
+  wsize=1048576,\
+  hard,\
+  intr,\
+  noatime,\
+  nodiratime \
+  0 0
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Local ext4 Filesystem Entry:</strong></p>
+                <div class="command-box">
+# Local ext4 filesystem with writeback mode
+UUID=[uuid] /mnt/data ext4 noatime,nodiratime,data=writeback 0 2
+                </div>
+            </div>
+        </section>
+
+        <section id="io-tuning" class="section">
+            <h2>I/O Tuning</h2>
+            <p>
+                I/O tuning optimizes how applications interact with storage. Key parameters include block size, 
+                queue depth, and I/O scheduler selection.
+            </p>
+
+            <div class="concept-card">
+                <h3>Block Size Optimization</h3>
+                <p>Match block size to workload access patterns:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Large Sequential Reads:</strong> Use larger block sizes (1MB+)</li>
+                    <li><strong>Small Random Reads:</strong> Use smaller block sizes (4KB-64KB)</li>
+                    <li><strong>Training Data:</strong> Typically benefits from 64KB-1MB block sizes</li>
+                    <li><strong>Checkpointing:</strong> Use 1MB+ block sizes for large checkpoint files</li>
+                </ul>
+                
+                <p style="margin-top: 20px;"><strong>Testing Block Size:</strong></p>
+                <div class="command-box">
+# Test with 1MB block size
+dd if=/dev/zero of=testfile bs=1M count=1000
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Python Data Loading Example:</strong></p>
+                <div class="command-box">
+# Set 1MB buffer for file reading
+with open(file, 'rb', buffering=1048576) as f:
+    data = f.read()
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Queue Depth Tuning</h3>
+                <p>Increase I/O queue depth for better parallelism:</p>
+                
+                <p style="margin-top: 20px;"><strong>Check Current Queue Depth:</strong></p>
+                <div class="command-box">
+# Check current queue depth
+cat /sys/block/sda/queue/nr_requests
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Increase Queue Depth for NVMe:</strong></p>
+                <div class="command-box">
+# Increase queue depth for NVMe devices (recommended: 1024)
+echo 1024 > /sys/block/nvme0n1/queue/nr_requests
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Increase Queue Depth for SCSI:</strong></p>
+                <div class="command-box">
+# Increase queue depth for SCSI devices (recommended: 256)
+echo 256 > /sys/block/sda/queue/nr_requests
+                </div>
+
+                <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+                    <strong>Note:</strong> Higher queue depth improves performance but uses more memory.
+                </p>
+            </div>
+
+            <div class="concept-card">
+                <h3>I/O Scheduler Selection</h3>
+                <p>Choose appropriate I/O scheduler:</p>
+                
+                <p style="margin-top: 20px;"><strong>Check Current Scheduler:</strong></p>
+                <div class="command-box">
+# Check current I/O scheduler
+cat /sys/block/sda/queue/scheduler
+                </div>
+
+                <p style="margin-top: 20px;"><strong>I/O Scheduler Options:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li><code>mq-deadline</code>: Good for NVMe (default for NVMe)</li>
+                    <li><code>none/noop</code>: Simple, good for fast storage</li>
+                    <li><code>bfq</code>: Good for desktop, not ideal for servers</li>
+                    <li><code>kyber</code>: Good for fast storage</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Set Scheduler for SATA/SCSI:</strong></p>
+                <div class="command-box">
+# Set mq-deadline scheduler
+echo mq-deadline > /sys/block/sda/queue/scheduler
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Set Scheduler for NVMe:</strong></p>
+                <div class="command-box">
+# For NVMe devices, use none (noop) or mq-deadline
+echo none > /sys/block/nvme0n1/queue/scheduler
+                </div>
+            </div>
+        </section>
+
+        <section id="caching" class="section">
+            <h2>Caching Strategies</h2>
+            <p>
+                Effective caching reduces storage I/O by keeping frequently accessed data in memory. Multiple caching 
+                layers can be optimized for AI workloads.
+            </p>
+
+            <div class="concept-card">
+                <h3>Page Cache Optimization</h3>
+                <p>Optimize Linux page cache for large file access:</p>
+                
+                <p style="margin-top: 20px;"><strong>Check Current Cache Usage:</strong></p>
+                <div class="command-box">
+# Check current cache usage
+free -h
+cat /proc/meminfo | grep -i cache
+                </div>
+
+                <p style="margin-top: 20px;"><strong>For Systems with Large RAM and Fast Storage:</strong></p>
+                <div class="command-box">
+# Adjust dirty ratio for better write performance
+sysctl -w vm.dirty_ratio=15
+sysctl -w vm.dirty_background_ratio=5
+                </div>
+
+                <p style="margin-top: 20px;"><strong>For Systems Prioritizing Read Performance:</strong></p>
+                <div class="command-box">
+# Lower dirty ratio for more cache available for reads
+sysctl -w vm.dirty_ratio=10
+sysctl -w vm.dirty_background_ratio=3
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Make Settings Persistent:</strong></p>
+                <div class="command-box">
+# Add to /etc/sysctl.conf for persistence
+echo "vm.dirty_ratio=15" >> /etc/sysctl.conf
+echo "vm.dirty_background_ratio=5" >> /etc/sysctl.conf
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Application-Level Caching</h3>
+                <p>Implement caching in data loading pipelines:</p>
+                
+                <p style="margin-top: 20px;"><strong>Python PyTorch Example:</strong></p>
+                <div class="command-box">
+# Import required libraries
+import torch
+from torch.utils.data import DataLoader
+
+# Cache dataset in memory if it fits
+dataset = YourDataset(cache=True)
+
+# Use multiple workers for parallel data loading
+dataloader = DataLoader(
+    dataset,
+    batch_size=32,
+    num_workers=8,
+    pin_memory=True,
+    prefetch_factor=2
+)
+
+# Options explained:
+# pin_memory=True: Enables faster CPU-to-GPU transfer
+# prefetch_factor=2: Prefetches next batch while processing current
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Prefetching Strategies</h3>
+                <p>Implement prefetching to overlap I/O with computation:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>DataLoader Prefetch:</strong> Use prefetch_factor in PyTorch DataLoader</li>
+                    <li><strong>Async I/O:</strong> Use asynchronous I/O libraries (aio, asyncio)</li>
+                    <li><strong>Read-Ahead:</strong> Enable read-ahead for sequential access patterns</li>
+                    <li><strong>Background Loading:</strong> Load next batch while processing current batch</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="lustre" class="section">
+            <h2>Lustre Optimization</h2>
+            <p>
+                Lustre parallel filesystem requires specific tuning for optimal AI workload performance. Key areas 
+                include stripe configuration, OST selection, and client tuning.
+            </p>
+
+            <div class="tuning-card">
+                <h3>Stripe Configuration</h3>
+                <p>Configure stripe count and size for optimal performance:</p>
+                
+                <p style="margin-top: 20px;"><strong>Set Stripe Count:</strong></p>
+                <div class="command-box">
+# Set stripe count (number of OSTs to stripe across)
+lfs setstripe -c 4 /mnt/lustre/training_data
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Set Stripe Size:</strong></p>
+                <div class="command-box">
+# Set stripe size (chunk size per OST)
+lfs setstripe -S 1M /mnt/lustre/training_data
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Set Both Stripe Count and Size:</strong></p>
+                <div class="command-box">
+# Configure both stripe count and size
+lfs setstripe -c 8 -S 1M /mnt/lustre/training_data
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Current Configuration:</strong></p>
+                <div class="command-box">
+# Check current stripe configuration
+lfs getstripe /mnt/lustre/training_data
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Stripe Configuration Recommendations:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Large files (>10GB):</strong> stripe count = 4-8, stripe size = 1MB</li>
+                    <li><strong>Small files (<1GB):</strong> stripe count = 1-2, stripe size = 1MB</li>
+                    <li><strong>Checkpoint files:</strong> stripe count = 8-16, stripe size = 1MB</li>
+                </ul>
+            </div>
+
+            <div class="tuning-card">
+                <h3>Lustre Client Tuning</h3>
+                <p>Optimize Lustre client parameters:</p>
+                
+                <p style="margin-top: 20px;"><strong>Increase Concurrent RPCs:</strong></p>
+                <div class="command-box">
+# Increase max_rpcs_in_flight (default: 8)
+# Allows more concurrent RPCs to OSTs for better parallelism
+lctl set_param osc.*.max_rpcs_in_flight=32
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Increase Write Cache:</strong></p>
+                <div class="command-box">
+# Increase max_dirty_mb (default: 256MB)
+# More write caching on client improves write performance
+lctl set_param osc.*.max_dirty_mb=1024
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Increase RPC Size:</strong></p>
+                <div class="command-box">
+# Increase max_pages_per_rpc (default: 1024)
+# Larger RPCs provide better bandwidth utilization
+lctl set_param osc.*.max_pages_per_rpc=256
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Current Parameters:</strong></p>
+                <div class="command-box">
+# Verify current parameter values
+lctl get_param osc.*.max_rpcs_in_flight
+                </div>
+            </div>
+
+            <div class="tuning-card">
+                <h3>Lustre Mount Options</h3>
+                <p>Optimize Lustre mount options:</p>
+                
+                <p style="margin-top: 20px;"><strong>Basic Optimized Mount:</strong></p>
+                <div class="command-box">
+# Optimized Lustre mount options
+mount -t lustre \
+  -o flock \
+  -o noatime \
+  -o nodiratime \
+  -o user_xattr \
+  [server]:/[fs] /mnt/lustre
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Key Mount Options:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li><code>flock</code>: Enable file locking</li>
+                    <li><code>noatime, nodiratime</code>: Disable access time updates</li>
+                    <li><code>user_xattr</code>: Enable extended attributes</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>Additional Options for High-Performance Workloads:</strong></p>
+                <div class="command-box">
+# Add security options if needed
+mount -t lustre \
+  -o flock \
+  -o noatime \
+  -o nodiratime \
+  -o user_xattr \
+  -o nosuid \
+  -o nodev \
+  [server]:/[fs] /mnt/lustre
+                </div>
+            </div>
+        </section>
+
+        <section id="nfs" class="section">
+            <h2>NFS Optimization</h2>
+            <p>
+                NFS optimization focuses on read/write sizes, version selection, and client/server tuning for 
+                optimal performance.
+            </p>
+
+            <div class="tuning-card">
+                <h3>NFS Mount Options</h3>
+                <p>Optimize NFS mount options for performance:</p>
+                
+                <p style="margin-top: 20px;"><strong>Optimized NFS Mount:</strong></p>
+                <div class="command-box">
+# Optimized NFS mount options
+mount -t nfs \
+  -o rsize=1048576 \
+  -o wsize=1048576 \
+  -o hard \
+  -o intr \
+  -o noatime \
+  -o nodiratime \
+  -o vers=4.2 \
+  [server]:/export /mnt/nfs
+
+# Options explained:
+# rsize/wsize: 1MB read/write size (1048576 bytes)
+# hard: Retry on server failure
+# intr: Allow interruptible operations
+# vers=4.2: Use NFSv4.2 for better performance
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Key NFS Options:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li><code>rsize, wsize</code>: Read/write size (1MB = 1048576 bytes)</li>
+                    <li><code>hard</code>: Retry on server failure (vs soft)</li>
+                    <li><code>intr</code>: Allow interruptible NFS operations</li>
+                    <li><code>noatime, nodiratime</code>: Disable access time updates</li>
+                    <li><code>vers=4.2</code>: Use NFSv4.2 (better performance than v3)</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>/etc/fstab Entry:</strong></p>
+                <div class="command-box">
+# Persistent mount configuration
+# Format: server:export mount_point nfs options dump pass
+[server]:/export /mnt/nfs nfs \
+  rsize=1048576,\
+  wsize=1048576,\
+  hard,\
+  intr,\
+  noatime,\
+  nodiratime,\
+  vers=4.2 \
+  0 0
+                </div>
+            </div>
+
+            <div class="tuning-card">
+                <h3>NFS Server Tuning</h3>
+                <p>Optimize NFS server parameters:</p>
+                
+                <p style="margin-top: 20px;"><strong>Increase NFS Threads:</strong></p>
+                <div class="command-box">
+# Increase number of NFS threads (on server)
+echo 32 > /proc/sys/sunrpc/tcp_slot_table_entries
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Configure NFS Server Threads:</strong></p>
+                <div class="command-box">
+# For RHEL/CentOS: Edit /etc/sysconfig/nfs
+# For Debian/Ubuntu: Edit /etc/default/nfs-kernel-server
+RPCNFSDCOUNT=32
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Apply Changes:</strong></p>
+                <div class="command-box">
+# Restart NFS server to apply changes
+systemctl restart nfs-server
+                </div>
+            </div>
+        </section>
+
+        <section id="monitoring" class="section">
+            <h2>Storage Performance Monitoring</h2>
+            <p>
+                Monitor storage performance to identify bottlenecks and verify tuning effectiveness. Use appropriate 
+                tools to measure I/O metrics.
+            </p>
+
+            <div class="concept-card">
+                <h3>I/O Monitoring Tools</h3>
+                
+                <p style="margin-top: 20px;"><strong>iostat - I/O Statistics:</strong></p>
+                <div class="command-box">
+# Monitor I/O statistics (update every 1 second)
+iostat -x 1
+
+# Monitor specific device
+iostat -x /dev/sda 1
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Key iostat Metrics:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li><code>%util</code>: Percentage of time device was busy</li>
+                    <li><code>r/s, w/s</code>: Reads/writes per second</li>
+                    <li><code>rkB/s, wkB/s</code>: Read/write KB per second</li>
+                    <li><code>await</code>: Average wait time for I/O</li>
+                </ul>
+
+                <p style="margin-top: 20px;"><strong>iotop - I/O by Process:</strong></p>
+                <div class="command-box">
+# Monitor I/O usage by process
+iotop
+                </div>
+
+                <p style="margin-top: 20px;"><strong>NFS Monitoring:</strong></p>
+                <div class="command-box">
+# Monitor NFS I/O statistics
+nfsiostat 1
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Performance Benchmarking</h3>
+                
+                <p style="margin-top: 20px;"><strong>Sequential Read/Write Test:</strong></p>
+                <div class="command-box">
+# Create test file
+dd if=/dev/zero of=testfile bs=1M count=1000
+
+# Sequential read test
+dd if=testfile of=/dev/null bs=1M
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Random Read/Write Test (fio):</strong></p>
+                <div class="command-box">
+# Random write test with fio
+fio --name=random-write \
+    --ioengine=libaio \
+    --iodepth=16 \
+    --rw=randwrite \
+    --bs=4k \
+    --size=1G \
+    --runtime=60 \
+    --time_based
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Sequential Read Test (fio):</strong></p>
+                <div class="command-box">
+# Sequential read test with fio
+fio --name=sequential-read \
+    --ioengine=libaio \
+    --iodepth=16 \
+    --rw=read \
+    --bs=1M \
+    --size=10G \
+    --runtime=60 \
+    --time_based
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Lustre Performance Check:</strong></p>
+                <div class="command-box">
+# Check Lustre filesystem status
+lfs df -h
+
+# Check stripe configuration
+lfs getstripe -r /mnt/lustre/training_data | head -20
+                </div>
+            </div>
+
+            <div class="example-box">
+                <strong>Storage Tuning Checklist:</strong>
+                1. Optimize mount options (noatime, appropriate rsize/wsize)<br>
+                2. Configure filesystem parameters<br>
+                3. Tune I/O scheduler and queue depth<br>
+                4. Optimize page cache settings<br>
+                5. Configure Lustre stripes (if using Lustre)<br>
+                6. Implement application-level caching<br>
+                7. Use prefetching in data loaders<br>
+                8. Monitor I/O performance<br>
+                9. Benchmark before and after tuning<br>
+                10. Document tuning parameters
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Storage Performance Tuning | Optimization Techniques for AI Workloads</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

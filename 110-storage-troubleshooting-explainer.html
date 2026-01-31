@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>110. Storage Troubleshooting: Diagnosing and Resolving Storage Issues</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #F57C00;
+    --secondary-color: #FF9800;
+    --accent-color: #FFB74D;
+    --bg-color: #FFF3E0;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #FFCC80;
+    --shadow: 0 2px 8px rgba(245, 124, 0, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #F57C00, #FF9800);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.troubleshooting-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.troubleshooting-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFF3E0, #FFCC80);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #FFB74D;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #FFCC80;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>110. Storage Troubleshooting</h1>
+        <p class="subtitle">Systematic Approach to Diagnosing and Resolving Storage Issues</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#methodology" class="nav-link">Methodology</a>
+        <a href="#connectivity" class="nav-link">Connectivity Issues</a>
+        <a href="#performance" class="nav-link">Performance Issues</a>
+        <a href="#filesystem" class="nav-link">Filesystem Issues</a>
+        <a href="#lustre" class="nav-link">Lustre Issues</a>
+        <a href="#nfs" class="nav-link">NFS Issues</a>
+        <a href="#tools" class="nav-link">Diagnostic Tools</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Storage Troubleshooting Overview</h2>
+            <p>
+                Storage troubleshooting in AI infrastructure requires systematic diagnosis of connectivity, performance, 
+                and filesystem issues. Effective troubleshooting ensures reliable data access for training workloads, 
+                prevents data loss, and maintains optimal storage performance. A structured approach following storage 
+                layers and using appropriate diagnostic tools enables efficient problem resolution.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Storage Issue] --> B[Gather Information]
+                    B --> C[Identify Symptoms]
+                    C --> D[Storage Layer Analysis]
+                    D --> E[Physical Layer]
+                    D --> F[Filesystem Layer]
+                    D --> G[Network Layer]
+                    D --> H[Application Layer]
+                    E --> I[Isolate Problem]
+                    F --> I
+                    G --> I
+                    H --> I
+                    I --> J[Test Hypothesis]
+                    J --> K[Implement Solution]
+                    K --> L[Verify Resolution]
+                    
+                    style A fill:#F57C00
+                    style D fill:#FF9800
+                    style K fill:#4CAF50
+            </div>
+
+            <div class="example-box">
+                <strong>Troubleshooting Impact:</strong>
+                Storage issues can halt AI training jobs, cause data corruption, or degrade performance significantly. 
+                Systematic troubleshooting reduces downtime and prevents data loss. Proper diagnosis ensures reliable 
+                storage operations critical for AI workloads.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Storage Troubleshooting))
+                    Methodology
+                      Information Gathering
+                      Problem Isolation
+                      Layer Analysis
+                      Solution Implementation
+                    Connectivity Issues
+                      Mount Failures
+                      Network Problems
+                      Device Detection
+                    Performance Issues
+                      Slow I/O
+                      Low Throughput
+                      High Latency
+                    Filesystem Issues
+                      Corruption
+                      Permissions
+                      Space Issues
+                    Lustre Issues
+                      OST Problems
+                      Stripe Issues
+                      Client Issues
+                    NFS Issues
+                      Mount Problems
+                      Performance
+                      Server Issues
+            </div>
+        </section>
+
+        <section id="methodology" class="section">
+            <h2>Troubleshooting Methodology</h2>
+            <p>
+                Follow a systematic methodology for storage troubleshooting, similar to network troubleshooting but 
+                focused on storage-specific layers and components.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Storage Issue] --> B[Gather Information]
+                    B --> C[Symptoms]
+                    B --> D[Scope]
+                    B --> E[Error Messages]
+                    C --> F[Analyze Storage Layers]
+                    D --> F
+                    E --> F
+                    F --> G{Issue Type?}
+                    G -->|Connectivity| H[Mount/Network Issues]
+                    G -->|Performance| I[Slow I/O]
+                    G -->|Filesystem| J[Corruption/Errors]
+                    H --> K[Check Mount Status]
+                    H --> L[Check Network]
+                    I --> M[Check I/O Stats]
+                    I --> N[Check Queue Depth]
+                    J --> O[Check Filesystem]
+                    J --> P[Run fsck]
+                    K --> Q[Form Hypothesis]
+                    L --> Q
+                    M --> Q
+                    N --> Q
+                    O --> Q
+                    P --> Q
+                    Q --> R[Test Hypothesis]
+                    R --> S{Issue Resolved?}
+                    S -->|No| Q
+                    S -->|Yes| T[Document Solution]
+                    
+                    style A fill:#00796B
+                    style T fill:#4CAF50
+                    style G fill:#FF9800
+                    style S fill:#FF9800
+            </div>
+
+            <div class="concept-card">
+                <h3>Step 1: Information Gathering</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Symptoms:</strong> What is the observed problem? (Cannot mount, slow performance, errors)</li>
+                    <li><strong>Scope:</strong> Is the issue affecting one node, multiple nodes, or entire cluster?</li>
+                    <li><strong>Timeline:</strong> When did the issue start? Was it sudden or gradual?</li>
+                    <li><strong>Context:</strong> What changed recently? (Configuration, hardware, software updates)</li>
+                    <li><strong>Error Messages:</strong> Collect all error messages and log entries</li>
+                    <li><strong>Affected Workloads:</strong> Which applications or jobs are impacted?</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Step 2: Storage Layer Analysis</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Physical Layer:</strong> Hardware, cables, connections, device detection</li>
+                    <li><strong>Filesystem Layer:</strong> Mount status, filesystem health, corruption</li>
+                    <li><strong>Network Layer:</strong> Network connectivity for network storage (NFS, Lustre)</li>
+                    <li><strong>Application Layer:</strong> I/O operations, permissions, quotas</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Step 3: Problem Isolation</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Test on different nodes to isolate node-specific issues</li>
+                    <li>Test different storage paths/filesystems</li>
+                    <li>Verify hardware vs software issues</li>
+                    <li>Check if issue is reproducible or intermittent</li>
+                    <li>Identify affected storage components</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="connectivity" class="section">
+            <h2>Connectivity Issues</h2>
+            <p>
+                Storage connectivity issues prevent access to storage resources. Common problems include mount failures, 
+                network connectivity problems, and device detection issues.
+            </p>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Cannot Mount Filesystem</h3>
+                <p><strong>Symptoms:</strong> Mount command fails, filesystem not accessible</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check if filesystem is already mounted</li>
+                    <li>Verify mount point exists and is empty</li>
+                    <li>Check network connectivity (for network storage)</li>
+                    <li>Verify server is accessible (for NFS/Lustre)</li>
+                    <li>Check mount options and configuration</li>
+                    <li>Review system logs for errors</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Mount Status:</strong></p>
+                <div class="command-box">
+# Check if filesystem is mounted
+mount | grep [mount_point]
+df -h | grep [mount_point]
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Mount Point:</strong></p>
+                <div class="command-box">
+# Verify mount point exists and is empty
+ls -la /mnt/[mount_point]
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Network Connectivity (NFS/Lustre):</strong></p>
+                <div class="command-box">
+# Test server connectivity
+ping [storage_server]
+telnet [storage_server] [port]
+
+# For NFS, check port 2049
+telnet [nfs_server] 2049
+
+# For Lustre, check server connectivity
+ping [lustre_server]
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Review Logs:</strong></p>
+                <div class="command-box">
+# Check system logs for mount errors
+dmesg | grep -i mount
+journalctl -k | grep -i mount
+tail -f /var/log/messages
+                </div>
+            </div>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Device Not Detected</h3>
+                <p><strong>Symptoms:</strong> Storage device not visible in system</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check physical connections</li>
+                    <li>Verify device appears in BIOS/UEFI</li>
+                    <li>Check device detection: <code>lsblk</code>, <code>fdisk -l</code></li>
+                    <li>Verify device in /dev/</li>
+                    <li>Check kernel messages: <code>dmesg</code></li>
+                    <li>Rescan SCSI bus if needed</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Device Detection:</strong></p>
+                <div class="command-box">
+# List block devices
+lsblk
+
+# List all disks
+fdisk -l
+
+# Check /dev/ for devices
+ls -la /dev/sd*
+ls -la /dev/nvme*
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Kernel Messages:</strong></p>
+                <div class="command-box">
+# Check for device detection messages
+dmesg | grep -i "sd\|nvme\|disk"
+
+# Check recent kernel messages
+journalctl -k | grep -i disk
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Rescan SCSI Bus:</strong></p>
+                <div class="command-box">
+# Rescan SCSI bus for new devices
+echo "- - -" > /sys/class/scsi_host/host0/scan
+echo "- - -" > /sys/class/scsi_host/host1/scan
+                </div>
+            </div>
+        </section>
+
+        <section id="performance" class="section">
+            <h2>Performance Issues</h2>
+            <p>
+                Storage performance issues manifest as slow I/O, low throughput, or high latency. These issues 
+                impact AI training workloads significantly.
+            </p>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Slow I/O Performance</h3>
+                <p><strong>Symptoms:</strong> Slow read/write operations, high I/O wait times</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Monitor I/O statistics: <code>iostat -x 1</code></li>
+                    <li>Check I/O wait: <code>top</code>, <code>htop</code></li>
+                    <li>Identify I/O-intensive processes: <code>iotop</code></li>
+                    <li>Check filesystem mount options</li>
+                    <li>Verify network bandwidth (for network storage)</li>
+                    <li>Check for I/O errors in logs</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Monitor I/O Statistics:</strong></p>
+                <div class="command-box">
+# Monitor I/O statistics (update every 1 second)
+iostat -x 1
+
+# Key metrics to watch:
+# %util: Device utilization (should be < 80% for good performance)
+# await: Average wait time (should be low)
+# rkB/s, wkB/s: Read/write throughput
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check I/O Wait:</strong></p>
+                <div class="command-box">
+# Check CPU I/O wait time
+top
+# Look for %wa (I/O wait) in CPU statistics
+
+# Or use htop for better visualization
+htop
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Identify I/O-Intensive Processes:</strong></p>
+                <div class="command-box">
+# Monitor I/O by process
+iotop
+
+# Check process I/O statistics
+pidstat -d 1
+                </div>
+            </div>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Low Throughput</h3>
+                <p><strong>Symptoms:</strong> Low read/write bandwidth, slow data transfer</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Benchmark storage performance</li>
+                    <li>Check network bandwidth (for network storage)</li>
+                    <li>Verify mount options (rsize/wsize for NFS)</li>
+                    <li>Check for network congestion</li>
+                    <li>Verify storage server performance</li>
+                    <li>Check for I/O scheduler issues</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Benchmark Storage:</strong></p>
+                <div class="command-box">
+# Sequential read test
+dd if=/dev/zero of=testfile bs=1M count=1000
+dd if=testfile of=/dev/null bs=1M
+
+# Check actual throughput
+# Compare with expected performance specifications
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Network Bandwidth (NFS/Lustre):</strong></p>
+                <div class="command-box">
+# Test network bandwidth
+iperf3 -c [storage_server]
+
+# Check network interface statistics
+ifconfig [interface]
+ethtool [interface]
+                </div>
+            </div>
+        </section>
+
+        <section id="filesystem" class="section">
+            <h2>Filesystem Issues</h2>
+            <p>
+                Filesystem issues include corruption, permission problems, and space issues. These require specific 
+                diagnostic and repair procedures.
+            </p>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Filesystem Corruption</h3>
+                <p><strong>Symptoms:</strong> I/O errors, data corruption, filesystem errors</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Unmount filesystem (if possible)</li>
+                    <li>Run filesystem check: <code>fsck</code></li>
+                    <li>Check for bad blocks</li>
+                    <li>Review system logs for errors</li>
+                    <li>Backup data before repair</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Filesystem (ext4):</strong></p>
+                <div class="command-box">
+# Unmount filesystem first
+umount /mnt/data
+
+# Run filesystem check
+fsck -f /dev/sda1
+
+# Check for errors without fixing
+fsck -n /dev/sda1
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Filesystem (XFS):</strong></p>
+                <div class="command-box">
+# XFS filesystem check (read-only)
+xfs_repair -n /dev/sda1
+
+# Repair XFS filesystem (if errors found)
+xfs_repair /dev/sda1
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check for Bad Blocks:</strong></p>
+                <div class="command-box">
+# Check for bad blocks
+badblocks -v /dev/sda1
+
+# Non-destructive read-only test
+badblocks -nsv /dev/sda1
+                </div>
+            </div>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Out of Space</h3>
+                <p><strong>Symptoms:</strong> "No space left on device" errors, cannot write files</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check disk usage: <code>df -h</code></li>
+                    <li>Find large files/directories: <code>du -sh /*</code></li>
+                    <li>Check inode usage: <code>df -i</code></li>
+                    <li>Identify space-consuming files</li>
+                    <li>Clean up temporary files</li>
+                    <li>Check for deleted files held by processes</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Disk Usage:</strong></p>
+                <div class="command-box">
+# Check filesystem usage
+df -h
+
+# Check inode usage
+df -i
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Find Large Directories:</strong></p>
+                <div class="command-box">
+# Find largest directories
+du -sh /* | sort -h
+
+# Find largest files
+find /mnt/data -type f -size +1G -exec ls -lh {} \;
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check for Deleted Files Held by Processes:</strong></p>
+                <div class="command-box">
+# Find processes holding deleted files
+lsof +L1
+
+# Or use
+lsof | grep deleted
+                </div>
+            </div>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Permission Denied</h3>
+                <p><strong>Symptoms:</strong> Cannot access files, permission denied errors</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check file permissions: <code>ls -l</code></li>
+                    <li>Check directory permissions</li>
+                    <li>Verify user/group ownership</li>
+                    <li>Check SELinux/AppArmor (if enabled)</li>
+                    <li>Verify NFS export permissions (for NFS)</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Permissions:</strong></p>
+                <div class="command-box">
+# Check file permissions
+ls -l [file]
+
+# Check directory permissions
+ls -ld [directory]
+
+# Check current user
+whoami
+id
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check SELinux (if enabled):</strong></p>
+                <div class="command-box">
+# Check SELinux status
+getenforce
+
+# Check SELinux context
+ls -Z [file]
+
+# Check SELinux denials
+ausearch -m avc -ts recent
+                </div>
+            </div>
+        </section>
+
+        <section id="lustre" class="section">
+            <h2>Lustre Troubleshooting</h2>
+            <p>
+                Lustre-specific issues include OST problems, stripe configuration issues, and client connectivity 
+                problems. Use Lustre-specific tools for diagnosis.
+            </p>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Lustre Client Cannot Connect</h3>
+                <p><strong>Symptoms:</strong> Cannot mount Lustre, connection errors</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check Lustre server connectivity</li>
+                    <li>Verify Lustre services are running</li>
+                    <li>Check Lustre network configuration</li>
+                    <li>Review Lustre logs</li>
+                    <li>Verify Lustre client modules are loaded</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Lustre Services:</strong></p>
+                <div class="command-box">
+# Check if Lustre modules are loaded
+lsmod | grep lustre
+
+# Check Lustre client status
+lctl get_param version
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check Lustre Logs:</strong></p>
+                <div class="command-box">
+# Check Lustre client logs
+dmesg | grep -i lustre
+tail -f /var/log/messages | grep lustre
+                </div>
+            </div>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Poor Lustre Performance</h3>
+                <p><strong>Symptoms:</strong> Slow Lustre I/O, low bandwidth</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check stripe configuration</li>
+                    <li>Verify OST availability</li>
+                    <li>Check Lustre client parameters</li>
+                    <li>Monitor Lustre performance</li>
+                    <li>Check network connectivity to OSTs</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Stripe Configuration:</strong></p>
+                <div class="command-box">
+# Check current stripe configuration
+lfs getstripe /mnt/lustre/[directory]
+
+# Check OST usage
+lfs df -h
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check OST Status:</strong></p>
+                <div class="command-box">
+# List OSTs and their status
+lfs df -h
+
+# Check OST connectivity
+lctl get_param osc.*.ost_server_uuid
+                </div>
+            </div>
+        </section>
+
+        <section id="nfs" class="section">
+            <h2>NFS Troubleshooting</h2>
+            <p>
+                NFS-specific issues include mount problems, performance issues, and server connectivity problems. 
+                Use NFS-specific diagnostic tools.
+            </p>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: NFS Mount Fails</h3>
+                <p><strong>Symptoms:</strong> NFS mount command fails, timeout errors</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check NFS server connectivity</li>
+                    <li>Verify NFS server is running</li>
+                    <li>Check NFS export configuration</li>
+                    <li>Verify NFS version compatibility</li>
+                    <li>Check firewall rules</li>
+                    <li>Review NFS logs</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check NFS Server Connectivity:</strong></p>
+                <div class="command-box">
+# Test server connectivity
+ping [nfs_server]
+
+# Test NFS port (2049)
+telnet [nfs_server] 2049
+nc -zv [nfs_server] 2049
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check NFS Services:</strong></p>
+                <div class="command-box">
+# Check NFS client services
+systemctl status nfs-client.target
+systemctl status rpc-statd
+
+# Check NFS server services (on server)
+systemctl status nfs-server
+systemctl status rpcbind
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Check NFS Exports (on server):</strong></p>
+                <div class="command-box">
+# List NFS exports
+showmount -e [nfs_server]
+
+# Check export configuration
+cat /etc/exports
+                </div>
+            </div>
+
+            <div class="troubleshooting-card">
+                <h3>Issue: Slow NFS Performance</h3>
+                <p><strong>Symptoms:</strong> Slow NFS I/O, low throughput</p>
+                
+                <p style="margin-top: 15px;"><strong>Troubleshooting Steps:</strong></p>
+                <ol style="margin-top: 10px; padding-left: 20px; line-height: 2;">
+                    <li>Check mount options (rsize/wsize)</li>
+                    <li>Verify NFS version</li>
+                    <li>Check network bandwidth</li>
+                    <li>Monitor NFS statistics</li>
+                    <li>Check server performance</li>
+                </ol>
+
+                <p style="margin-top: 20px;"><strong>Check Mount Options:</strong></p>
+                <div class="command-box">
+# Check current mount options
+mount | grep nfs
+
+# Verify rsize/wsize settings
+# Should be 1MB (1048576) for high bandwidth
+                </div>
+
+                <p style="margin-top: 20px;"><strong>Monitor NFS Statistics:</strong></p>
+                <div class="command-box">
+# Monitor NFS I/O statistics
+nfsiostat 1
+
+# Check NFS client statistics
+cat /proc/self/mountstats | grep nfs
+                </div>
+            </div>
+        </section>
+
+        <section id="tools" class="section">
+            <h2>Storage Diagnostic Tools</h2>
+            <p>
+                Use appropriate diagnostic tools for storage troubleshooting. Different tools are needed for different 
+                storage types and issues.
+            </p>
+
+            <div class="concept-card">
+                <h3>General Storage Tools</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>df:</strong> Filesystem disk space usage</li>
+                    <li><strong>du:</strong> Directory disk usage</li>
+                    <li><strong>lsblk:</strong> List block devices</li>
+                    <li><strong>fdisk:</strong> Disk partitioning</li>
+                    <li><strong>iostat:</strong> I/O statistics</li>
+                    <li><strong>iotop:</strong> I/O by process</li>
+                    <li><strong>fsck:</strong> Filesystem check</li>
+                    <li><strong>badblocks:</strong> Bad block detection</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Lustre-Specific Tools</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>lfs:</strong> Lustre filesystem commands</li>
+                    <li><strong>lctl:</strong> Lustre control utility</li>
+                    <li><strong>lfs df:</strong> Lustre filesystem usage</li>
+                    <li><strong>lfs getstripe:</strong> Check stripe configuration</li>
+                    <li><strong>lfs setstripe:</strong> Configure striping</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>NFS-Specific Tools</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>showmount:</strong> Show NFS exports</li>
+                    <li><strong>nfsiostat:</strong> NFS I/O statistics</li>
+                    <li><strong>rpcinfo:</strong> RPC information</li>
+                    <li><strong>mountstats:</strong> Mount statistics</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Storage Troubleshooting Checklist:</strong>
+                1. Gather information (symptoms, scope, timeline)<br>
+                2. Check connectivity (mount status, network)<br>
+                3. Verify device detection<br>
+                4. Check filesystem health<br>
+                5. Monitor I/O performance<br>
+                6. Review system logs<br>
+                7. Test with diagnostic tools<br>
+                8. Isolate the problem<br>
+                9. Implement solution<br>
+                10. Verify resolution and monitor
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Storage Troubleshooting | Systematic Approach to Storage Issue Resolution</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
