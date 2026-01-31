@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>46. Credit-Based Flow Control: Preventing Network Jams</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #388E3C;
+    --secondary-color: #4CAF50;
+    --accent-color: #66BB6A;
+    --bg-color: #E8F5E9;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #A5D6A7;
+    --shadow: 0 2px 8px rgba(56, 142, 60, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #388E3C, #4CAF50);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #A5D6A7;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>46. Credit-Based Flow Control</h1>
+        <p class="subtitle">Preventing Network Jams with Lossless Networking</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#mechanism" class="nav-link">Mechanism</a>
+        <a href="#credit-system" class="nav-link">Credit System</a>
+        <a href="#lossless" class="nav-link">Lossless Networking</a>
+        <a href="#benefits" class="nav-link">Benefits</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Credit-Based Flow Control Overview</h2>
+            <p>
+                Credit-Based Flow Control is a mechanism used in InfiniBand networks to prevent congestion and 
+                packet loss by controlling the rate at which data is transmitted. Unlike traditional networks that 
+                drop packets when buffers fill up, credit-based flow control ensures lossless operation by using a 
+                credit system where receivers grant credits (permission to send) to senders based on available buffer 
+                space. This prevents network jams and ensures reliable, high-performance communication essential for 
+                AI and HPC workloads.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Traditional Flow Control] --> B[Send Packets]
+                    B --> C{Buffer Full?}
+                    C -->|Yes| D[Drop Packets]
+                    C -->|No| E[Forward]
+                    D --> F[Retransmission]
+                    F --> G[Performance Loss]
+                    
+                    H[Credit-Based Flow Control] --> I[Request Credits]
+                    I --> J[Receive Credits]
+                    J --> K[Send Based on Credits]
+                    K --> L[No Packet Loss]
+                    L --> M[Lossless Operation]
+                    
+                    style A fill:#FF6B6B
+                    style H fill:#388E3C
+                    style D fill:#FF6B6B
+                    style L fill:#388E3C
+            </div>
+
+            <div class="example-box">
+                <strong>Preventing Network Jams:</strong>
+                Credit-based flow control operates by having receivers grant credits (permissions) to senders based 
+                on available buffer capacity. Senders can only transmit data when they have available credits, ensuring 
+                receivers always have buffer space. This prevents buffer overflow and packet loss by controlling data 
+                transmission based on receiver capacity.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Credit-Based Flow Control))
+                    Mechanism
+                      Credit Granting
+                      Buffer Capacity
+                      Permission System
+                    Benefits
+                      Lossless Networking
+                      No Packet Loss
+                      Prevents Congestion
+                      High Performance
+                    Credit System
+                      Receiver Grants Credits
+                      Sender Uses Credits
+                      Credit Replenishment
+                    Use Cases
+                      InfiniBand Networks
+                      AI Training
+                      HPC Workloads
+            </div>
+        </section>
+
+        <section id="mechanism" class="section">
+            <h2>Flow Control Mechanism</h2>
+            <p>
+                Credit-based flow control operates by having receivers grant credits to senders, where each credit 
+                represents permission to send a certain amount of data. Senders can only transmit when they have 
+                available credits, ensuring receivers always have buffer space available.
+            </p>
+
+            <div class="mermaid">
+                sequenceDiagram
+                    participant Receiver
+                    participant Sender
+                    participant Network
+                    
+                    Receiver->>Receiver: Monitor Buffer Space
+                    Receiver->>Receiver: Calculate Credits
+                    Receiver->>Sender: Send Credit Grant
+                    Sender->>Sender: Track Credits
+                    Sender->>Sender: Check Credits Available?
+                    Sender->>Network: Transmit Packet (if credits)
+                    Network->>Receiver: Deliver Packet
+                    Receiver->>Receiver: Free Buffer Space
+                    Receiver->>Sender: Grant More Credits
+                    Note over Receiver,Sender: Lossless Operation<br/>No Packet Drops
+            </div>
+
+            <div class="concept-card">
+                <h3>Credit Grant Process</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Buffer Monitoring:</strong> Receiver monitors available buffer space</li>
+                    <li><strong>Credit Calculation:</strong> Calculates credits based on free buffers</li>
+                    <li><strong>Credit Grant:</strong> Sends credit grants to sender</li>
+                    <li><strong>Credit Tracking:</strong> Sender tracks available credits</li>
+                    <li><strong>Transmission:</strong> Sender transmits only when credits available</li>
+                </ol>
+            </div>
+
+            <div class="concept-card">
+                <h3>Credit Types</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Virtual Lane Credits:</strong> Credits per virtual lane</li>
+                    <li><strong>Buffer Credits:</strong> Credits representing buffer space</li>
+                    <li><strong>Flow Control Credits:</strong> Credits for flow control packets</li>
+                    <li><strong>Dynamic Allocation:</strong> Credits allocated based on demand</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Credit Management</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Credit Consumption:</strong> Credits consumed when packets sent</li>
+                    <li><strong>Credit Replenishment:</strong> Credits replenished as buffers free</li>
+                    <li><strong>Credit Tracking:</strong> Both ends track credit state</li>
+                    <li><strong>Credit Updates:</strong> Periodic credit updates sent</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="credit-system" class="section">
+            <h2>Credit System Operation</h2>
+            <p>
+                The credit system ensures that senders never transmit more data than receivers can handle, preventing 
+                buffer overflow and packet loss. Credits are managed per virtual lane and updated dynamically.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Receiver] --> B[Monitor Buffers]
+                    B --> C[Calculate Credits]
+                    C --> D[Send Credit Grant]
+                    D --> E[Sender]
+                    E --> F[Track Credits]
+                    F --> G{Credits Available?}
+                    G -->|Yes| H[Send Packet]
+                    G -->|No| I[Wait for Credits]
+                    H --> J[Consume Credit]
+                    J --> K[Update Credit Count]
+                    
+                    style A fill:#388E3C
+                    style E fill:#4CAF50
+                    style H fill:#66BB6A
+            </div>
+
+            <div class="concept-card">
+                <h3>Credit Calculation</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Available Buffers:</strong> Count of free buffer slots</li>
+                    <li><strong>Credit Value:</strong> Amount of data per credit</li>
+                    <li><strong>Total Credits:</strong> Available buffers / credit value</li>
+                    <li><strong>Dynamic Adjustment:</strong> Credits adjusted based on buffer state</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Credit Grant Messages</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Flow Control Packets:</strong> Special packets for credit grants</li>
+                    <li><strong>Periodic Updates:</strong> Credits sent periodically</li>
+                    <li><strong>On-Demand Updates:</strong> Credits sent when buffers free</li>
+                    <li><strong>Low Overhead:</strong> Minimal overhead for credit management</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Virtual Lane Credits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Per-Lane Credits:</strong> Credits managed per virtual lane</li>
+                    <li><strong>Independent Control:</strong> Each lane has independent credit pool</li>
+                    <li><strong>Priority Support:</strong> Different priorities per lane</li>
+                    <li><strong>Fairness:</strong> Ensures fair bandwidth allocation</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="lossless" class="section">
+            <h2>Lossless Networking</h2>
+            <p>
+                Credit-based flow control enables lossless networking, where packets are never dropped due to buffer 
+                overflow. This is critical for high-performance workloads where packet loss would require retransmission 
+                and significantly impact performance.
+            </p>
+
+            <div class="concept-card">
+                <h3>Lossless Operation</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>No Packet Drops:</strong> Packets never dropped due to congestion</li>
+                    <li><strong>Buffer Guarantee:</strong> Receivers always have buffer space</li>
+                    <li><strong>Reliable Delivery:</strong> Ensures reliable packet delivery</li>
+                    <li><strong>Performance:</strong> No retransmission overhead</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Congestion Prevention</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Proactive Control:</strong> Prevents congestion before it occurs</li>
+                    <li><strong>Buffer Management:</strong> Ensures buffers never overflow</li>
+                    <li><strong>Flow Regulation:</strong> Regulates data flow automatically</li>
+                    <li><strong>Stability:</strong> Maintains network stability under load</li>
+                </ul>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Characteristic</th>
+                        <th>Traditional Networks</th>
+                        <th>Credit-Based Flow Control</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Packet Loss</strong></td>
+                        <td>Packets dropped when buffers full</td>
+                        <td>No packet loss</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Retransmission</strong></td>
+                        <td>Required when packets lost</td>
+                        <td>Not required</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Congestion Control</strong></td>
+                        <td>Reactive (after congestion)</td>
+                        <td>Proactive (prevents congestion)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance</strong></td>
+                        <td>Degrades with congestion</td>
+                        <td>Maintains performance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reliability</strong></td>
+                        <td>Best effort</td>
+                        <td>Lossless</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="example-box">
+                <strong>Critical for AI Workloads:</strong>
+                In distributed AI training, packet loss would require retransmission of gradients or model parameters, 
+                significantly impacting training performance. Credit-based flow control ensures lossless operation, 
+                maintaining high performance even under heavy network load. This is essential for achieving optimal 
+                training throughput in large-scale deployments.
+            </div>
+        </section>
+
+        <section id="benefits" class="section">
+            <h2>Benefits of Credit-Based Flow Control</h2>
+            <p>
+                Credit-based flow control provides significant advantages for high-performance networks, particularly 
+                those supporting AI and HPC workloads.
+            </p>
+
+            <div class="concept-card">
+                <h3>Performance Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>No Retransmission:</strong> Eliminates retransmission overhead</li>
+                    <li><strong>Consistent Latency:</strong> Predictable, low latency</li>
+                    <li><strong>High Throughput:</strong> Maintains high throughput under load</li>
+                    <li><strong>Efficient Utilization:</strong> Optimal network utilization</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Reliability Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Lossless Operation:</strong> Guaranteed packet delivery</li>
+                    <li><strong>No Packet Drops:</strong> Packets never dropped</li>
+                    <li><strong>Stable Operation:</strong> Network remains stable under load</li>
+                    <li><strong>Predictable Behavior:</strong> Consistent network behavior</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Scalability Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Scales Well:</strong> Performance scales with network size</li>
+                    <li><strong>Handles Load:</strong> Handles high network load efficiently</li>
+                    <li><strong>Large Clusters:</strong> Effective for large-scale deployments</li>
+                    <li><strong>Future-Proof:</strong> Supports growing network demands</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Use Case Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>AI Training:</strong> Essential for distributed training</li>
+                    <li><strong>HPC Applications:</strong> Critical for scientific computing</li>
+                    <li><strong>Storage Networks:</strong> Important for storage traffic</li>
+                    <li><strong>Real-Time Applications:</strong> Supports low-latency requirements</li>
+                </ul>
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Credit-Based Flow Control Guide | Preventing Network Jams</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfiniBand Command-Line Tools: Network Management and Diagnostics</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #F9A825;
+    --secondary-color: #FBC02D;
+    --accent-color: #FDD835;
+    --bg-color: #FFFDE7;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #FFF59D;
+    --shadow: 0 2px 8px rgba(249, 168, 37, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #F9A825, #FBC02D);
+    color: white;
+    position: relative;
+}
+header::before {
+    content: '';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.animal-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFFDE7, #FFF59D);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.command-box {
+    background: #1A1A1A;
+    color: #FDD835;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #FFF59D;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+</style>
+</head>
+<body>
+    <header>
+        <h1>20. InfiniBand Command-Line Tools</h1>
+        <p class="subtitle">Network Management and Diagnostics for InfiniBand Fabrics</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#commands" class="nav-link">Commands</a>
+        <a href="#use-cases" class="nav-link">Use Cases</a>
+        <a href="#syntax" class="nav-link">Syntax</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>InfiniBand Command-Line Tools Overview</h2>
+            <p>
+                InfiniBand networks require specialized command-line tools for management, monitoring, and 
+                troubleshooting. These tools enable administrators to discover network topology, monitor 
+                performance, test connectivity, and diagnose issues. Each command serves a specific purpose 
+                in managing InfiniBand fabric infrastructure.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Zookeeper<br/>Administrator] --> B[Manages Animals<br/>Commands]
+                    B --> C[Feeds Them<br/>Provides Input]
+                    B --> D[Trains Them<br/>Uses Effectively]
+                    B --> E[Benefits<br/>Network Management]
+                    
+                    style A fill:#F9A825
+                    style B fill:#FBC02D
+                    style C fill:#FDD835
+                    style D fill:#FFF59D
+                    style E fill:#FFFDE7
+            </div>
+
+            <div class="mermaid">
+                graph TB
+                    A[InfiniBand Network] --> B[Management Commands]
+                    B --> C[ibstat<br/>Status Check]
+                    B --> D[ibping<br/>Connectivity Test]
+                    B --> E[ibtracert<br/>Route Tracing]
+                    B --> F[ibswitches<br/>Switch Discovery]
+                    B --> G[ibhosts<br/>Host Discovery]
+                    B --> H[ib_write_bw<br/>Bandwidth Test]
+                    
+                    C --> I[Network Management]
+                    D --> I
+                    E --> I
+                    F --> I
+                    G --> I
+                    H --> I
+                    
+                    style A fill:#F9A825
+                    style I fill:#FDD835
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((InfiniBand Commands))
+                    Discovery Commands
+                      ibstat
+                        Adapter Status
+                        Link State
+                      ibhosts
+                        Host Discovery
+                        Node List
+                      ibswitches
+                        Switch Discovery
+                        Topology
+                    Testing Commands
+                      ibping
+                        Connectivity Test
+                        Layer 2 Communication
+                      ibtracert
+                        Route Tracing
+                        Path Discovery
+                    Performance Commands
+                      ib_write_bw
+                        Bandwidth Test
+                        Throughput Measurement
+                      ib_write_lat
+                        Latency Test
+                        Delay Measurement
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Network Issue] --> B{What to Check?}
+                    B -->|Status| C[ibstat<br/>Check Adapter]
+                    B -->|Connectivity| D[ibping<br/>Test Connection]
+                    B -->|Topology| E[ibswitches<br/>ibhosts<br/>Discover Nodes]
+                    B -->|Route| F[ibtracert<br/>Trace Path]
+                    B -->|Performance| G[ib_write_bw<br/>ib_write_lat<br/>Measure Performance]
+                    
+                    C --> H[Verify Status]
+                    D --> I[Test Connectivity]
+                    E --> J[Map Topology]
+                    F --> K[Find Route]
+                    G --> L[Measure Metrics]
+                    
+                    style C fill:#F9A825
+                    style D fill:#FBC02D
+                    style E fill:#FDD835
+                    style F fill:#FFF59D
+                    style G fill:#FFFDE7
+            </div>
+
+            <div class="mermaid">
+                sequenceDiagram
+                    participant Admin
+                    participant IB as InfiniBand Network
+                    participant Node1
+                    participant Node2
+                    participant Switch
+                    
+                    Admin->>IB: ibstat (Check Status)
+                    IB-->>Admin: Adapter Status
+                    
+                    Admin->>Node1: ibping (Test Connectivity)
+                    Node1->>Node2: Test Connection
+                    Node2-->>Node1: Response
+                    Node1-->>Admin: Connectivity OK
+                    
+                    Admin->>IB: ibswitches (Discover Topology)
+                    IB->>Switch: Query Switches
+                    Switch-->>IB: Switch Info
+                    IB-->>Admin: Topology Map
+                    
+                    Admin->>Node1: ib_write_bw (Measure Performance)
+                    Node1->>Node2: Bandwidth Test
+                    Node2-->>Node1: Throughput Results
+                    Node1-->>Admin: Performance Metrics
+                    
+                    Note over Admin,Switch: Complete Network<br/>Management
+            </div>
+
+            <div class="example-box">
+                <strong>Command-Line Tools:</strong>
+                InfiniBand provides specialized command-line tools for network management, monitoring, 
+                and troubleshooting. Each command serves a specific purpose: checking status, testing 
+                connectivity, tracing routes, discovering topology, and measuring performance. 
+                Understanding these commands enables effective InfiniBand network management.
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Purpose</th>
+                        <th>Example Output</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>ibstat</strong></td>
+                        <td>Show adapter status</td>
+                        <td>Link state, rate, physical state</td>
+                        <td>Verify InfiniBand is working</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ibping</strong></td>
+                        <td>Test connectivity</td>
+                        <td>Round-trip time, packet loss</td>
+                        <td>Verify Layer 2 communication</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ibtracert</strong></td>
+                        <td>Trace routing path</td>
+                        <td>Hop-by-hop path between nodes</td>
+                        <td>Debug routing issues</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ibswitches</strong></td>
+                        <td>List switches</td>
+                        <td>Switch GUIDs, ports, state</td>
+                        <td>Discover network topology</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ibhosts</strong></td>
+                        <td>List hosts</td>
+                        <td>Host GUIDs, LIDs, ports</td>
+                        <td>Discover connected nodes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ib_write_bw</strong></td>
+                        <td>Bandwidth test</td>
+                        <td>MB/s throughput</td>
+                        <td>Measure network performance</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="commands" class="section">
+            <h2>InfiniBand Commands</h2>
+            <p>
+                InfiniBand provides various command-line tools for network management, monitoring, and 
+                troubleshooting. Each command serves specific purposes for managing and diagnosing InfiniBand 
+                networks.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 30px 0;">
+                <div class="animal-card" style="border-left: 5px solid #F9A825;">
+                    <h3 style="color: #F9A825; margin-bottom: 15px;">ibstat - Network Status</h3>
+                    <p><strong>Function:</strong> Shows adapter status</p>
+                    <div class="command-box" style="margin: 10px 0;">$ ibstat</div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Check if InfiniBand is working, see link state, rate, and physical state.
+                    </p>
+                </div>
+
+                <div class="animal-card" style="border-left: 5px solid #FBC02D;">
+                    <h3 style="color: #FBC02D; margin-bottom: 15px;">ibping - Connectivity Test</h3>
+                    <p><strong>Function:</strong> Tests connectivity</p>
+                    <div class="command-box" style="margin: 10px 0;">$ ibping -C ibp13s0 -S<br>$ ibping -C ibp13s0 14</div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Verify Layer 2 communication, test if nodes can communicate.
+                    </p>
+                </div>
+
+                <div class="animal-card" style="border-left: 5px solid #FDD835;">
+                    <h3 style="color: #FDD835; margin-bottom: 15px;">ibtracert - Route Tracing</h3>
+                    <p><strong>Function:</strong> Maps routing paths</p>
+                    <div class="command-box" style="margin: 10px 0;">$ ibtracert</div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Explore network topology, see how data routes between nodes.
+                    </p>
+                </div>
+
+                <div class="animal-card" style="border-left: 5px solid #FFF59D;">
+                    <h3 style="color: #FFF59D; margin-bottom: 15px;">ibswitches - Switch Discovery</h3>
+                    <p><strong>Function:</strong> Lists switches</p>
+                    <div class="command-box" style="margin: 10px 0;">$ ibswitches</div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Discover all switches in the fabric, understand network infrastructure.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 30px 0;">
+                <div class="animal-card" style="border-left: 5px solid #F9A825;">
+                    <h3 style="color: #F9A825; margin-bottom: 15px;">ibhosts - Host Discovery</h3>
+                    <p><strong>Function:</strong> Lists all hosts</p>
+                    <div class="command-box" style="margin: 10px 0;">$ ibhosts</div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Discover all connected nodes, understand network topology.
+                    </p>
+                </div>
+
+                <div class="animal-card" style="border-left: 5px solid #FBC02D;">
+                    <h3 style="color: #FBC02D; margin-bottom: 15px;">ib_write_bw - Bandwidth Test</h3>
+                    <p><strong>Function:</strong> Tests bandwidth</p>
+                    <div class="command-box" style="margin: 10px 0;">$ ib_write_bw</div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Measure data transfer speed, verify network performance.
+                    </p>
+                </div>
+
+                <div class="animal-card" style="border-left: 5px solid #FDD835;">
+                    <h3 style="color: #FDD835; margin-bottom: 15px;">ib_write_lat - Latency Test</h3>
+                    <p><strong>Function:</strong> Tests latency</p>
+                    <div class="command-box" style="margin: 10px 0;">$ ib_write_lat</div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Measure communication delay, verify low latency performance.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="habitats" class="section">
+            <h2>🌳 The Habitats: Use Cases</h2>
+            <p>
+                Each animal (command) lives in specific habitats (use cases) - knowing where to 
+                find them helps you use them effectively.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Use Cases<br/>Habitats] --> B[Network Discovery<br/>ibstat, ibhosts, ibswitches]
+                    A --> C[Connectivity Testing<br/>ibping]
+                    A --> D[Topology Exploration<br/>ibtracert, ibroute]
+                    A --> E[Performance Testing<br/>ib_write_bw, ib_write_lat]
+                    
+                    style A fill:#F9A825
+            </div>
+
+            <div class="example-box">
+                <strong>🌳 Habitat Guide:</strong>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li><strong>Discovery:</strong> Use ibstat, ibhosts, ibswitches to explore</li>
+                    <li><strong>Testing:</strong> Use ibping to verify connectivity</li>
+                    <li><strong>Mapping:</strong> Use ibtracert to understand topology</li>
+                    <li><strong>Performance:</strong> Use ib_write_bw/lat to measure speed</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="feeding" class="section">
+            <h2>🍖 The Feeding: Syntax</h2>
+            <p>
+                Feeding the animals (providing commands) requires the right syntax - each animal 
+                needs specific input to work properly.
+            </p>
+
+            <div class="animal-card">
+                <h3>Common Syntax Patterns</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Basic:</strong> <code>command</code> - simple execution</li>
+                    <li><strong>With Options:</strong> <code>command -option value</code> - specify behavior</li>
+                    <li><strong>With Target:</strong> <code>command -C device</code> - target specific device</li>
+                    <li><strong>Server Mode:</strong> <code>command -S</code> - run as server</li>
+                    <li><strong>Client Mode:</strong> <code>command target</code> - connect to target</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="training" class="section">
+            <h2>🎓 Training: Best Practices</h2>
+            <p>
+                Training the animals (using commands effectively) requires understanding best practices 
+                - how to work with them for optimal results.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Best Practices<br/>Training] --> B[Start Simple<br/>Basic Commands]
+                    B --> C[Understand Output<br/>Read Results]
+                    C --> D[Combine Commands<br/>Workflows]
+                    D --> E[Master the Zoo<br/>Expert Zookeeper]
+                    
+                    style A fill:#F9A825
+            </div>
+
+            <div class="example-box">
+                <strong>🎓 Zookeeper's Guide:</strong>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li><strong>Start with Discovery:</strong> Use ibstat, ibhosts to understand your network</li>
+                    <li><strong>Test Connectivity:</strong> Use ibping to verify communication</li>
+                    <li><strong>Measure Performance:</strong> Use ib_write_bw/lat for benchmarks</li>
+                    <li><strong>Document Findings:</strong> Keep notes on network state</li>
+                    <li><strong>Regular Checkups:</strong> Monitor network health regularly</li>
+                </ul>
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p><strong>The InfiniBand Command Line Zoo</strong> - Taming Network Beasts</p>
+        <p>Master the zoo, master your network! </p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' }
+);
+            });
+        });
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            let current = '';
+            sections.forEach(s => {
+                if (window.pageYOffset >= s.offsetTop - 100) current = s.getAttribute('id');
+            }
+);
+            navLinks.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href') === `#${current}`) l.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

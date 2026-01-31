@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVIDIA GPU Portfolio: Compute Solutions for AI and HPC</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #1E3A8A;
+    --secondary-color: #3B82F6;
+    --accent-color: #F59E0B;
+    --success-color: #10B981;
+    --bg-color: #FFFFFF;
+    --card-bg: #F8F9FA;
+    --light-bg: #EFF6FF;
+    --text-color: #1A1A1A;
+    --text-muted: #6C757D;
+    --border-color: #E0E0E0;
+    --shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
+    --shadow-hover: 0 4px 16px rgba(30, 58, 138, 0.15);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0F172A, #1E3A8A, #3B82F6);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+header::before {
+    content: '';
+    position: absolute;
+    font-size: 300px;
+    opacity: 0.05;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: twinkle 3s ease-in-out infinite;
+}
+@keyframes twinkle {
+    0%, 100% { opacity: 0.05; }
+    50% { opacity: 0.15; }
+}
+header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.hero-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin: 30px 0;
+}
+.hero-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+.hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+.hero-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-hover);
+}
+.power-rating {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+}
+.power-bar {
+    height: 20px;
+    background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+    border-radius: 4px;
+    margin-top: 5px;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: var(--light-bg);
+    border-top: 2px solid var(--border-color);
+    color: var(--text-muted);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    .hero-grid { grid-template-columns: 1fr; }
+    
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+</style>
+</head>
+<body>
+    <header>
+        <h1>16. NVIDIA GPU Portfolio</h1>
+        <p class="subtitle">Compute Solutions for AI and HPC Workloads</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#training-gpus" class="nav-link">Training GPUs</a>
+        <a href="#inference-gpus" class="nav-link">Inference GPUs</a>
+        <a href="#edge-gpus" class="nav-link">Edge GPUs</a>
+        <a href="#next-gen" class="nav-link">Next Generation</a>
+        <a href="#selection" class="nav-link">Selection Guide</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>NVIDIA GPU Portfolio Overview</h2>
+            <p>
+                NVIDIA offers a comprehensive portfolio of GPUs designed for different AI and HPC workloads. 
+                Each GPU is optimized for specific use cases, from large-scale training workloads requiring 
+                maximum compute power to inference applications needing high throughput and low latency. 
+                Understanding the characteristics and capabilities of each GPU enables organizations to select 
+                the optimal solution for their specific requirements.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[GPU Galaxy] --> B[The Titans<br/>H100, A100<br/>Training Powerhouses]
+                    A --> C[The Speedsters<br/>L40S, L4<br/>Inference Specialists]
+                    A --> D[Versatile Heroes<br/>A2<br/>Edge Computing]
+                    A --> E[Next Generation<br/>Blackwell<br/>Future of AI]
+                    A --> F[The Brain<br/>Grace CPU<br/>Orchestrator]
+                    
+                    style A fill:#1E3A8A
+                    style B fill:#3B82F6
+                    style C fill:#F59E0B
+                    style D fill:#10B981
+                    style E fill:#8B5CF6
+                    style F fill:#EC4899
+            </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[AI Workload] --> B{Workload Type?}
+                    B -->|Large Training| C[H100<br/>Maximum Compute]
+                    B -->|Standard Training| D[A100<br/>High Compute]
+                    B -->|Inference| E[L40S/L4<br/>Low Latency]
+                    B -->|Edge| F[A2<br/>Balanced]
+                    
+                    C --> G[Training Optimized<br/>80GB HBM3]
+                    D --> H[Training Optimized<br/>40-80GB HBM2]
+                    E --> I[Inference Optimized<br/>24-48GB GDDR6]
+                    F --> J[Edge Optimized<br/>16GB GDDR6]
+                    
+                    style C fill:#3B82F6
+                    style D fill:#6366F1
+                    style E fill:#F59E0B
+                    style F fill:#10B981
+            </div>
+
+            <div class="example-box">
+                <strong>GPU Categories:</strong>
+                GPUs are categorized by their primary use case. High-performance GPUs (H100, A100) are designed 
+                for training large models requiring massive compute. Inference-optimized GPUs (L40S, L4) are 
+                designed for serving models with low latency. Each GPU type is optimized for specific workloads 
+                and performance requirements.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((GPU Galaxy))
+                    Training GPUs
+                      H100
+                        Highest Compute
+                        80GB HBM3
+                        Massive Training
+                      A100
+                        High Compute
+                        40GB/80GB HBM2
+                        Large-Scale Training
+                    Inference GPUs
+                      L40S
+                        Optimized Speed
+                        48GB GDDR6
+                        Real-Time Services
+                      L4
+                        Compact Design
+                        24GB GDDR6
+                        Edge Inference
+                    Versatile GPUs
+                      A2
+                        Balanced Performance
+                        16GB GDDR6
+                        Edge Computing
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[AI Workload] --> B{Workload Type?}
+                    B -->|Training| C[Training GPUs]
+                    B -->|Inference| D[Inference GPUs]
+                    B -->|Edge| E[Versatile GPUs]
+                    
+                    C --> F[H100<br/>A100]
+                    D --> G[L40S<br/>L4]
+                    E --> H[A2]
+                    
+                    F --> I[High Compute<br/>Large Memory<br/>Training Optimized]
+                    G --> J[Low Latency<br/>Efficient<br/>Inference Optimized]
+                    H --> K[Balanced<br/>Compact<br/>Edge Optimized]
+                    
+                    style C fill:#EF5350
+                    style D fill:#F59E0B
+                    style E fill:#10B981
+            </div>
+        </section>
+
+        <section id="training-gpus" class="section">
+            <h2>Training GPUs: H100 & A100</h2>
+            <p>
+                The Titans are the heavy lifters - designed for training massive AI models that require enormous 
+                computational power and memory.
+            </p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>GPU Model</th>
+                        <th>Type</th>
+                        <th>Memory</th>
+                        <th>Compute</th>
+                        <th>Best For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>H100</strong></td>
+                        <td>Training</td>
+                        <td>80GB HBM3</td>
+                        <td>Highest</td>
+                        <td>Massive model training</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A100</strong></td>
+                        <td>Training</td>
+                        <td>40GB/80GB HBM2</td>
+                        <td>High</td>
+                        <td>Large-scale training</td>
+                    </tr>
+                    <tr>
+                        <td><strong>L40S</strong></td>
+                        <td>Inference</td>
+                        <td>48GB GDDR6</td>
+                        <td>Optimized</td>
+                        <td>Real-time AI services</td>
+                    </tr>
+                    <tr>
+                        <td><strong>L4</strong></td>
+                        <td>Inference</td>
+                        <td>24GB GDDR6</td>
+                        <td>Efficient</td>
+                        <td>Edge inference</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A2</strong></td>
+                        <td>Versatile</td>
+                        <td>16GB GDDR6</td>
+                        <td>Balanced</td>
+                        <td>Edge computing</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="hero-grid">
+                <div class="hero-card">
+                    <h3>H100 - The Ultimate Titan</h3>
+                    <div class="power-rating">
+                        <span><strong>Compute:</strong></span>
+                        <span>⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="power-bar" style="width: 100%;"></div>
+                    <div class="power-rating">
+                        <span><strong>Memory:</strong></span>
+                        <span>80GB HBM3</span>
+                    </div>
+                    <div class="power-rating">
+                        <span><strong>Best For:</strong></span>
+                        <span>Massive model training</span>
+                    </div>
+                    <p style="margin-top: 15px;">
+                        Handles the most demanding training workloads, from GPT-scale language models to complex 
+                        scientific simulations. Optimized for maximum compute performance and memory bandwidth.
+                    </p>
+                </div>
+                <div class="hero-card">
+                    <h3>A100 - The Reliable Titan</h3>
+                    <div class="power-rating">
+                        <span><strong>Compute:</strong></span>
+                        <span>⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="power-bar" style="width: 85%;"></div>
+                    <div class="power-rating">
+                        <span><strong>Memory:</strong></span>
+                        <span>40GB/80GB HBM2</span>
+                    </div>
+                    <div class="power-rating">
+                        <span><strong>Best For:</strong></span>
+                        <span>Large-scale training</span>
+                    </div>
+                    <p style="margin-top: 15px;">
+                        A proven workhorse - reliable and powerful for most training tasks, with excellent 
+                        performance per dollar. Widely deployed in production environments.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="inference-gpus" class="section">
+            <h2>Inference GPUs: L40S & L4</h2>
+            <p>
+                Inference GPUs specialize in running trained models quickly and efficiently, delivering 
+                results with low latency for real-time applications.
+            </p>
+
+            <div class="hero-grid">
+                <div class="hero-card">
+                    <h3>L40S - The Inference Master</h3>
+                    <div class="power-rating">
+                        <span><strong>Speed:</strong></span>
+                        <span>⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="power-bar" style="width: 95%; background: linear-gradient(90deg, #F59E0B, #FBBF24);"></div>
+                    <div class="power-rating">
+                        <span><strong>Efficiency:</strong></span>
+                        <span>Optimized for inference</span>
+                    </div>
+                    <div class="power-rating">
+                        <span><strong>Best For:</strong></span>
+                        <span>Real-time AI services</span>
+                    </div>
+                    <p style="margin-top: 15px;">
+                        Optimized for serving AI models to users with low latency and high throughput, 
+                        ideal for real-time inference workloads.
+                    </p>
+                </div>
+                <div class="hero-card">
+                    <h3>L4 - The Compact Speedster</h3>
+                    <div class="power-rating">
+                        <span><strong>Speed:</strong></span>
+                        <span>⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="power-bar" style="width: 80%; background: linear-gradient(90deg, #F59E0B, #FBBF24);"></div>
+                    <div class="power-rating">
+                        <span><strong>Size:</strong></span>
+                        <span>Low-profile form factor</span>
+                    </div>
+                    <div class="power-rating">
+                        <span><strong>Best For:</strong></span>
+                        <span>Edge inference</span>
+                    </div>
+                    <p style="margin-top: 15px;">
+                        Compact form factor with high performance, ideal for edge deployments where space and 
+                        power are constrained but inference performance is critical.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="versatile" class="section">
+            <h2>🔄 Versatile Heroes: A2</h2>
+            <p>
+                The versatile heroes are all-rounders - good at many things, perfect for edge computing and 
+                diverse workloads.
+            </p>
+
+            <div class="hero-card" style="max-width: 600px; margin: 0 auto;">
+                <h3>A2 - The All-Rounder</h3>
+                <div class="power-rating">
+                    <span><strong>Versatility:</strong></span>
+                    <span>⭐⭐⭐⭐⭐</span>
+                </div>
+                <div class="power-bar" style="width: 90%; background: linear-gradient(90deg, #10B981, #34D399);"></div>
+                <div class="power-rating">
+                    <span><strong>Best For:</strong></span>
+                    <span>Edge computing, diverse workloads</span>
+                </div>
+                <p style="margin-top: 15px;">
+                    Versatile GPU suitable for diverse workloads, optimized for edge deployments where space 
+                    and power constraints require efficient, multi-purpose compute capabilities.
+                </p>
+            </div>
+        </section>
+
+        <section id="future" class="section">
+            <h2>🚀 Next Generation: Blackwell</h2>
+            <p>
+                The future of AI compute - Blackwell represents the next evolution, pushing the boundaries of 
+                what's possible.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Current Gen<br/>H100] -->|Evolution| B[Next Gen<br/>Blackwell]
+                    B --> C[2x Performance]
+                    B --> D[Advanced Features]
+                    B --> E[Better Efficiency]
+                    
+                    style A fill:#3B82F6
+                    style B fill:#8B5CF6
+            </div>
+
+            <div class="example-box">
+                <strong> The Future:</strong>
+                Blackwell represents the next generation of GPU architecture, building on current GPU capabilities 
+                with improved performance, new features, and enhanced efficiency for advanced AI workloads.
+            </div>
+        </section>
+
+        <section id="recruitment" class="section">
+            <h2>📋 Recruitment Guide: Choosing Your GPU Team</h2>
+            <p>
+                Choosing the right GPUs depends on your workload requirements, performance needs, and deployment 
+                constraints. Here's a selection guide:
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    Start[Choose Your Mission] --> Q1{Training or Inference?}
+                    Q1 -->|Training| Q2{Large or Small Models?}
+                    Q1 -->|Inference| Q3{Real-time or Batch?}
+                    
+                    Q2 -->|Large| Titans[H100/A100<br/>The Titans]
+                    Q2 -->|Small| Versatile[A2<br/>Versatile]
+                    
+                    Q3 -->|Real-time| Speedsters[L40S/L4<br/>Speedsters]
+                    Q3 -->|Batch| Titans
+                    
+                    style Start fill:#1E3A8A
+                    style Titans fill:#3B82F6
+                    style Speedsters fill:#F59E0B
+                    style Versatile fill:#10B981
+            </div>
+
+            <div class="example-box">
+                <strong>💡 Mission Profiles:</strong>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li><strong>Training Massive Models:</strong> Deploy the Titans (H100, A100)</li>
+                    <li><strong>Real-time Inference:</strong> Call the Speedsters (L40S, L4)</li>
+                    <li><strong>Edge Deployment:</strong> Use Versatile Heroes (A2)</li>
+                    <li><strong>Future Projects:</strong> Consider Next Generation (Blackwell)</li>
+                </ul>
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p><strong>The GPU Galaxy</strong> - Assembling Your Superhero Team for AI Compute</p>
+        <p>Each GPU is a hero with unique powers - choose wisely for your mission!</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' }
+);
+            });
+        });
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            let current = '';
+            sections.forEach(s => {
+                if (window.pageYOffset >= s.offsetTop - 100) current = s.getAttribute('id');
+            }
+);
+            navLinks.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href') === `#${current}`) l.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

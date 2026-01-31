@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>31. GPU Driver Installation: Foundation for GPU Computing</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #66BB6A;
+    --accent-color: #81C784;
+    --bg-color: #E8F5E9;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #A5D6A7;
+    --shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    color: white;
+    position: relative;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+.step-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.step-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+.step-number {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    font-weight: bold;
+    margin-right: 15px;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+code {
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #D32F2F;
+}
+.command-box {
+    background: #263238;
+    color: #A5D6A7;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #A5D6A7;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>31. GPU Driver Installation: Foundation for GPU Computing</h1>
+        <p class="subtitle">Step-by-Step Guide to Installing and Configuring NVIDIA GPU Drivers</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#prerequisites" class="nav-link">Prerequisites</a>
+        <a href="#pre-installation" class="nav-link">Pre-Installation</a>
+        <a href="#installation" class="nav-link">Installation</a>
+        <a href="#verification" class="nav-link">Verification</a>
+        <a href="#troubleshooting" class="nav-link">Troubleshooting</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>GPU Driver Installation Overview</h2>
+            <p>
+                GPU drivers are essential software components that enable communication between the operating system 
+                and GPU hardware. Without proper drivers, GPUs cannot function, and applications cannot access GPU 
+                resources. The installation process involves several critical steps: verifying system compatibility, 
+                preparing the environment, installing the driver package, and verifying successful installation.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[GPU Driver Installation] --> B[System Check]
+                    B --> C[Pre-Installation Prep]
+                    C --> D[Driver Download]
+                    D --> E[Installation Process]
+                    E --> F[Verification]
+                    F --> G[GPU Operational]
+                    
+                    style A fill:#4CAF50
+                    style B fill:#66BB6A
+                    style C fill:#81C784
+                    style D fill:#A5D6A7
+                    style E fill:#C8E6C9
+                    style F fill:#E8F5E9
+                    style G fill:#4CAF50
+            </div>
+
+            <div class="example-box">
+                <strong>Critical Foundation:</strong>
+                GPU drivers serve as the bridge between hardware and software. Just as a building needs a solid 
+                foundation, GPU computing requires properly installed drivers. The driver installation process 
+                establishes this foundation, enabling all subsequent GPU operations including CUDA applications, 
+                deep learning frameworks, and GPU-accelerated workloads.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((GPU Driver Installation))
+                    Prerequisites
+                      Hardware Verification
+                      OS Compatibility
+                      Disk Space
+                    Pre-Installation
+                      Remove Old Drivers
+                      System Preparation
+                      Kernel Module Check
+                    Installation
+                      Download Driver
+                      Run Installer
+                      Configure System
+                    Verification
+                      Driver Status
+                      GPU Detection
+                      Functionality Test
+                    Troubleshooting
+                      Common Issues
+                      Log Analysis
+                      Recovery Steps
+            </div>
+        </section>
+
+        <section id="prerequisites" class="section">
+            <h2>System Prerequisites</h2>
+            <p>
+                Before installing GPU drivers, verify that your system meets the necessary requirements. This includes 
+                checking hardware compatibility, operating system version, kernel version, and available disk space.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Driver Installation] --> B[Prerequisites<br/>System Check]
+                    B --> C[Hardware Verification<br/>GPU Detection]
+                    B --> D[OS Compatibility<br/>Version Check]
+                    B --> E[Disk Space<br/>Available Storage]
+                    
+                    C --> F[Pre-Installation<br/>Preparation]
+                    D --> F
+                    E --> F
+                    
+                    F --> G[Driver Installation<br/>Process]
+                    G --> H[Verification<br/>Testing]
+                    H --> I[GPU Operational<br/>Ready to Use]
+                    
+                    style A fill:#4CAF50
+                    style I fill:#66BB6A
+            </div>
+
+            <div class="step-card">
+                <h3><span class="step-number">1</span>Hardware Verification</h3>
+                <p>Verify that NVIDIA GPU hardware is present and detected by the system:</p>
+                <div class="command-box">
+lspci | grep -i nvidia
+                </div>
+                <p>This command lists all NVIDIA devices connected to the system. You should see entries for your GPU(s).</p>
+            </div>
+
+            <div class="step-card">
+                <h3><span class="step-number">2</span>Operating System Check</h3>
+                <p>Verify your operating system version and kernel:</p>
+                <div class="command-box">
+uname -a<br>
+cat /etc/os-release
+                </div>
+                <p>Ensure your OS version is supported by the NVIDIA driver. Check NVIDIA's compatibility matrix for supported distributions.</p>
+            </div>
+
+            <div class="step-card">
+                <h3><span class="step-number">3</span>Disk Space Requirements</h3>
+                <p>Ensure sufficient disk space is available:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Driver package: ~300-500 MB</li>
+                    <li>Installation files: ~1-2 GB</li>
+                    <li>CUDA toolkit (if installing): ~3-5 GB</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="pre-installation" class="section">
+            <h2>Pre-Installation Steps</h2>
+            <p>
+                Proper preparation before driver installation prevents conflicts and ensures a smooth installation process. 
+                These steps include removing old drivers, disabling conflicting services, and preparing the system environment.
+            </p>
+
+            <div class="step-card">
+                <h3>Remove Existing Drivers</h3>
+                <p>If previous NVIDIA drivers are installed, remove them first:</p>
+                <div class="command-box">
+sudo apt-get remove --purge '^nvidia-.*'<br>
+sudo apt-get autoremove
+                </div>
+                <p>For RPM-based systems:</p>
+                <div class="command-box">
+sudo yum remove nvidia-*<br>
+sudo dnf remove nvidia-*
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h3>Disable Nouveau Driver</h3>
+                <p>The open-source Nouveau driver can conflict with NVIDIA drivers. Disable it:</p>
+                <div class="command-box">
+sudo bash -c "echo blacklist nouveau > /etc/modprobe.d/blacklist-nvidia-nouveau.conf"<br>
+sudo bash -c "echo options nouveau modeset=0 >> /etc/modprobe.d/blacklist-nvidia-nouveau.conf"
+                </div>
+                <p>Then regenerate the initramfs:</p>
+                <div class="command-box">
+sudo update-initramfs -u
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h3>Install Build Dependencies</h3>
+                <p>Install required build tools and kernel headers:</p>
+                <div class="command-box">
+sudo apt-get update<br>
+sudo apt-get install build-essential dkms linux-headers-$(uname -r)
+                </div>
+            </div>
+        </section>
+
+        <section id="installation" class="section">
+            <h2>Driver Installation Process</h2>
+            <p>
+                The driver installation can be performed using package managers or by downloading the driver directly 
+                from NVIDIA. Package manager installation is recommended for most users as it handles dependencies automatically.
+            </p>
+
+            <div class="step-card">
+                <h3>Method 1: Package Manager Installation (Recommended)</h3>
+                <p>For Ubuntu/Debian systems:</p>
+                <div class="command-box">
+sudo apt-get update<br>
+sudo apt-get install nvidia-driver-535<br>
+# Or use the latest version available
+                </div>
+                <p>For RHEL/CentOS/Fedora:</p>
+                <div class="command-box">
+sudo dnf install nvidia-driver
+                </p>
+            </div>
+
+            <div class="step-card">
+                <h3>Method 2: Direct Driver Download</h3>
+                <p>Download the driver from NVIDIA's website and install:</p>
+                <div class="command-box">
+# Download driver (example for Linux x86_64)<br>
+wget https://us.download.nvidia.com/XFree86/Linux-x86_64/535.XX.XX/NVIDIA-Linux-x86_64-535.XX.XX.run<br>
+<br>
+# Make executable<br>
+chmod +x NVIDIA-Linux-x86_64-535.XX.XX.run<br>
+<br>
+# Install<br>
+sudo ./NVIDIA-Linux-x86_64-535.XX.XX.run
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h3>Installation Options</h3>
+                <p>During installation, you may be prompted for:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>32-bit compatibility libraries:</strong> Required for some legacy applications</li>
+                    <li><strong>DKMS support:</strong> Automatic driver rebuilds when kernel updates</li>
+                    <li><strong>X server configuration:</strong> Automatic X.org configuration</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="verification" class="section">
+            <h2>Verification and Testing</h2>
+            <p>
+                After installation, verify that the driver is properly installed and the GPU is functioning correctly. 
+                This involves checking driver version, GPU detection, and basic functionality tests.
+            </p>
+
+            <div class="step-card">
+                <h3>Check Driver Version</h3>
+                <div class="command-box">
+nvidia-smi
+                </div>
+                <p>This command displays GPU information, driver version, CUDA version, and GPU utilization. If this command 
+                works, the driver is installed correctly.</p>
+            </div>
+
+            <div class="step-card">
+                <h3>Verify GPU Detection</h3>
+                <div class="command-box">
+nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv
+                </div>
+                <p>This provides detailed information about detected GPUs, confirming hardware recognition.</p>
+            </div>
+
+            <div class="step-card">
+                <h3>Test CUDA Functionality</h3>
+                <p>If CUDA toolkit is installed, test basic CUDA operations:</p>
+                <div class="command-box">
+nvcc --version<br>
+# Run a simple CUDA test program if available
+                </div>
+            </div>
+        </section>
+
+        <section id="troubleshooting" class="section">
+            <h2>Troubleshooting Common Issues</h2>
+            <p>
+                Driver installation can encounter various issues. Understanding common problems and their solutions helps 
+                resolve installation failures quickly.
+            </p>
+
+            <div class="step-card">
+                <h3>Issue: Driver Installation Fails</h3>
+                <p><strong>Symptoms:</strong> Installation script fails or returns errors</p>
+                <p><strong>Solutions:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Check kernel headers are installed: <code>uname -r</code> matches installed headers</li>
+                    <li>Verify sufficient disk space</li>
+                    <li>Check installation logs: <code>/var/log/nvidia-installer.log</code></li>
+                    <li>Ensure secure boot is disabled (if applicable)</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>Issue: GPU Not Detected After Installation</h3>
+                <p><strong>Symptoms:</strong> <code>nvidia-smi</code> shows "No devices found"</p>
+                <p><strong>Solutions:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Verify GPU is properly seated: <code>lspci | grep -i nvidia</code></li>
+                    <li>Check driver is loaded: <code>lsmod | grep nvidia</code></li>
+                    <li>Reboot the system</li>
+                    <li>Verify PCIe power connections</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>Issue: X Server Conflicts</h3>
+                <p><strong>Symptoms:</strong> Display issues or X server won't start</p>
+                <p><strong>Solutions:</strong></p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Install in runlevel 3 (text mode): <code>sudo init 3</code></li>
+                    <li>Use <code>--no-x-check</code> flag during installation</li>
+                    <li>Manually configure X.org if needed</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Best Practices:</strong>
+                Always check NVIDIA's official documentation for your specific GPU model and driver version. Keep 
+                installation logs for troubleshooting. Test GPU functionality after installation before deploying 
+                production workloads. Consider using package managers for easier updates and dependency management.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>GPU Driver Installation Guide | Foundation for GPU Computing</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        // Smooth scrolling for navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        // Update active nav link on scroll
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

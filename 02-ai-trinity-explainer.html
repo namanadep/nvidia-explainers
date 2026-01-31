@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The AI Trinity: Understanding AI, Machine Learning, and Deep Learning</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #6B46C1;
+    --secondary-color: #9333EA;
+    --accent-color: #EC4899;
+    --success-color: #10B981;
+    --bg-color: #FFFFFF;
+    --card-bg: #F8F9FA;
+    --light-bg: #F3F4F6;
+    --text-color: #1A1A1A;
+    --text-muted: #6C757D;
+    --border-color: #E0E0E0;
+    --shadow: 0 2px 8px rgba(107, 70, 193, 0.1);
+    --shadow-hover: 0 4px 16px rgba(107, 70, 193, 0.15);
+    --ai-color: #3B82F6;
+    --ml-color: #8B5CF6;
+    --dl-color: #EC4899;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    text-align: center;
+    padding: 40px 40px;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: drift 20s linear infinite;
+}
+
+@keyframes drift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+}
+
+header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.95);
+    position: relative;
+    z-index: 1;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+
+.nav-link:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+main {
+    width: 100%;
+    padding: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+
+.section h4 {
+    font-size: 1.3rem;
+    margin: 20px 0 12px;
+    color: var(--text-color);
+}
+
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-color);
+}
+
+.family-tree-container,
+.matryoshka-container,
+.decision-tree-container,
+.family-dinner-container {
+    margin: 30px 0;
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 30px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.specs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    margin: 30px 0;
+}
+
+.spec-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.spec-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--ai-color), var(--ml-color), var(--dl-color));
+}
+
+.spec-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-hover);
+}
+
+.spec-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: var(--text-muted);
+}
+
+.spec-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.spec-detail {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.example-box {
+    background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+
+.comparison-table tr:hover {
+    background: var(--light-bg);
+}
+
+.comparison-table td:first-child {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.interactive-controls {
+    display: flex;
+    gap: 30px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.control-group input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--border-color);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(107, 70, 193, 0.4);
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: var(--secondary-color);
+}
+
+.control-group input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(107, 70, 193, 0.4);
+}
+
+.scenario-box {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    margin: 20px 0;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.scenario-box h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.scenario-box .character {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.scenario-box .character.ai {
+    border-left-color: var(--ai-color);
+}
+
+.scenario-box .character.ml {
+    border-left-color: var(--ml-color);
+}
+
+.scenario-box .character.dl {
+    border-left-color: var(--dl-color);
+}
+
+.scenario-box .character-name {
+    font-weight: 700;
+    margin-right: 15px;
+    min-width: 80px;
+}
+
+.scenario-box .character.ai .character-name {
+    color: var(--ai-color);
+}
+
+.scenario-box .character.ml .character-name {
+    color: var(--ml-color);
+}
+
+.scenario-box .character.dl .character-name {
+    color: var(--dl-color);
+}
+
+.decision-tree-node {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 15px;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.decision-tree-node:hover {
+    transform: scale(1.05);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-hover);
+}
+
+.decision-tree-node.active {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(107, 70, 193, 0.1), rgba(147, 51, 234, 0.1));
+}
+
+footer {
+    text-align: center;
+    padding: 40px;
+    margin-top: 0;
+    background: var(--light-bg);
+    border-top: 2px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+footer p {
+    margin: 10px 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (max-width: 1200px) {
+    .specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    .section { padding: 25px 20px; }
+}
+    
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+
+    .section h2 {
+        font-size: 1.8rem;
+    }
+
+    .specs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .interactive-controls {
+        flex-direction: column;
+    }
+    
+    
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+
+/* Remove tooltips */
+* {
+    pointer-events: auto;
+}
+
+[title] {
+    pointer-events: auto;
+}
+
+[title]:hover::after,
+[title]:hover::before {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    content: none !important;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>2. The AI Trinity: Understanding AI, Machine Learning, and Deep Learning</h1>
+            <p class="subtitle">Relationships and Applications of AI Technologies</p>
+            <p class="author-credit">Explained by Naman Adep</p>
+        </header>
+
+        <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+            <a href="#overview" class="nav-link active">Overview</a>
+            <a href="#relationships" class="nav-link">Relationships</a>
+            <a href="#hierarchy" class="nav-link">Hierarchy</a>
+            <a href="#examples" class="nav-link">Examples</a>
+            <a href="#use-cases" class="nav-link">Use Cases</a>
+            <a href="#selection" class="nav-link">Selection Guide</a>
+        </nav>
+    <div class="main-content-wrapper">
+        <main>
+            <!-- Overview Section -->
+            <section id="overview" class="section">
+                <h2>AI, Machine Learning, and Deep Learning Overview</h2>
+                <p>
+                    Artificial Intelligence (AI), Machine Learning (ML), and Deep Learning (DL) represent a hierarchical 
+                    relationship where each builds upon the previous. <strong>AI</strong> is the broadest concept, 
+                    encompassing any system that exhibits intelligent behavior. <strong>Machine Learning</strong> is a 
+                    subset of AI that enables systems to learn and improve from data without explicit programming. 
+                    <strong>Deep Learning</strong> is a subset of Machine Learning that uses neural networks with 
+                    multiple layers to learn complex patterns and representations.
+                </p>
+                
+                <div class="example-box">
+                    <strong>Hierarchical Relationship:</strong>
+                    AI is the broad umbrella term covering all intelligent systems. Machine Learning is a specific 
+                    approach within AI that learns from data. Deep Learning is an advanced form of Machine Learning 
+                    that uses multi-layered neural networks. Understanding this hierarchy helps clarify when to use 
+                    each technology and how they relate to one another.
+                </div>
+
+                <div class="mermaid">
+                    graph LR
+                        A[Problem to Solve] --> B{Clear Rules?}
+                        B -->|Yes| C[Use AI<br/>Rule-Based]
+                        B -->|No| D{Have Data?}
+                        D -->|No| E[Collect Data First]
+                        D -->|Yes| F{Complex Patterns?}
+                        F -->|No| G[Use ML<br/>Traditional Algorithms]
+                        F -->|Yes| H[Use DL<br/>Neural Networks]
+                        
+                        style C fill:#3B82F6
+                        style G fill:#8B5CF6
+                        style H fill:#EC4899
+                </div>
+
+                <div class="mermaid">
+                    mindmap
+                      root((AI Technologies))
+                        AI
+                          Rule-Based Systems
+                            Expert Systems
+                            Knowledge Bases
+                          Search Algorithms
+                          Game AI
+                        Machine Learning
+                          Supervised Learning
+                            Classification
+                            Regression
+                          Unsupervised Learning
+                            Clustering
+                            Dimensionality Reduction
+                          Reinforcement Learning
+                          Traditional Algorithms
+                            Decision Trees
+                            SVM
+                            Random Forest
+                        Deep Learning
+                          Neural Networks
+                            CNNs
+                              Image Recognition
+                              Computer Vision
+                            RNNs
+                              Sequence Processing
+                              Language Modeling
+                            Transformers
+                              NLP
+                              GPT Models
+                          Training
+                            Backpropagation
+                            Optimization
+                          Applications
+                            Image Recognition
+                            Natural Language Processing
+                            Speech Recognition
+            </div>
+
+                <div class="specs-grid">
+                    <div class="spec-card">
+                        <h3>AI - The Visionary</h3>
+                        <div class="spec-value">Broad</div>
+                        <div class="spec-detail">The umbrella term for all intelligent machines. Dreams of creating systems that can think, reason, and solve problems like humans.</div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>ML - The Learner</h3>
+                        <div class="spec-value">Adaptive</div>
+                        <div class="spec-detail">A subset of AI that learns from data. Like a child learning from experience, ML improves its performance without being explicitly programmed.</div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>DL - The Prodigy</h3>
+                        <div class="spec-value">Neural</div>
+                        <div class="spec-detail">A subset of ML that mimics the human brain using neural networks. The most advanced form, capable of recognizing complex patterns.</div>
+                    </div>
+                </div>
+
+                <div class="mermaid">
+                    flowchart TD
+                        A[AI<br/>All Intelligent Systems] --> B[ML<br/>Learning Systems]
+                        B --> C[DL<br/>Deep Neural Networks]
+                        
+                        A --> A1[Rule-Based<br/>Expert Systems]
+                        A --> A2[Search Algorithms<br/>Game AI]
+                        B --> B1[Traditional ML<br/>Decision Trees, SVM]
+                        B --> C
+                        C --> C1[CNNs<br/>Image Recognition]
+                        C --> C2[RNNs<br/>Sequence Processing]
+                        C --> C3[Transformers<br/>NLP, GPT]
+                        
+                        style A fill:#3B82F6
+                        style B fill:#8B5CF6
+                        style C fill:#EC4899
+                </div>
+
+                <h3>The Hierarchical Relationship</h3>
+                <p>
+                    <strong>AI</strong> is the broadest category, encompassing all intelligent systems. 
+                    <strong>ML</strong> is a subset of AI that focuses on systems that learn from data. 
+                    <strong>DL</strong> is a subset of ML that uses deep neural networks with multiple layers. 
+                    They form a hierarchical relationship where DL is contained within ML, which is contained 
+                    within AI. Each level is more specialized and uses more advanced techniques than the previous.
+                </p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Technology</th>
+                            <th>Scope</th>
+                            <th>Approach</th>
+                            <th>Data Requirements</th>
+                            <th>Complexity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>AI</strong></td>
+                            <td>All intelligent systems</td>
+                            <td>Rule-based, expert systems</td>
+                            <td>Knowledge bases, rules</td>
+                            <td>Low to Medium</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ML</strong></td>
+                            <td>Learning systems</td>
+                            <td>Statistical learning, algorithms</td>
+                            <td>Labeled datasets</td>
+                            <td>Medium</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DL</strong></td>
+                            <td>Neural network systems</td>
+                            <td>Deep neural networks</td>
+                            <td>Large labeled datasets</td>
+                            <td>High</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="mermaid">
+                    graph TD
+                        A[AI<br/>All Intelligent Systems] --> B[ML<br/>Learning from Data]
+                        B --> C[DL<br/>Deep Neural Networks]
+                        
+                        A --> D[Rule-Based Systems]
+                        A --> E[Expert Systems]
+                        B --> F[Traditional ML Algorithms]
+                        B --> C
+                        C --> G[Convolutional Networks]
+                        C --> H[Recurrent Networks]
+                        C --> I[Transformers]
+                        
+                        style A fill:#3B82F6
+                        style B fill:#8B5CF6
+                        style C fill:#EC4899
+                </div>
+            </section>
+
+            <!-- Historical Development Section -->
+            <section id="historical-development" class="section">
+                <h2>Historical Development: How They Evolved</h2>
+                <p>
+                    AI, ML, and DL developed over time, with each building upon previous technologies. 
+                    Understanding their historical development helps clarify how they relate and when 
+                    each technology emerged.
+                </p>
+
+                <div class="family-tree-container">
+                    <svg id="family-tree-svg" width="100%" height="500"></svg>
+                </div>
+
+                <div class="specs-grid">
+                    <div class="spec-card">
+                        <h3>Phase 1: AI (1950s-1980s)</h3>
+                        <div class="spec-value">1950s</div>
+                        <div class="spec-detail">
+                            <strong>Development:</strong> AI emerged when researchers explored whether machines could exhibit intelligent behavior<br>
+                            <strong>Technology:</strong> Rule-based systems, expert systems, symbolic reasoning<br>
+                            <strong>Examples:</strong> Chess computers (Deep Blue), expert medical systems, automated reasoning<br>
+                            <strong>Approach:</strong> Explicit programming of rules and knowledge bases
+                        </div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>Phase 2: ML (1980s-2010s)</h3>
+                        <div class="spec-value">1980s</div>
+                        <div class="spec-detail">
+                            <strong>Development:</strong> ML emerged as computers gained ability to learn patterns from data<br>
+                            <strong>Technology:</strong> Statistical learning, decision trees, support vector machines<br>
+                            <strong>Examples:</strong> Email spam filters, recommendation systems, fraud detection<br>
+                            <strong>Approach:</strong> Algorithms that improve performance through data exposure
+                        </div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>Phase 3: DL (2010s-Present)</h3>
+                        <div class="spec-value">2010s</div>
+                        <div class="spec-detail">
+                            <strong>Development:</strong> DL became practical with advances in GPU computing and large datasets<br>
+                            <strong>Technology:</strong> Deep neural networks, convolutional networks, transformers<br>
+                            <strong>Examples:</strong> Image recognition, natural language processing, autonomous vehicles<br>
+                            <strong>Approach:</strong> Multi-layered neural networks that learn hierarchical representations
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hierarchical Structure Section -->
+            <section id="hierarchy" class="section">
+                <h2>Hierarchical Structure: Nested Relationships</h2>
+                <p>
+                    AI, ML, and DL form a hierarchical structure where DL is a subset of ML, which is a subset 
+                    of AI. This nesting relationship means that all DL techniques are ML techniques, and all ML 
+                    techniques are AI techniques. Understanding this hierarchy helps clarify when to use each 
+                    technology.
+                </p>
+
+                <div class="mermaid">
+                    graph TB
+                        subgraph "AI - All Intelligent Systems"
+                            subgraph "ML - Learning Systems"
+                                subgraph "DL - Deep Neural Networks"
+                                    DL1[CNNs]
+                                    DL2[RNNs]
+                                    DL3[Transformers]
+                                end
+                                ML1[Linear Regression]
+                                ML2[Decision Trees]
+                                ML3[SVM]
+                            end
+                            AI1[Rule-Based Systems]
+                            AI2[Expert Systems]
+                            AI3[Search Algorithms]
+                        end
+                        
+                        style AI1 fill:#3B82F6
+                        style ML1 fill:#8B5CF6
+                        style DL1 fill:#EC4899
+                </div>
+
+                <div class="example-box">
+                    <strong>Understanding the Hierarchy:</strong>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li><strong>AI (Outer Layer):</strong> Includes all intelligent systems - from simple rule-based systems to advanced neural networks</li>
+                        <li><strong>ML (Middle Layer):</strong> Subset of AI focusing on learning from data - includes traditional algorithms (linear regression, decision trees) and neural networks</li>
+                        <li><strong>DL (Inner Layer):</strong> Subset of ML using deep neural networks - includes CNNs for images, RNNs for sequences, transformers for language</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Approach Comparison Section -->
+            <section id="approaches" class="section">
+                <h2>Approach Comparison: Recognizing Objects in Images</h2>
+                <p>
+                    AI, ML, and DL use different approaches to solve the same problem. Consider the task of 
+                    recognizing a cat in an image. Each technology uses a different method, showcasing their 
+                    unique characteristics and capabilities.
+                </p>
+
+                <div class="mermaid">
+                    graph LR
+                        A[Image Input] --> B[AI Approach<br/>Rule-Based]
+                        A --> C[ML Approach<br/>Feature Learning]
+                        A --> D[DL Approach<br/>Deep Learning]
+                        
+                        B --> E[Rule Matching]
+                        C --> F[Pattern Recognition]
+                        D --> G[Feature Extraction]
+                        
+                        E --> H[Classification Result]
+                        F --> H
+                        G --> H
+                        
+                        style B fill:#3B82F6
+                        style C fill:#8B5CF6
+                        style D fill:#EC4899
+                </div>
+
+                <div class="scenario-box">
+                    <h4>Task: "Is there a cat in this image?"</h4>
+                    
+                    <div class="character ai">
+                        <div class="character-name">AI Approach:</div>
+                        <div>
+                            <strong>Rule-Based System:</strong> Uses predefined rules stored in a knowledge base. 
+                            Checks for features: "If image contains four legs, fur, whiskers, and pointed ears, 
+                            classify as cat." Requires explicit programming of all rules. <em>Example: Early 
+                            computer vision systems with hand-crafted feature detectors.</em>
+                        </div>
+                    </div>
+
+                    <div class="character ml">
+                        <div class="character-name">ML Approach:</div>
+                        <div>
+                            <strong>Learning from Examples:</strong> Trained on thousands of labeled cat images. 
+                            Learns statistical patterns: "Images with certain combinations of features are usually 
+                            cats." Extracts features (edges, textures) and learns which combinations indicate cats. 
+                            <em>Example: Traditional computer vision using feature extraction (SIFT, HOG) followed 
+                            by classification (SVM, random forest).</em>
+                        </div>
+                    </div>
+
+                    <div class="character dl">
+                        <div class="character-name">DL Approach:</div>
+                        <div>
+                            <strong>Deep Neural Networks:</strong> Uses convolutional neural networks (CNNs) with 
+                            multiple layers. Automatically learns hierarchical features: low-level (edges, textures), 
+                            mid-level (shapes, patterns), high-level (object parts, complete objects). No explicit 
+                            feature engineering required. <em>Example: Modern image recognition systems (ResNet, 
+                            EfficientNet) that achieve human-level accuracy.</em>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Key Technical Differences</h3>
+                <p>
+                    <strong>AI</strong> uses explicit rules programmed by developers. <strong>ML</strong> learns 
+                    patterns from data using statistical methods. <strong>DL</strong> uses deep neural networks 
+                    to automatically learn hierarchical feature representations. DL can discover complex patterns 
+                    that are difficult to express as explicit rules or traditional features.
+                </p>
+            </section>
+
+            <!-- Real World Examples Section -->
+            <section id="real-world" class="section">
+                <h2>Real-World Examples: Where You've Met Them</h2>
+                <p>
+                    You've already interacted with AI, ML, and DL in your daily life! Let's see where each one shines.
+                </p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Technology</th>
+                            <th>Real-World Example</th>
+                            <th>How It Works</th>
+                            <th>Why This Type?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>AI</strong><br><small style="color: var(--text-muted);">The Visionary</small></td>
+                            <td>Chess Computer (Deep Blue)</td>
+                            <td>Uses predefined rules and strategies programmed by experts</td>
+                            <td>Perfect for games with clear rules - doesn't need to learn, just follows logic</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ML</strong><br><small style="color: var(--text-muted);">The Learner</small></td>
+                            <td>Email Spam Filter</td>
+                            <td>Learns from thousands of emails you mark as spam or not spam</td>
+                            <td>Gets better over time as it sees more examples - adapts to your email patterns</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DL</strong><br><small style="color: var(--text-muted);">The Prodigy</small></td>
+                            <td>Self-Driving Cars</td>
+                            <td>Uses neural networks to recognize objects, predict behavior, and make driving decisions</td>
+                            <td>Needs to handle complex, unpredictable real-world scenarios - requires deep pattern recognition</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI</strong></td>
+                            <td>Expert Medical Systems</td>
+                            <td>Uses knowledge bases of medical rules and symptoms</td>
+                            <td>Reliable for well-defined medical knowledge that doesn't change frequently</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ML</strong></td>
+                            <td>Netflix Recommendations</td>
+                            <td>Learns your viewing preferences from what you watch and rate</td>
+                            <td>Personalizes recommendations based on your behavior patterns</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DL</strong></td>
+                            <td>Image Recognition (Google Photos)</td>
+                            <td>Neural networks recognize faces, objects, and scenes in photos</td>
+                            <td>Requires understanding complex visual patterns that are hard to describe with rules</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ML</strong></td>
+                            <td>Fraud Detection</td>
+                            <td>Learns normal spending patterns and flags unusual transactions</td>
+                            <td>Adapts to new fraud patterns as criminals evolve their tactics</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DL</strong></td>
+                            <td>Language Translation (Google Translate)</td>
+                            <td>Neural networks understand context and nuance in multiple languages</td>
+                            <td>Language is too complex for simple rules - needs deep understanding of context</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 30px 0;">
+                    <div class="scenario-box" style="border-left: 5px solid #3B82F6;">
+                        <h4 style="color: #3B82F6; margin-bottom: 15px;">AI Examples</h4>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Chess Computer (Deep Blue)</strong>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Uses predefined rules and strategies. Perfect for games with clear rules.</p>
+                        </div>
+                        <div>
+                            <strong>Expert Medical Systems</strong>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Uses knowledge bases of medical rules. Reliable for well-defined knowledge.</p>
+                        </div>
+                    </div>
+
+                    <div class="scenario-box" style="border-left: 5px solid #8B5CF6;">
+                        <h4 style="color: #8B5CF6; margin-bottom: 15px;">ML Examples</h4>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Email Spam Filter</strong>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Learns from labeled emails. Adapts to your email patterns over time.</p>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Netflix Recommendations</strong>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Learns viewing preferences. Personalizes based on behavior patterns.</p>
+                        </div>
+                        <div>
+                            <strong>Fraud Detection</strong>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Learns normal spending patterns. Adapts to new fraud tactics.</p>
+                        </div>
+                    </div>
+
+                    <div class="scenario-box" style="border-left: 5px solid #EC4899;">
+                        <h4 style="color: #EC4899; margin-bottom: 15px;">DL Examples</h4>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Self-Driving Cars</strong>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Neural networks recognize objects and predict behavior. Handles complex scenarios.</p>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Image Recognition (Google Photos)</strong>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Recognizes faces, objects, and scenes. Understands complex visual patterns.</p>
+                        </div>
+                        <div>
+                            <strong>Language Translation</strong>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Understands context and nuance. Needs deep understanding of language.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <strong>💡 Key Insight:</strong>
+                    Notice how simpler problems (chess, spam filtering) use simpler AI/ML, while complex problems 
+                    (driving, image recognition) require DL. Each technology is optimized for different complexity levels - 
+                    choose the right tool for the job!
+                </div>
+            </section>
+
+            <!-- Decision Tree Section -->
+            <section id="decision-tree" class="section">
+                <h2>When to Use What? The Decision Tree</h2>
+                <p>
+                    Not every problem needs the most advanced solution. Here's a decision tree to help you choose 
+                    the right member of the AI family for your problem.
+                </p>
+
+                <div class="decision-tree-container">
+                    <svg id="decision-tree-svg" width="100%" height="800"></svg>
+                </div>
+
+                <div class="specs-grid">
+                    <div class="spec-card">
+                        <h3>Use AI When...</h3>
+                        <div class="spec-value">✓</div>
+                        <div class="spec-detail">
+                            <ul style="text-align: left; padding-left: 20px; margin-top: 10px;">
+                                <li>Rules are clear and well-defined</li>
+                                <li>Problem doesn't change over time</li>
+                                <li>You need predictable, explainable results</li>
+                                <li>Examples: Game AI, expert systems, rule-based automation</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>Use ML When...</h3>
+                        <div class="spec-value">✓✓</div>
+                        <div class="spec-detail">
+                            <ul style="text-align: left; padding-left: 20px; margin-top: 10px;">
+                                <li>You have lots of data</li>
+                                <li>Patterns exist but are hard to describe</li>
+                                <li>Problem adapts over time</li>
+                                <li>Examples: Recommendations, predictions, classification</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="spec-card">
+                        <h3>Use DL When...</h3>
+                        <div class="spec-value">✓✓✓</div>
+                        <div class="spec-detail">
+                            <ul style="text-align: left; padding-left: 20px; margin-top: 10px;">
+                                <li>Dealing with images, audio, or text</li>
+                                <li>Patterns are extremely complex</li>
+                                <li>You have massive amounts of data</li>
+                                <li>Examples: Computer vision, NLP, speech recognition</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <strong>🎯 Decision Framework:</strong>
+                    <ol style="margin-top: 10px; padding-left: 20px;">
+                        <li><strong>Start Simple:</strong> Can you solve it with clear rules? → Use AI</li>
+                        <li><strong>Need Learning:</strong> Do you have data and need patterns? → Use ML</li>
+                        <li><strong>Complex Patterns:</strong> Are you dealing with images/text/audio? → Use DL</li>
+                        <li><strong>Remember:</strong> DL is powerful but requires more data and computing power. Don't use a sledgehammer to crack a nut!</li>
+                    </ol>
+                </div>
+            </section>
+                </main>
+
+                </div>
+</div>
+
+    <footer>
+            <p><strong>The AI Trinity Explainer</strong> - Understanding AI, ML, and DL</p>
+            <p>AI encompasses ML, which encompasses DL. Each has unique capabilities for different use cases!</p>
+        </footer>
+    </div>
+
+    <script>
+// Remove tooltips function
+function removeAllTooltips() {
+    const elements = document.querySelectorAll('[title]');
+    elements.forEach(function(element) {
+        element.removeAttribute('title');
+    });
+}
+
+// Initialize visualizations when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    removeAllTooltips();
+    
+    initializeFamilyTree();
+    initializeMatryoshka();
+    initializeFamilyDinner();
+    initializeDecisionTree();
+    setupInteractivity();
+    setupSmoothScrolling();
+    
+    setTimeout(removeAllTooltips, 100);
+    setTimeout(removeAllTooltips, 500);
+    
+    const observer = new MutationObserver(function() {
+        removeAllTooltips();
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['title']
+    });
+    
+    setInterval(removeAllTooltips, 1000);
+    
+    document.addEventListener('mouseover', function(e) {
+        if (e.target && e.target.hasAttribute && e.target.hasAttribute('title')) {
+            e.target.removeAttribute('title');
+        }
+    }, true);
+});
+
+// Family Tree Visualization
+function initializeFamilyTree() {
+    const svg = d3.select('#family-tree-svg');
+    const width = 1000;
+    const height = 500;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    svg.selectAll('*').remove();
+
+    // Define colors
+    const aiColor = '#3B82F6';
+    const mlColor = '#8B5CF6';
+    const dlColor = '#EC4899';
+
+    // AI (Top level)
+    const aiX = width / 2;
+    const aiY = 80;
+    const aiWidth = 300;
+    const aiHeight = 120;
+
+    const aiGroup = svg.append('g');
+    aiGroup.append('rect')
+        .attr('x', aiX - aiWidth / 2)
+        .attr('y', aiY)
+        .attr('width', aiWidth)
+        .attr('height', aiHeight)
+        .attr('fill', aiColor)
+        .attr('stroke', '#1E40AF')
+        .attr('stroke-width', 3)
+        .attr('rx', 15)
+        .attr('opacity', 0.9);
+
+    aiGroup.append('text')
+        .attr('x', aiX)
+        .attr('y', aiY + 35)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '28px')
+        .attr('font-weight', 'bold')
+        .text('AI');
+
+    aiGroup.append('text')
+        .attr('x', aiX)
+        .attr('y', aiY + 65)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '16px')
+        .text('Artificial Intelligence');
+
+    aiGroup.append('text')
+        .attr('x', aiX)
+        .attr('y', aiY + 90)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '14px')
+        .text('The Visionary Grandparent');
+
+    // ML (Middle level)
+    const mlX = width / 2;
+    const mlY = aiY + aiHeight + 40;
+    const mlWidth = 250;
+    const mlHeight = 100;
+
+    // Connection line
+    svg.append('line')
+        .attr('x1', aiX)
+        .attr('y1', aiY + aiHeight)
+        .attr('x2', mlX)
+        .attr('y2', mlY)
+        .attr('stroke', '#6B7280')
+        .attr('stroke-width', 4)
+        .attr('marker-end', 'url(#arrowhead)');
+
+    const mlGroup = svg.append('g');
+    mlGroup.append('rect')
+        .attr('x', mlX - mlWidth / 2)
+        .attr('y', mlY)
+        .attr('width', mlWidth)
+        .attr('height', mlHeight)
+        .attr('fill', mlColor)
+        .attr('stroke', '#6D28D9')
+        .attr('stroke-width', 3)
+        .attr('rx', 15)
+        .attr('opacity', 0.9);
+
+    mlGroup.append('text')
+        .attr('x', mlX)
+        .attr('y', mlY + 35)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '24px')
+        .attr('font-weight', 'bold')
+        .text('ML');
+
+    mlGroup.append('text')
+        .attr('x', mlX)
+        .attr('y', mlY + 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '14px')
+        .text('Machine Learning');
+
+    mlGroup.append('text')
+        .attr('x', mlX)
+        .attr('y', mlY + 85)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '12px')
+        .text('The Learning Child');
+
+    // DL (Bottom level)
+    const dlX = width / 2;
+    const dlY = mlY + mlHeight + 40;
+    const dlWidth = 200;
+    const dlHeight = 100;
+
+    // Connection line
+    svg.append('line')
+        .attr('x1', mlX)
+        .attr('y1', mlY + mlHeight)
+        .attr('x2', dlX)
+        .attr('y2', dlY)
+        .attr('stroke', '#6B7280')
+        .attr('stroke-width', 4)
+        .attr('marker-end', 'url(#arrowhead)');
+
+    const dlGroup = svg.append('g');
+    dlGroup.append('rect')
+        .attr('x', dlX - dlWidth / 2)
+        .attr('y', dlY)
+        .attr('width', dlWidth)
+        .attr('height', dlHeight)
+        .attr('fill', dlColor)
+        .attr('stroke', '#BE185D')
+        .attr('stroke-width', 3)
+        .attr('rx', 15)
+        .attr('opacity', 0.9);
+
+    dlGroup.append('text')
+        .attr('x', dlX)
+        .attr('y', dlY + 35)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '22px')
+        .attr('font-weight', 'bold')
+        .text('DL');
+
+    dlGroup.append('text')
+        .attr('x', dlX)
+        .attr('y', dlY + 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '13px')
+        .text('Deep Learning');
+
+    dlGroup.append('text')
+        .attr('x', dlX)
+        .attr('y', dlY + 85)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '11px')
+        .text('The Prodigy Grandchild');
+
+    // Arrow marker definition
+    const defs = svg.append('defs');
+    const marker = defs.append('marker')
+        .attr('id', 'arrowhead')
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('refX', 5)
+        .attr('refY', 5)
+        .attr('orient', 'auto');
+    
+    marker.append('polygon')
+        .attr('points', '0,0 10,5 0,10')
+        .attr('fill', '#6B7280');
+}
+
+// Matryoshka Visualization
+function initializeMatryoshka() {
+    const svg = d3.select('#matryoshka-svg');
+    const width = 1000;
+    const height = 600;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    updateMatryoshka(0);
+}
+
+function updateMatryoshka(layer) {
+    const svg = d3.select('#matryoshka-svg');
+    const width = 1000;
+    const height = 600;
+    
+    svg.selectAll('*').remove();
+
+    const centerX = width / 2;
+    const baseY = height - 50;
+
+    const dolls = [
+        { name: 'AI', color: '#3B82F6', size: 200, y: baseY - 200, label: 'AI - All Intelligent Machines' },
+        { name: 'ML', color: '#8B5CF6', size: 150, y: baseY - 150, label: 'ML - Learning from Data' },
+        { name: 'DL', color: '#EC4899', size: 100, y: baseY - 100, label: 'DL - Neural Networks' }
+    ];
+
+    dolls.forEach((doll, index) => {
+        if (layer === 0 || layer === index + 1) {
+            const opacity = (layer === 0 || layer === index + 1) ? 1 : 0.3;
+            
+            // Doll body
+            svg.append('ellipse')
+                .attr('cx', centerX)
+                .attr('cy', doll.y)
+                .attr('rx', doll.size / 2)
+                .attr('ry', doll.size / 2.5)
+                .attr('fill', doll.color)
+                .attr('stroke', '#1A1A1A')
+                .attr('stroke-width', 3)
+                .attr('opacity', opacity);
+
+            // Doll head
+            svg.append('circle')
+                .attr('cx', centerX)
+                .attr('cy', doll.y - doll.size / 2.5)
+                .attr('r', doll.size / 3)
+                .attr('fill', doll.color)
+                .attr('stroke', '#1A1A1A')
+                .attr('stroke-width', 3)
+                .attr('opacity', opacity);
+
+            // Label
+            svg.append('text')
+                .attr('x', centerX)
+                .attr('y', doll.y + doll.size / 2 + 30)
+                .attr('text-anchor', 'middle')
+                .attr('fill', doll.color)
+                .attr('font-size', '18px')
+                .attr('font-weight', 'bold')
+                .attr('opacity', opacity)
+                .text(doll.label);
+        }
+    });
+
+    // Show nesting relationship
+    if (layer === 0) {
+        svg.append('text')
+            .attr('x', centerX)
+            .attr('y', 50)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#6B46C1')
+            .attr('font-size', '24px')
+            .attr('font-weight', 'bold')
+            .text('The Matryoshka: DL fits in ML, ML fits in AI');
+    }
+}
+
+// Family Dinner Visualization
+function initializeFamilyDinner() {
+    const svg = d3.select('#dinner-svg');
+    const width = 1000;
+    const height = 400;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    svg.selectAll('*').remove();
+
+    // Table
+    svg.append('ellipse')
+        .attr('cx', width / 2)
+        .attr('cy', height - 50)
+        .attr('rx', 400)
+        .attr('ry', 80)
+        .attr('fill', '#8B4513')
+        .attr('opacity', 0.7);
+
+    // Photo in center
+    svg.append('rect')
+        .attr('x', width / 2 - 60)
+        .attr('y', height - 200)
+        .attr('width', 120)
+        .attr('height', 90)
+        .attr('fill', '#F3F4F6')
+        .attr('stroke', '#1A1A1A')
+        .attr('stroke-width', 2)
+        .attr('rx', 5);
+
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', height - 150)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '14px')
+        .text('Photo');
+
+    // AI character
+    const aiX = width / 2 - 200;
+    const aiY = height - 100;
+    svg.append('circle')
+        .attr('cx', aiX)
+        .attr('cy', aiY)
+        .attr('r', 40)
+        .attr('fill', '#3B82F6')
+        .attr('stroke', '#1E40AF')
+        .attr('stroke-width', 3);
+
+    svg.append('text')
+        .attr('x', aiX)
+        .attr('y', aiY - 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#3B82F6')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('AI');
+
+    svg.append('text')
+        .attr('x', aiX)
+        .attr('y', aiY + 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '12px')
+        .text('Uses Rules');
+
+    // ML character
+    const mlX = width / 2;
+    const mlY = height - 100;
+    svg.append('circle')
+        .attr('cx', mlX)
+        .attr('cy', mlY)
+        .attr('r', 40)
+        .attr('fill', '#8B5CF6')
+        .attr('stroke', '#6D28D9')
+        .attr('stroke-width', 3);
+
+    svg.append('text')
+        .attr('x', mlX)
+        .attr('y', mlY - 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#8B5CF6')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('ML');
+
+    svg.append('text')
+        .attr('x', mlX)
+        .attr('y', mlY + 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '12px')
+        .text('Learns Patterns');
+
+    // DL character
+    const dlX = width / 2 + 200;
+    const dlY = height - 100;
+    svg.append('circle')
+        .attr('cx', dlX)
+        .attr('cy', dlY)
+        .attr('r', 40)
+        .attr('fill', '#EC4899')
+        .attr('stroke', '#BE185D')
+        .attr('stroke-width', 3);
+
+    svg.append('text')
+        .attr('x', dlX)
+        .attr('y', dlY - 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#EC4899')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('DL');
+
+    svg.append('text')
+        .attr('x', dlX)
+        .attr('y', dlY + 60)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '12px')
+        .text('Neural Networks');
+
+    // Thought bubbles
+    svg.append('path')
+        .attr('d', `M ${aiX} ${aiY - 40} Q ${aiX - 30} ${aiY - 80} ${aiX - 60} ${aiY - 80} Q ${aiX - 90} ${aiY - 80} ${aiX - 90} ${aiY - 110}`)
+        .attr('fill', 'white')
+        .attr('stroke', '#1A1A1A')
+        .attr('stroke-width', 2);
+
+    svg.append('text')
+        .attr('x', aiX - 90)
+        .attr('y', aiY - 95)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '11px')
+        .text('Rules!');
+
+    svg.append('path')
+        .attr('d', `M ${mlX} ${mlY - 40} Q ${mlX} ${mlY - 80} ${mlX} ${mlY - 110}`)
+        .attr('fill', 'white')
+        .attr('stroke', '#1A1A1A')
+        .attr('stroke-width', 2);
+
+    svg.append('text')
+        .attr('x', mlX)
+        .attr('y', mlY - 95)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '11px')
+        .text('Examples!');
+
+    svg.append('path')
+        .attr('d', `M ${dlX} ${dlY - 40} Q ${dlX + 30} ${dlY - 80} ${dlX + 60} ${dlY - 80} Q ${dlX + 90} ${dlY - 80} ${dlX + 90} ${dlY - 110}`)
+        .attr('fill', 'white')
+        .attr('stroke', '#1A1A1A')
+        .attr('stroke-width', 2);
+
+    svg.append('text')
+        .attr('x', dlX + 90)
+        .attr('y', dlY - 95)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '11px')
+        .text('Brain!');
+}
+
+// Decision Tree Visualization
+function initializeDecisionTree() {
+    const svg = d3.select('#decision-tree-svg');
+    const width = 1000;
+    const height = 800;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    svg.selectAll('*').remove();
+
+    const startX = width / 2;
+    const startY = 50;
+
+    // Start node
+    svg.append('rect')
+        .attr('x', startX - 100)
+        .attr('y', startY)
+        .attr('width', 200)
+        .attr('height', 60)
+        .attr('fill', '#6B46C1')
+        .attr('stroke', '#4C1D95')
+        .attr('stroke-width', 3)
+        .attr('rx', 10);
+
+    svg.append('text')
+        .attr('x', startX)
+        .attr('y', startY + 35)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '18px')
+        .attr('font-weight', 'bold')
+        .text('What Problem?');
+
+    // First decision
+    const q1Y = startY + 120;
+    svg.append('rect')
+        .attr('x', startX - 150)
+        .attr('y', q1Y)
+        .attr('width', 300)
+        .attr('height', 50)
+        .attr('fill', '#F3F4F6')
+        .attr('stroke', '#6B46C1')
+        .attr('stroke-width', 2)
+        .attr('rx', 8);
+
+    svg.append('text')
+        .attr('x', startX)
+        .attr('y', q1Y + 30)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '14px')
+        .text('Clear rules?');
+
+    // Lines
+    svg.append('line')
+        .attr('x1', startX)
+        .attr('y1', startY + 60)
+        .attr('x2', startX)
+        .attr('y2', q1Y)
+        .attr('stroke', '#6B7280')
+        .attr('stroke-width', 2);
+
+    // Yes branch - AI
+    const aiX = startX - 300;
+    const aiY = q1Y + 120;
+    svg.append('line')
+        .attr('x1', startX - 150)
+        .attr('y1', q1Y + 25)
+        .attr('x2', aiX)
+        .attr('y2', aiY)
+        .attr('stroke', '#3B82F6')
+        .attr('stroke-width', 3);
+
+    svg.append('text')
+        .attr('x', (startX - 150 + aiX) / 2)
+        .attr('y', (q1Y + 25 + aiY) / 2 - 10)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#3B82F6')
+        .attr('font-size', '12px')
+        .attr('font-weight', 'bold')
+        .text('YES');
+
+    svg.append('rect')
+        .attr('x', aiX - 100)
+        .attr('y', aiY)
+        .attr('width', 200)
+        .attr('height', 80)
+        .attr('fill', '#3B82F6')
+        .attr('stroke', '#1E40AF')
+        .attr('stroke-width', 3)
+        .attr('rx', 10);
+
+    svg.append('text')
+        .attr('x', aiX)
+        .attr('y', aiY + 30)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('Use AI');
+
+    svg.append('text')
+        .attr('x', aiX)
+        .attr('y', aiY + 55)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '12px')
+        .text('Rule-based');
+
+    // No branch - Continue
+    const q2X = startX + 300;
+    const q2Y = q1Y + 120;
+    svg.append('line')
+        .attr('x1', startX + 150)
+        .attr('y1', q1Y + 25)
+        .attr('x2', q2X)
+        .attr('y2', q2Y)
+        .attr('stroke', '#8B5CF6')
+        .attr('stroke-width', 3);
+
+    svg.append('text')
+        .attr('x', (startX + 150 + q2X) / 2)
+        .attr('y', (q1Y + 25 + q2Y) / 2 - 10)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#8B5CF6')
+        .attr('font-size', '12px')
+        .attr('font-weight', 'bold')
+        .text('NO');
+
+    svg.append('rect')
+        .attr('x', q2X - 150)
+        .attr('y', q2Y)
+        .attr('width', 300)
+        .attr('height', 50)
+        .attr('fill', '#F3F4F6')
+        .attr('stroke', '#8B5CF6')
+        .attr('stroke-width', 2)
+        .attr('rx', 8);
+
+    svg.append('text')
+        .attr('x', q2X)
+        .attr('y', q2Y + 30)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#1A1A1A')
+        .attr('font-size', '14px')
+        .text('Images/Text/Audio?');
+
+    // ML branch
+    const mlX = q2X - 300;
+    const mlY = q2Y + 120;
+    svg.append('line')
+        .attr('x1', q2X - 150)
+        .attr('y1', q2Y + 25)
+        .attr('x2', mlX)
+        .attr('y2', mlY)
+        .attr('stroke', '#8B5CF6')
+        .attr('stroke-width', 3);
+
+    svg.append('text')
+        .attr('x', (q2X - 150 + mlX) / 2)
+        .attr('y', (q2Y + 25 + mlY) / 2 - 10)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#8B5CF6')
+        .attr('font-size', '12px')
+        .attr('font-weight', 'bold')
+        .text('NO');
+
+    svg.append('rect')
+        .attr('x', mlX - 100)
+        .attr('y', mlY)
+        .attr('width', 200)
+        .attr('height', 80)
+        .attr('fill', '#8B5CF6')
+        .attr('stroke', '#6D28D9')
+        .attr('stroke-width', 3)
+        .attr('rx', 10);
+
+    svg.append('text')
+        .attr('x', mlX)
+        .attr('y', mlY + 30)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('Use ML');
+
+    svg.append('text')
+        .attr('x', mlX)
+        .attr('y', mlY + 55)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '12px')
+        .text('Learning');
+
+    // DL branch
+    const dlX = q2X + 300;
+    const dlY = q2Y + 120;
+    svg.append('line')
+        .attr('x1', q2X + 150)
+        .attr('y1', q2Y + 25)
+        .attr('x2', dlX)
+        .attr('y2', dlY)
+        .attr('stroke', '#EC4899')
+        .attr('stroke-width', 3);
+
+    svg.append('text')
+        .attr('x', (q2X + 150 + dlX) / 2)
+        .attr('y', (q2Y + 25 + dlY) / 2 - 10)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#EC4899')
+        .attr('font-size', '12px')
+        .attr('font-weight', 'bold')
+        .text('YES');
+
+    svg.append('rect')
+        .attr('x', dlX - 100)
+        .attr('y', dlY)
+        .attr('width', 200)
+        .attr('height', 80)
+        .attr('fill', '#EC4899')
+        .attr('stroke', '#BE185D')
+        .attr('stroke-width', 3)
+        .attr('rx', 10);
+
+    svg.append('text')
+        .attr('x', dlX)
+        .attr('y', dlY + 30)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('Use DL');
+
+    svg.append('text')
+        .attr('x', dlX)
+        .attr('y', dlY + 55)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '12px')
+        .text('Neural Networks');
+}
+
+// Setup Interactivity
+function setupInteractivity() {
+    removeAllTooltips();
+    
+    // Matryoshka layer control
+    const dollSlider = document.getElementById('doll-layer');
+    const layerName = document.getElementById('layer-name');
+    
+    if (dollSlider && layerName) {
+        dollSlider.removeAttribute('title');
+        
+        const layerNames = ['AI (All Layers)', 'ML (Middle Layer)', 'DL (Inner Layer)'];
+        
+        dollSlider.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            layerName.textContent = layerNames[value];
+            updateMatryoshka(value);
+        });
+    }
+    
+    removeAllTooltips();
+}
+
+// Smooth scrolling for navigation
+function setupSmoothScrolling() {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            
+            const targetId = this.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+    });
+}
+
+// Update visualizations on window resize
+window.addEventListener('resize', function() {
+    initializeFamilyTree();
+    initializeMatryoshka();
+    initializeFamilyDinner();
+    initializeDecisionTree();
+});
+    </script>
+</body>
+</html>

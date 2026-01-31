@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Hierarchy: Data Lifecycle Management for AI Workloads</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #1976D2;
+    --secondary-color: #42A5F5;
+    --accent-color: #90CAF9;
+    --bg-color: #E3F2FD;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #BBDEFB;
+    --shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #1976D2, #42A5F5);
+    color: white;
+    position: relative;
+}
+header::before {
+    content: '';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.journey-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #BBDEFB;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+</style>
+</head>
+<body>
+    <header>
+        <h1>28. Storage Hierarchy</h1>
+        <p class="subtitle">Data Lifecycle Management Across Storage Tiers for AI Workloads</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#local-storage" class="nav-link active">Local Storage</a>
+        <a href="#network-storage" class="nav-link">Network Storage</a>
+        <a href="#parallel-storage" class="nav-link">Parallel Storage</a>
+        <a href="#object-storage" class="nav-link">Object Storage</a>
+        <a href="#lifecycle" class="nav-link">Data Lifecycle</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="local-storage" class="section">
+            <h2>Local Storage</h2>
+            <p>
+                Local storage refers to storage devices directly attached to compute nodes, such as NVMe SSDs 
+                and local disks. This tier provides the fastest access times and lowest latency, making it ideal 
+                for active data that requires immediate access. However, local storage typically offers limited 
+                capacity and higher cost per gigabyte compared to network-attached storage solutions.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Local Storage<br/>Hometown] --> B[Fast Access<br/>Immediate]
+                    A --> C[Small Capacity<br/>Limited]
+                    A --> D[Expensive<br/>Premium]
+                    A --> E[Where Data is Born<br/>Creation Point]
+                    
+                    style A fill:#1976D2
+                    style B fill:#42A5F5
+                    style C fill:#90CAF9
+                    style D fill:#BBDEFB
+                    style E fill:#E3F2FD
+            </div>
+
+            <div class="example-box">
+                <strong>Key Characteristics:</strong>
+                Local storage provides immediate access to data with minimal latency, making it essential for 
+                AI workloads that require high I/O performance. Typical use cases include temporary files, 
+                checkpoint data, and frequently accessed datasets. The trade-off is limited scalability and 
+                higher cost compared to shared storage solutions.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Storage Hierarchy))
+                    Local Storage
+                      Fast Access
+                      Low Latency
+                      Limited Capacity
+                    Network Storage
+                      Shared Access
+                      Moderate Speed
+                      NFS/NAS
+                    Parallel Storage
+                      High Throughput
+                      Massive Scale
+                      Lustre
+                    Object Storage
+                      Archive Storage
+                      Cost-Effective
+                      S3-Compatible
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Data Created] --> B{Storage Tier?}
+                    B -->|Active Use| C[Local Storage<br/>Fast, Low Latency]
+                    B -->|Shared Access| D[Network Storage<br/>NFS/NAS]
+                    B -->|Large Scale| E[Parallel Storage<br/>Lustre]
+                    B -->|Archive| F[Object Storage<br/>S3]
+                    
+                    C --> G[High Performance]
+                    D --> H[Shared Resources]
+                    E --> I[Massive Throughput]
+                    F --> J[Cost-Effective Archive]
+                    
+                    style A fill:#1976D2
+                    style G fill:#42A5F5
+            </div>
+        </section>
+
+        <section id="city" class="section">
+            <h2>🏙️ The City: Network Storage</h2>
+            <p>
+                Network storage (NFS, clustered NAS) is like moving to the city - more space, shared 
+                resources, but slightly slower access. Data moves here for sharing across systems.
+            </p>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Network Storage] --> B[NFS<br/>Network File System]
+                    A --> C[Clustered NAS<br/>Network Attached]
+                    A --> D[Shared Access<br/>Multiple Systems]
+                    A --> E[Moderate Speed<br/>Balanced Performance]
+                    
+                    B --> F[City Storage<br/>Shared Resources]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#1976D2
+                    style F fill:#42A5F5
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[City Life - Network Storage] --> B[NFS<br/>Public Transportation]
+                    A --> C[Clustered NAS<br/>City Utilities]
+                    A --> D[Shared Access<br/>Multiple Systems]
+                    A --> E[Moderate Speed<br/>Balanced Performance]
+                    
+                    B --> F[Network Storage<br/>Shared Resources]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#1976D2
+                    style F fill:#42A5F5
+                </div>
+        </section>
+
+        <section id="metropolis" class="section">
+            <h2>Parallel Storage: Lustre</h2>
+            <p>
+                Parallel storage systems like Lustre provide massive scale and high throughput, designed 
+                for large-scale AI workloads requiring petabyte-scale capacity and terabyte-per-second 
+                performance.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Parallel Storage<br/>Lustre] --> B[Massive Scale<br/>Petabytes]
+                    A --> C[High Throughput<br/>Terabytes/sec]
+                    A --> D[Distributed<br/>Many Nodes]
+                    A --> E[AI-Optimized<br/>Perfect for Training]
+                    
+                    style A fill:#1976D2
+            </div>
+
+            <div class="example-box">
+                <strong>Parallel Storage Benefits:</strong>
+                Lustre and other parallel file systems can handle massive scale with incredible throughput. 
+                They are ideal for AI training workloads that need to read petabytes of data at 
+                terabyte-per-second speeds, enabling efficient data loading for distributed training.
+            </div>
+        </section>
+
+        <section id="object-storage" class="section">
+            <h2>Object Storage</h2>
+            <p>
+                Object storage systems like S3 provide vast, cost-effective storage capacity with high 
+                durability. They are designed for archives, backups, and long-term data retention rather 
+                than active workloads requiring low latency.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Object Storage] --> B[Vast Capacity<br/>Exabytes Scale]
+                    A --> C[Cost-Effective<br/>Low Cost/GB]
+                    A --> D[High Durability<br/>Long-Term Retention]
+                    A --> E[Higher Latency<br/>Not Active Workloads]
+                    A --> F[Use Cases<br/>Archives, Backups, Data Lakes]
+                    
+                    B --> G[Object Storage<br/>Complete Solution]
+                    C --> G
+                    D --> G
+                    E --> G
+                    F --> G
+                    
+                    style A fill:#1976D2
+                    style G fill:#42A5F5
+                </div>
+        </section>
+
+        <section id="lifecycle" class="section">
+            <h2>Data Lifecycle</h2>
+            <p>
+                Data moves through the storage hierarchy based on access patterns and requirements, from 
+                active use to archival storage.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Birth<br/>Local Storage] --> B[Adolescence<br/>Network Storage]
+                    B --> C[Adulthood<br/>Parallel Storage]
+                    C --> D[Production<br/>Optimized Storage]
+                    D --> E[Retirement<br/>Object Storage]
+                    
+                    style A fill:#1976D2
+                    style B fill:#42A5F5
+                    style C fill:#90CAF9
+                    style D fill:#BBDEFB
+                    style E fill:#E3F2FD
+            </div>
+
+            <div class="example-box">
+                <strong>🚶 The Journey Stages:</strong>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li><strong>Birth:</strong> Data created in local storage</li>
+                    <li><strong>Adolescence:</strong> Moved to network storage for sharing</li>
+                    <li><strong>Adulthood:</strong> Active training uses parallel storage</li>
+                    <li><strong>Production:</strong> Optimized storage for serving models</li>
+                    <li><strong>Retirement:</strong> Archived to object storage</li>
+                </ul>
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p><strong>The Storage Hierarchy</strong> - From Flash to Cloud: AI's Data Journey</p>
+        <p>Every piece of data has a journey - from hometown to cloud! 🗺️</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' }
+);
+            });
+        });
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            let current = '';
+            sections.forEach(s => {
+                if (window.pageYOffset >= s.offsetTop - 100) current = s.getAttribute('id');
+            }
+);
+            navLinks.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href') === `#${current}`) l.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>39. nvidia-mig-parted: MIG Partition Configuration Tool</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #E91E63;
+    --secondary-color: #F06292;
+    --accent-color: #FF4081;
+    --bg-color: #FFF5F7;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #F8BBD0;
+    --shadow: 0 2px 8px rgba(233, 30, 99, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #E91E63, #F06292);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.tool-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.tool-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.command-box {
+    background: #263238;
+    color: #F8BBD0;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+.yaml-example {
+    background: #FFF9E6;
+    border-left: 4px solid #FFC107;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFF5F7, #FFE8F0);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #F8BBD0;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>39. nvidia-mig-parted: MIG Partition Editor</h1>
+        <p class="subtitle">Configuration Tool for Multi-Instance GPU Partitions</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#installation" class="nav-link">Installation</a>
+        <a href="#yaml-config" class="nav-link">YAML Configuration</a>
+        <a href="#commands" class="nav-link">Commands</a>
+        <a href="#persistent" class="nav-link">Persistent Config</a>
+        <a href="#best-practices" class="nav-link">Best Practices</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>nvidia-mig-parted Overview</h2>
+            <p>
+                nvidia-mig-parted is a command-line tool that simplifies MIG partition configuration and management. 
+                It provides a declarative approach to MIG configuration using YAML files, making it easier to define, 
+                apply, and maintain MIG partitions across multiple GPUs. The tool handles the complexity of creating 
+                GPU Instances and Compute Instances in the correct order and ensures configurations persist across 
+                reboots.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[nvidia-mig-parted] --> B[YAML Configuration]
+                    A --> C[Apply Configuration]
+                    A --> D[Validate Configuration]
+                    A --> E[Persistent Setup]
+                    
+                    B --> B1[Define Partitions]
+                    B --> B2[Specify Profiles]
+                    
+                    C --> C1[Create GIs]
+                    C --> C2[Create CIs]
+                    
+                    D --> D1[Check Validity]
+                    D --> D2[Verify Resources]
+                    
+                    E --> E1[Systemd Service]
+                    E --> E2[Auto-Apply on Boot]
+                    
+                    style A fill:#E91E63
+                    style B fill:#F06292
+                    style C fill:#FF4081
+                    style D fill:#F8BBD0
+                    style E fill:#FFF5F7
+            </div>
+
+            <div class="example-box">
+                <strong>Configuration-Based Partitioning:</strong>
+                nvidia-mig-parted enables configuration-based MIG partitioning, allowing you to define partition 
+                configurations in a YAML file and apply them to GPUs. This approach ensures consistency and 
+                repeatability - you define partitions once in configuration and apply them across multiple GPUs 
+                or deployments.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((nvidia-mig-parted))
+                    Configuration
+                      YAML Files
+                      Declarative Approach
+                      Partition Definitions
+                    Commands
+                      Apply Configuration
+                      Validate Configuration
+                      List Partitions
+                    Persistent Setup
+                      Systemd Service
+                      Auto-Apply on Boot
+                      Daemon Mode
+                    Best Practices
+                      Version Control
+                      Testing
+                      Production Deployment
+            </div>
+        </section>
+
+        <section id="installation" class="section">
+            <h2>Installation</h2>
+            <p>
+                nvidia-mig-parted is available as a standalone tool and can be installed via package managers 
+                or downloaded directly from NVIDIA.
+            </p>
+
+            <div class="tool-card">
+                <h3>Installation Methods</h3>
+                <p><strong>Method 1: Package Manager (Recommended)</strong></p>
+                <div class="command-box">
+# Ubuntu/Debian<br>
+sudo apt-get update<br>
+sudo apt-get install nvidia-mig-parted
+                </div>
+                <p><strong>Method 2: Direct Download</strong></p>
+                <div class="command-box">
+# Download from NVIDIA GitHub<br>
+wget https://github.com/NVIDIA/mig-parted/releases/download/vX.X.X/nvidia-mig-parted_X.X.X_amd64.deb<br>
+sudo dpkg -i nvidia-mig-parted_X.X.X_amd64.deb
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <h3>Verify Installation</h3>
+                <div class="command-box">
+nvidia-mig-parted --version
+                </div>
+                <p>This command displays the installed version and confirms the tool is available.</p>
+            </div>
+        </section>
+
+        <section id="yaml-config" class="section">
+            <h2>YAML Configuration Files</h2>
+            <p>
+                nvidia-mig-parted uses YAML configuration files to define MIG partitions declaratively. 
+                The YAML format makes configurations readable, version-controllable, and easy to share across 
+                systems.
+            </p>
+
+            <div class="tool-card">
+                <h3>Basic YAML Structure</h3>
+                <p>A simple MIG configuration file:</p>
+                <div class="yaml-example">
+version: v1<br>
+mig-configs:<br>
+  all-disabled:<br>
+    - devices: all<br>
+      mig-enabled: false<br>
+<br>
+  all-enabled:<br>
+    - devices: all<br>
+      mig-enabled: true<br>
+      mig-devices: {}<br>
+<br>
+  custom-config:<br>
+    - devices: all<br>
+      mig-enabled: true<br>
+      mig-devices:<br>
+        "0":<br>
+          - profile: 2g.47gb<br>
+            count: 2
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[YAML Config File] --> B[Define Configuration<br/>mig-configs]
+                    B --> C[Specify Devices<br/>Target GPUs]
+                    C --> D[Enable MIG<br/>mig-enabled: true]
+                    D --> E[Define Partitions<br/>mig-devices]
+                    E --> F[Specify Profiles<br/>2g.47gb, etc.]
+                    F --> G[Set Count<br/>Number of Instances]
+                    G --> H[Apply Configuration<br/>nvidia-mig-parted apply]
+                    
+                    style A fill:#E91E63
+                    style H fill:#F06292
+            </div>
+
+            <div class="tool-card">
+                <h3>Configuration Components</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>version:</strong> Configuration file format version</li>
+                    <li><strong>mig-configs:</strong> Dictionary of named configurations</li>
+                    <li><strong>devices:</strong> Target GPUs (all, specific IDs, or ranges)</li>
+                    <li><strong>mig-enabled:</strong> Enable or disable MIG mode</li>
+                    <li><strong>mig-devices:</strong> Specific MIG partition definitions</li>
+                    <li><strong>profile:</strong> MIG profile (e.g., 2g.47gb)</li>
+                    <li><strong>count:</strong> Number of instances to create</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Example: Multiple Partition Configuration</h3>
+                <div class="yaml-example">
+version: v1<br>
+mig-configs:<br>
+  production-config:<br>
+    - devices: all<br>
+      mig-enabled: true<br>
+      mig-devices:<br>
+        "0":<br>
+          - profile: 2g.47gb<br>
+            count: 2<br>
+            mig-instance-profile-names: ["MIG-2g.47gb-0", "MIG-2g.47gb-1"]<br>
+        "1":<br>
+          - profile: 4g.24gb<br>
+            count: 4<br>
+            mig-instance-profile-names: ["MIG-4g.24gb-0", "MIG-4g.24gb-1", "MIG-4g.24gb-2", "MIG-4g.24gb-3"]
+                </div>
+            </div>
+        </section>
+
+        <section id="commands" class="section">
+            <h2>Common Commands</h2>
+            <p>
+                nvidia-mig-parted provides commands for applying configurations, validating setups, and managing 
+                MIG partitions. Understanding these commands enables efficient MIG management.
+            </p>
+
+            <div class="tool-card">
+                <h3>Apply Configuration</h3>
+                <p>Apply a configuration from a YAML file:</p>
+                <div class="command-box">
+sudo nvidia-mig-parted apply -f config.yaml
+                </div>
+                <p>This command reads the YAML file and applies the MIG configuration to specified GPUs.</p>
+            </div>
+
+            <div class="tool-card">
+                <h3>Select Configuration</h3>
+                <p>Apply a named configuration from the file:</p>
+                <div class="command-box">
+sudo nvidia-mig-parted apply -f config.yaml -c production-config
+                </div>
+                <p>The <code>-c</code> flag specifies which configuration to apply from the file.</p>
+            </div>
+
+            <div class="tool-card">
+                <h3>Validate Configuration</h3>
+                <p>Check if a configuration is valid without applying:</p>
+                <div class="command-box">
+nvidia-mig-parted assert -f config.yaml -c production-config
+                </div>
+                <p>This validates the configuration against current GPU state without making changes.</p>
+            </div>
+
+            <div class="tool-card">
+                <h3>Export Current Configuration</h3>
+                <p>Export current MIG state to YAML:</p>
+                <div class="command-box">
+nvidia-mig-parted export -f current-config.yaml
+                </div>
+                <p>Useful for documenting current setup or creating backup configurations.</p>
+            </div>
+
+            <div class="tool-card">
+                <h3>List Available Profiles</h3>
+                <p>View available MIG profiles for your GPU:</p>
+                <div class="command-box">
+nvidia-mig-parted list-profiles
+                </div>
+                <p>Shows all valid MIG profiles for the installed GPU model.</p>
+            </div>
+        </section>
+
+        <section id="persistent" class="section">
+            <h2>Persistent Configuration</h2>
+            <p>
+                nvidia-mig-parted can be configured to automatically apply MIG partitions on system boot, 
+                ensuring configurations persist across reboots. This is essential for production deployments.
+            </p>
+
+            <div class="tool-card">
+                <h3>Setup Persistent Configuration</h3>
+                <p>Configure automatic application on boot:</p>
+                <div class="command-box">
+sudo nvidia-mig-parted daemon install -f config.yaml -c production-config
+                </div>
+                <p>This installs a systemd service that applies the configuration on boot.</p>
+            </div>
+
+            <div class="tool-card">
+                <h3>Systemd Service</h3>
+                <p>The daemon creates a systemd service:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Service Name:</strong> nvidia-mig-parted.service</li>
+                    <li><strong>Timing:</strong> Runs after GPU drivers are loaded</li>
+                    <li><strong>Dependencies:</strong> Waits for NVIDIA driver initialization</li>
+                    <li><strong>Logging:</strong> Logs to systemd journal</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Manage Daemon</h3>
+                <p>Control the persistent configuration service:</p>
+                <div class="command-box">
+# Check service status<br>
+sudo systemctl status nvidia-mig-parted.service<br>
+<br>
+# Enable service (auto-start on boot)<br>
+sudo systemctl enable nvidia-mig-parted.service<br>
+<br>
+# Disable service<br>
+sudo systemctl disable nvidia-mig-parted.service<br>
+<br>
+# Uninstall daemon<br>
+sudo nvidia-mig-parted daemon uninstall
+                </div>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>Best Practices</h2>
+            <p>
+                Following best practices ensures reliable MIG configuration management and avoids common pitfalls.
+            </p>
+
+            <div class="tool-card">
+                <h3>Configuration Management</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Version Control:</strong> Store YAML files in version control (Git)</li>
+                    <li><strong>Documentation:</strong> Document the purpose of each configuration</li>
+                    <li><strong>Testing:</strong> Test configurations on non-production systems first</li>
+                    <li><strong>Backup:</strong> Export current config before making changes</li>
+                    <li><strong>Naming:</strong> Use descriptive configuration names</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Configuration Workflow</h3>
+                <p>Recommended workflow for MIG configuration:</p>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Plan:</strong> Determine required MIG partitions based on workloads</li>
+                    <li><strong>Design:</strong> Create YAML configuration file</li>
+                    <li><strong>Validate:</strong> Use <code>assert</code> to validate configuration</li>
+                    <li><strong>Test:</strong> Apply to test system first</li>
+                    <li><strong>Apply:</strong> Apply to production systems</li>
+                    <li><strong>Persist:</strong> Setup daemon for automatic application</li>
+                    <li><strong>Monitor:</strong> Verify MIG instances are created correctly</li>
+                </ol>
+            </div>
+
+            <div class="tool-card">
+                <h3>Common Mistakes to Avoid</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Resource Overcommitment:</strong> Don't request more resources than available</li>
+                    <li><strong>Invalid Profiles:</strong> Ensure profiles are valid for your GPU model</li>
+                    <li><strong>Missing Dependencies:</strong> Ensure GPU drivers are loaded before applying</li>
+                    <li><strong>Concurrent Changes:</strong> Don't modify MIG while workloads are running</li>
+                    <li><strong>No Backup:</strong> Always backup current config before changes</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <h3>Validation Checklist</h3>
+                <p>Before applying a configuration, verify:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>✓ YAML syntax is correct</li>
+                    <li>✓ Profiles are valid for GPU model</li>
+                    <li>✓ Resource allocation doesn't exceed GPU capacity</li>
+                    <li>✓ No existing MIG instances conflict with new config</li>
+                    <li>✓ Configuration matches workload requirements</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Production Recommendation:</strong>
+                For production deployments, use persistent configurations with the daemon service. Store 
+                configuration files in version control and use infrastructure-as-code practices. Test 
+                configurations thoroughly before applying to production. Monitor MIG instance creation 
+                and verify workloads can access their assigned instances correctly.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>nvidia-mig-parted Guide | MIG Configuration Tool</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

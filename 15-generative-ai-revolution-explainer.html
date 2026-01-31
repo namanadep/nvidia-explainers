@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative AI: From Concept to Implementation</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #FF6B6B;
+    --secondary-color: #4ECDC4;
+    --accent-color: #FFE66D;
+    --success-color: #95E1D3;
+    --bg-color: #FFFFFF;
+    --card-bg: #F8F9FA;
+    --light-bg: #F0F4F8;
+    --text-color: #1A1A1A;
+    --text-muted: #6C757D;
+    --border-color: #E0E0E0;
+    --shadow: 0 2px 8px rgba(255, 107, 107, 0.1);
+    --shadow-hover: 0 4px 16px rgba(255, 107, 107, 0.15);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    text-align: center;
+    padding: 50px 40px;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+    50% { transform: translate(-50%, -50%) rotate(10deg); }
+}
+
+header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.95);
+    position: relative;
+    z-index: 1;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+
+.nav-link:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+
+.nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+
+main {
+    width: 100%;
+    padding: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+.section h3 {
+    font-size: 1.6rem;
+    margin: 25px 0 15px;
+    color: var(--secondary-color);
+}
+
+.section p {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-color);
+}
+
+.studio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin: 30px 0;
+}
+
+.studio-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.studio-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.studio-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-hover);
+}
+
+.studio-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+
+.workflow-diagram {
+    margin: 30px 0;
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 30px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.example-box {
+    background: linear-gradient(135deg, #FFF5F5, #E8F4F8);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+
+.comparison-table tr:hover {
+    background: var(--light-bg);
+}
+
+.mermaid {
+    margin: 30px 0;
+    text-align: center;
+}
+
+footer {
+    text-align: center;
+    padding: 40px;
+    margin-top: 0;
+    background: var(--light-bg);
+    border-top: 2px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    .studio-grid {
+        grid-template-columns: 1fr;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>15. Generative AI: From Concept to Implementation</h1>
+            <p class="subtitle">Understanding Generative AI Technology and Applications</p>
+            <p class="author-credit">Explained by Naman Adep</p>
+        </header>
+
+        <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+            <a href="#overview" class="nav-link active">Overview</a>
+            <a href="#models" class="nav-link">AI Models</a>
+            <a href="#workflow" class="nav-link">How It Works</a>
+            <a href="#workflow-process" class="nav-link">Workflow</a>
+            <a href="#applications" class="nav-link">Applications</a>
+            <a href="#training" class="nav-link">Training Process</a>
+        </nav>
+    <div class="main-content-wrapper">
+        <main>
+            <section id="overview" class="section">
+                <h2>Generative AI Overview</h2>
+                <p>
+                    Generative AI represents a revolutionary class of artificial intelligence technologies capable of 
+                    creating new content across multiple modalities including text, images, code, music, and video. Unlike 
+                    traditional AI systems that classify or predict, generative AI models learn patterns from vast 
+                    datasets and can produce novel, coherent outputs based on prompts or inputs. This capability has 
+                    transformative applications across industries, enabling automated content creation, code generation, 
+                    creative assistance, and problem-solving.
+                </p>
+                
+                <div class="example-box">
+                    <strong>Key Capability:</strong>
+                    Generative AI models learn from extensive training data to understand patterns, relationships, and 
+                    structures. When given a prompt, they can generate new content that follows these learned patterns, 
+                    creating outputs that are coherent, contextually appropriate, and often indistinguishable from 
+                    human-created content. This capability enables applications ranging from conversational AI assistants 
+                    to automated code generation and creative content production.
+                </div>
+
+                <div class="mermaid">
+                    mindmap
+                      root((Generative AI))
+                        AI Models
+                          Text Models
+                            GPT
+                            Claude
+                            BERT
+                          Image Models
+                            DALL-E
+                            Midjourney
+                            Stable Diffusion
+                          Code Models
+                            Codex
+                            GitHub Copilot
+                            CodeT5
+                          Audio Models
+                            MusicLM
+                            Whisper
+                            VALL-E
+                        How It Works
+                          Training
+                            Pattern Learning
+                            Data Processing
+                          Generation
+                            Prompt Processing
+                            Content Creation
+                        Applications
+                          Content Creation
+                          Code Generation
+                          Creative Assistance
+                          Problem Solving
+                </div>
+
+                <div class="studio-grid">
+                    <div class="studio-card">
+                        <h3>What is Generative AI?</h3>
+                        <p>
+                            Generative AI is a type of artificial intelligence that can create new content - text, images, 
+                            audio, video, code - that didn't exist before. Unlike traditional AI that recognizes patterns, 
+                            Generative AI creates patterns.
+                        </p>
+                    </div>
+                    <div class="studio-card">
+                        <h3>Why It's Revolutionary</h3>
+                        <p>
+                            For the first time in history, machines can create original content at scale. This transforms 
+                            industries from content creation to software development, from healthcare to entertainment.
+                        </p>
+                    </div>
+                    <div class="studio-card">
+                        <h3>The Core Concept</h3>
+                        <p>
+                            Generative AI learns from millions of examples, understanding patterns, styles, and structures. 
+                            After training on extensive datasets, it can generate new content that follows learned patterns 
+                            while creating original outputs.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="models" class="section">
+                <h2>AI Models: Specialized Capabilities</h2>
+                <p>
+                    Different AI models specialize in different content types and tasks. Each model is designed 
+                    for specific capabilities and use cases.
+                </p>
+
+                <div class="mermaid">
+                    graph TD
+                        A[Generative AI Models] --> B[Text Models]
+                        A --> C[Image Models]
+                        A --> D[Code Models]
+                        A --> E[Audio Models]
+                        
+                        B --> B1[GPT - Language Master]
+                        B --> B2[Claude - Conversationalist]
+                        B --> B3[BERT - Understanding Expert]
+                        
+                        C --> C1[DALL-E - Image Creator]
+                        C --> C2[Midjourney - Artistic Vision]
+                        C --> C3[Stable Diffusion - Open Source]
+                        
+                        D --> D1[Codex - Code Writer]
+                        D --> D2[GitHub Copilot - Pair Programmer]
+                        D --> D3[CodeT5 - Code Generator]
+                        
+                        E --> E1[MusicLM - Composer]
+                        E --> E2[Whisper - Transcriber]
+                        E --> E3[VALL-E - Voice Cloner]
+                        
+                        style A fill:#FF6B6B
+                        style B fill:#4ECDC4
+                        style C fill:#FFE66D
+                        style D fill:#95E1D3
+                        style E fill:#FFB6C1
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 30px 0;">
+                    <div class="studio-card" style="border-left: 5px solid #FF6B6B;">
+                        <h3 style="color: #FF6B6B; margin-bottom: 15px;">GPT - Text Generation</h3>
+                        <p><strong>Specialty:</strong> Text generation, conversation, writing</p>
+                        <p><strong>Capabilities:</strong> Stories, articles, code explanations, translations</p>
+                        <p><strong>Use Cases:</strong> Content creation, chatbots, language translation, summarization</p>
+                        <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                            Generates human-like text for various applications including content creation and conversation.
+                        </p>
+                    </div>
+
+                    <div class="studio-card" style="border-left: 5px solid #4ECDC4;">
+                        <h3 style="color: #4ECDC4; margin-bottom: 15px;">DALL-E - Image Generation</h3>
+                        <p><strong>Specialty:</strong> Image generation from text</p>
+                        <p><strong>Capabilities:</strong> Photorealistic images, artistic illustrations, concept art</p>
+                        <p><strong>Use Cases:</strong> Visual content creation, design, art generation</p>
+                        <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                            Creates images from text descriptions, enabling automated visual content generation.
+                        </p>
+                    </div>
+
+                    <div class="studio-card" style="border-left: 5px solid #95E1D3;">
+                        <h3 style="color: #95E1D3; margin-bottom: 15px;">Codex - Code Generation</h3>
+                        <p><strong>Specialty:</strong> Code generation from natural language</p>
+                        <p><strong>Capabilities:</strong> Code writing, debugging, documentation</p>
+                        <p><strong>Use Cases:</strong> Software development, code assistance, automation</p>
+                        <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                            Generates code from natural language descriptions, accelerating software development.
+                        </p>
+                    </div>
+                </div>
+
+            </section>
+
+            <section id="how-it-works" class="section">
+                <h2>How Generative AI Works</h2>
+                <p>
+                    Generative AI learns patterns from training data. After processing millions of examples, 
+                    the model understands relationships - which elements work together, which patterns are common, 
+                    and how to generate new content that follows learned structures.
+                </p>
+
+                <div class="mermaid">
+                    graph TB
+                        A[Training Data] --> B[Pattern Learning]
+                        B --> C[Model Training]
+                        C --> D[Pattern Recognition]
+                        D --> E[Content Generation]
+                        
+                        E --> F[New Content<br/>Following Patterns]
+                        
+                        style A fill:#FF6B6B
+                        style E fill:#4ECDC4
+                </div>
+
+                <div class="mermaid">
+                    flowchart TD
+                        A[Training Data<br/>Millions Examples] --> B[Neural Network<br/>Pattern Learning]
+                        B --> C[Model Weights<br/>Learned Patterns]
+                        C --> D[Prompt Input<br/>User Request]
+                        D --> E[Content Generation<br/>New Output]
+                        
+                        E --> F[Text Generation]
+                        E --> G[Image Creation]
+                        E --> H[Code Writing]
+                        E --> I[Music Composition]
+                        
+                        style A fill:#FF6B6B
+                        style B fill:#4ECDC4
+                        style E fill:#FFE66D
+                    </div>
+
+                <div class="example-box">
+                    <strong>Learning Process:</strong>
+                    Generative AI models are trained on vast datasets. They learn patterns: which words 
+                    commonly appear together, which visual elements create certain styles, which code 
+                    patterns solve specific problems. When generating new content, the model uses these 
+                    learned patterns to create original outputs that follow the training data's structure 
+                    and style.
+                </div>
+
+                <div class="mermaid">
+                    graph LR
+                        A[Training Data<br/>Millions of Examples] --> B[Neural Network<br/>Learning Patterns]
+                        B --> C[Pattern Recognition<br/>Understanding Structure]
+                        C --> D[Generation<br/>Creating New Content]
+                        
+                        D --> E[Text Generation]
+                        D --> F[Image Creation]
+                        D --> G[Code Writing]
+                        D --> H[Music Composition]
+                        
+                        style A fill:#FF6B6B
+                        style B fill:#4ECDC4
+                        style C fill:#FFE66D
+                        style D fill:#95E1D3
+                    </div>
+
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant User
+                        participant Model as AI Model
+                        participant NeuralNet as Neural Network
+                        participant Output
+                        
+                        User->>Model: Provide Prompt
+                        Model->>NeuralNet: Process Input
+                        NeuralNet->>NeuralNet: Apply Learned Patterns
+                        NeuralNet->>Output: Generate Content
+                        Output-->>User: Return Generated Content
+                        
+                        Note over Model,Output: Content follows learned patterns<br/>but is original
+                </div>
+
+                <h3>The Process</h3>
+                <ol style="margin-left: 20px; line-height: 2;">
+                    <li><strong>Training:</strong> The AI studies millions of examples (text, images, code, etc.)</li>
+                    <li><strong>Learning:</strong> It identifies patterns, structures, and relationships</li>
+                    <li><strong>Understanding:</strong> It builds a "mental model" of how content is created</li>
+                    <li><strong>Generation:</strong> When given a prompt, it creates new content following learned patterns</li>
+                </ol>
+            </section>
+
+            <section id="workshop" class="section">
+                <h2>🏭 The Workshop: From Prompt to Output</h2>
+                <p>
+                    The creative process in Generative AI follows a clear workflow - from your idea (prompt) to the 
+                    finished creation (output).
+                </p>
+
+                <div class="workflow-diagram">
+                    <div class="mermaid">
+                        sequenceDiagram
+                            participant User
+                            participant Prompt
+                            participant Model
+                            participant Neural Network
+                            participant Output
+                            
+                            User->>Prompt: "Create a sunset scene"
+                            Prompt->>Model: Process request
+                            Model->>Neural Network: Generate patterns
+                            Neural Network->>Neural Network: Apply learned patterns
+                            Neural Network->>Output: Create content
+                            Output->>User: Generated image/text/code
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+                    <div class="studio-card" style="border-left: 5px solid #FF6B6B;">
+                        <h3 style="color: #FF6B6B; margin-bottom: 15px;">Step 1: The Prompt</h3>
+                        <p><strong>Input:</strong> User provides description</p>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            The prompt specifies desired output characteristics, guiding the model's generation process.
+                        </p>
+                    </div>
+
+                    <div class="studio-card" style="border-left: 5px solid #4ECDC4;">
+                        <h3 style="color: #4ECDC4; margin-bottom: 15px;">Step 2: Processing</h3>
+                        <p><strong>Action:</strong> Model processes prompt</p>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            The AI model breaks down the request into components it understands from training.
+                        </p>
+                    </div>
+
+                    <div class="studio-card" style="border-left: 5px solid #FFE66D;">
+                        <h3 style="color: #FFE66D; margin-bottom: 15px;">Step 3: Generation</h3>
+                        <p><strong>Action:</strong> Create new content</p>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            The model applies learned patterns to create original outputs following training data structures.
+                        </p>
+                    </div>
+
+                    <div class="studio-card" style="border-left: 5px solid #95E1D3;">
+                        <h3 style="color: #95E1D3; margin-bottom: 15px;">Step 4: Output</h3>
+                        <p><strong>Result:</strong> Generated content</p>
+                        <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            User receives generated content - text, image, code - that follows learned patterns.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="impact" class="section">
+                <h2>🌍 Real-World Impact: Changing Industries</h2>
+                <p>
+                    Generative AI is transforming industries across the board. Here's how it's making a difference:
+                </p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Industry</th>
+                            <th>Application</th>
+                            <th>Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Healthcare</strong></td>
+                            <td>Drug discovery, medical imaging analysis, patient report generation</td>
+                            <td>Accelerating research, improving diagnostics, reducing administrative burden</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Entertainment</strong></td>
+                            <td>Script writing, character design, music composition, visual effects</td>
+                            <td>Enabling independent creators, reducing production costs, new creative possibilities</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Software Development</strong></td>
+                            <td>Code generation, bug fixing, documentation, testing</td>
+                            <td>Faster development, reduced errors, democratizing programming</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Education</strong></td>
+                            <td>Personalized tutoring, content creation, language learning</td>
+                            <td>Customized learning experiences, accessible education, interactive content</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marketing</strong></td>
+                            <td>Content creation, ad copy, social media posts, email campaigns</td>
+                            <td>Faster content production, A/B testing at scale, personalized messaging</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Design</strong></td>
+                            <td>Logo creation, website design, product mockups, UI/UX</td>
+                            <td>Rapid prototyping, design exploration, cost-effective solutions</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="behind-scenes" class="section">
+                <h2>🎬 Behind the Scenes: The Training Journey</h2>
+                <p>
+                    Creating a Generative AI model involves training, fine-tuning, and deployment. It's a process 
+                    of learning patterns from data, refining the model for specific tasks, and deploying it for 
+                    production use.
+                </p>
+
+                <div class="mermaid">
+                    graph TD
+                        A[Raw Data Collection] --> B[Data Cleaning]
+                        B --> C[Preprocessing]
+                        C --> D[Model Architecture]
+                        D --> E[Training Phase]
+                        E --> F[Validation]
+                        F --> G{Good Enough?}
+                        G -->|No| H[Fine-tuning]
+                        H --> E
+                        G -->|Yes| I[Deployment]
+                        I --> J[Production Use]
+                        
+                        style A fill:#FF6B6B
+                        style E fill:#4ECDC4
+                        style I fill:#95E1D3
+                </div>
+
+                <div class="studio-grid">
+                    <div class="studio-card">
+                        <h3>Data Collection</h3>
+                        <p>
+                            Like gathering art supplies, we collect massive datasets - billions of text documents, 
+                            millions of images, or vast code repositories.
+                        </p>
+                    </div>
+                    <div class="studio-card">
+                        <h3>Training</h3>
+                        <p>
+                            The model learns by example, processing training data to understand patterns, relationships, 
+                            and structures. This training phase enables the model to generate content following learned 
+                            patterns.
+                        </p>
+                    </div>
+                    <div class="studio-card">
+                        <h3>Fine-tuning</h3>
+                        <p>
+                            The model is fine-tuned for specific tasks, adapting learned patterns to particular use cases 
+                            or domains.
+                        </p>
+                    </div>
+                    <div class="studio-card">
+                        <h3>Deployment</h3>
+                        <p>
+                            The trained model is ready for deployment, enabling it to generate content for production 
+                            use cases.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <strong>💡 Key Insight:</strong>
+                    The training process requires enormous computational power - often using hundreds of GPUs for 
+                    weeks or months. But once trained, the model can generate content in seconds, making it accessible 
+                    to everyone.
+                </div>
+            </section>
+                </main>
+
+                </div>
+</div>
+
+    <footer>
+            <p><strong>From Brainstorm to Brain</strong> - Understanding Generative AI Through Creative Stories</p>
+            <p>The future of creativity is here - where AI becomes the artist's assistant, the writer's muse, and the developer's pair programmer.</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        // Smooth scrolling
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }
+);
+                }
+            });
+        });
+        
+        // Highlight active nav on scroll
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

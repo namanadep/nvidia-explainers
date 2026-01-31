@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>45. SHARP: Scalable Hierarchical Aggregation and Reduction Protocol</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #F57C00;
+    --secondary-color: #FF9800;
+    --accent-color: #FFB74D;
+    --bg-color: #FFF3E0;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #FFCC80;
+    --shadow: 0 2px 8px rgba(245, 124, 0, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #F57C00, #FF9800);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #FFCC80;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>45. SHARP: Network Accelerator</h1>
+        <p class="subtitle">In-Network Computing for Collective Operations</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#technology" class="nav-link">Technology</a>
+        <a href="#operations" class="nav-link">Operations</a>
+        <a href="#benefits" class="nav-link">Benefits</a>
+        <a href="#use-cases" class="nav-link">Use Cases</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>SHARP Overview</h2>
+            <p>
+                SHARP (Scalable Hierarchical Aggregation and Reduction Protocol) is an InfiniBand technology that 
+                enables in-network computing, performing collective operations directly within network switches rather 
+                than requiring end-to-end communication. This dramatically reduces communication overhead and latency 
+                for operations like all-reduce, all-gather, and broadcast that are fundamental to distributed AI training 
+                and HPC workloads. SHARP transforms network switches from simple forwarding devices into computational 
+                resources that can aggregate and reduce data as it flows through the network.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Traditional All-Reduce] --> B[Node 1]
+                    B --> C[Send to All]
+                    C --> D[Node 2]
+                    C --> E[Node 3]
+                    C --> F[Node 4]
+                    D --> G[Reduce Locally]
+                    E --> G
+                    F --> G
+                    G --> H[Send Results Back]
+                    
+                    I[SHARP All-Reduce] --> J[Node 1]
+                    J --> K[Send to Switch]
+                    L[Node 2] --> K
+                    M[Node 3] --> K
+                    N[Node 4] --> K
+                    K --> O[Switch Aggregates]
+                    O --> P[Send Result to All]
+                    
+                    style A fill:#FF6B6B
+                    style I fill:#F57C00
+                    style G fill:#FF6B6B
+                    style O fill:#F57C00
+            </div>
+
+            <div class="example-box">
+                <strong>Network Accelerator Analogy:</strong>
+                SHARP is like having a smart postal system that can calculate totals while sorting mail, rather than 
+                just forwarding letters. Traditional networking requires all data to reach destinations before computation 
+                can occur. SHARP enables switches to perform computations (like summing or finding maximums) as data 
+                flows through, dramatically reducing the amount of data that needs to traverse the network and the time 
+                required for collective operations.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((SHARP))
+                    Technology
+                      In-Network Computing
+                      Switch-Based Aggregation
+                      Hierarchical Reduction
+                    Operations
+                      All-Reduce
+                      All-Gather
+                      Broadcast
+                      Reduce-Scatter
+                    Benefits
+                      Reduced Latency
+                      Lower Network Traffic
+                      Faster Collective Operations
+                    Use Cases
+                      Distributed Training
+                      Large-Scale AI
+                      HPC Workloads
+            </div>
+        </section>
+
+        <section id="technology" class="section">
+            <h2>SHARP Technology</h2>
+            <p>
+                SHARP leverages specialized hardware in InfiniBand switches to perform aggregation and reduction operations 
+                in-network. This requires coordination between network adapters, switches, and applications to enable 
+                in-network computation.
+            </p>
+
+            <div class="concept-card">
+                <h3>In-Network Computing</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Switch Processing:</strong> Switches perform computations, not just forwarding</li>
+                    <li><strong>Hardware Acceleration:</strong> Dedicated hardware for aggregation/reduction</li>
+                    <li><strong>Hierarchical Processing:</strong> Multi-level aggregation in switch hierarchy</li>
+                    <li><strong>Transparent:</strong> Applications use standard APIs</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>SHARP Components</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>SHARP Switches:</strong> Switches with SHARP hardware support</li>
+                    <li><strong>SHARP Adapters:</strong> Network adapters supporting SHARP</li>
+                    <li><strong>SHARP Library:</strong> Software library for SHARP operations</li>
+                    <li><strong>NCCL Integration:</strong> NCCL uses SHARP automatically when available</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Supported Operations</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>All-Reduce:</strong> Sum, max, min, product operations</li>
+                    <li><strong>All-Gather:</strong> Collect data from all nodes</li>
+                    <li><strong>Reduce-Scatter:</strong> Scatter reduced data</li>
+                    <li><strong>Broadcast:</strong> Distribute data to all nodes</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="operations" class="section">
+            <h2>SHARP Operations</h2>
+            <p>
+                SHARP accelerates collective operations by performing computations within the network fabric. The 
+                hierarchical nature of SHARP enables efficient aggregation across large numbers of nodes.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[All-Reduce Operation] --> B[Level 1: Leaf Switches]
+                    B --> C[Aggregate at Leaf]
+                    C --> D[Level 2: Spine Switches]
+                    D --> E[Aggregate at Spine]
+                    E --> F[Final Result]
+                    F --> G[Distribute to All Nodes]
+                    
+                    style A fill:#F57C00
+                    style C fill:#FF9800
+                    style E fill:#FFB74D
+                    style F fill:#F57C00
+            </div>
+
+            <div class="mermaid">
+                sequenceDiagram
+                    participant N1 as Node 1
+                    participant N2 as Node 2
+                    participant N3 as Node 3
+                    participant N4 as Node 4
+                    participant S1 as Leaf Switch
+                    participant S2 as Spine Switch
+                    
+                    N1->>S1: Send Data
+                    N2->>S1: Send Data
+                    N3->>S1: Send Data
+                    N4->>S1: Send Data
+                    S1->>S1: Aggregate at Leaf
+                    S1->>S2: Send Aggregated
+                    S2->>S2: Aggregate at Spine
+                    S2->>S1: Send Final Result
+                    S1->>N1: Distribute Result
+                    S1->>N2: Distribute Result
+                    S1->>N3: Distribute Result
+                    S1->>N4: Distribute Result
+                    Note over N1,N4: All-Reduce Complete<br/>Much Faster with SHARP
+            </div>
+
+            <div class="concept-card">
+                <h3>All-Reduce with SHARP</h3>
+                <p>How SHARP accelerates all-reduce operations:</p>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Data Submission:</strong> Nodes send data to SHARP-enabled switches</li>
+                    <li><strong>Hierarchical Aggregation:</strong> Switches aggregate data at multiple levels</li>
+                    <li><strong>Reduction:</strong> Switches perform reduction operations (sum, max, etc.)</li>
+                    <li><strong>Result Distribution:</strong> Final result distributed to all nodes</li>
+                    <li><strong>Completion:</strong> All nodes receive final result</li>
+                </ol>
+            </div>
+
+            <div class="concept-card">
+                <h3>Reduction Operations</h3>
+                <p>SHARP supports various reduction operations:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Sum:</strong> Add all values together</li>
+                    <li><strong>Max:</strong> Find maximum value</li>
+                    <li><strong>Min:</strong> Find minimum value</li>
+                    <li><strong>Product:</strong> Multiply all values</li>
+                    <li><strong>Custom:</strong> User-defined reduction functions</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Hierarchical Processing</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Multi-Level:</strong> Aggregation at multiple switch levels</li>
+                    <li><strong>Efficient:</strong> Reduces data volume at each level</li>
+                    <li><strong>Scalable:</strong> Scales to thousands of nodes</li>
+                    <li><strong>Optimal:</strong> Minimizes network bandwidth usage</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="benefits" class="section">
+            <h2>SHARP Benefits</h2>
+            <p>
+                SHARP provides significant performance improvements for collective operations, particularly in large-scale 
+                distributed training scenarios where collective communication is frequent and bandwidth-intensive.
+            </p>
+
+            <div class="concept-card">
+                <h3>Reduced Latency</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>In-Network Processing:</strong> Computation happens during transit</li>
+                    <li><strong>Lower Latency:</strong> 2-5x lower latency than traditional methods</li>
+                    <li><strong>Example:</strong> Traditional: 500-800 μs, SHARP: 100-200 μs</li>
+                    <li><strong>Impact:</strong> Faster collective operations</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Reduced Bandwidth</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Data Reduction:</strong> Less data traverses network</li>
+                    <li><strong>Efficient:</strong> Only aggregated results sent</li>
+                    <li><strong>Scalability:</strong> Bandwidth savings increase with scale</li>
+                    <li><strong>Example:</strong> 8-node all-reduce: 8x less bandwidth with SHARP</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Better Scalability</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Hierarchical:</strong> Scales efficiently to large clusters</li>
+                    <li><strong>Performance:</strong> Performance scales better than traditional</li>
+                    <li><strong>Large Scale:</strong> Particularly beneficial for 100+ node clusters</li>
+                    <li><strong>Impact:</strong> Enables larger distributed training</li>
+                </ul>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Operation</th>
+                        <th>Traditional</th>
+                        <th>SHARP</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>All-Reduce Latency</strong></td>
+                        <td>500-800 μs</td>
+                        <td>100-200 μs</td>
+                        <td>3-4x faster</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bandwidth Usage</strong></td>
+                        <td>N × data size</td>
+                        <td>~data size</td>
+                        <td>N× reduction</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scalability</strong></td>
+                        <td>Degrades with scale</td>
+                        <td>Scales efficiently</td>
+                        <td>Better at scale</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CPU Usage</strong></td>
+                        <td>High</td>
+                        <td>Low</td>
+                        <td>Reduced overhead</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="use-cases" class="section">
+            <h2>SHARP Use Cases</h2>
+            <p>
+                SHARP is particularly valuable for workloads requiring frequent collective operations, especially 
+                distributed AI training and large-scale HPC applications.
+            </p>
+
+            <div class="concept-card">
+                <h3>Distributed AI Training</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Gradient Synchronization:</strong> Fast all-reduce of gradients</li>
+                    <li><strong>Frequent Operations:</strong> Hundreds of all-reduce operations per epoch</li>
+                    <li><strong>Large Scale:</strong> Particularly beneficial for 100+ GPU training</li>
+                    <li><strong>Impact:</strong> Reduces training time by 20-40%</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Large-Scale HPC</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Collective Operations:</strong> Fast MPI collectives</li>
+                    <li><strong>Reduction Operations:</strong> Efficient data reduction</li>
+                    <li><strong>Scalability:</strong> Enables larger simulations</li>
+                    <li><strong>Impact:</strong> Improves simulation performance</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>NCCL Integration</h3>
+                <p>NCCL automatically uses SHARP when available:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Automatic Detection:</strong> NCCL detects SHARP capability</li>
+                    <li><strong>Transparent:</strong> Applications benefit without code changes</li>
+                    <li><strong>Optimization:</strong> Uses SHARP for optimal performance</li>
+                    <li><strong>Fallback:</strong> Falls back if SHARP unavailable</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Real-World Impact:</strong>
+                In a distributed training scenario with 256 GPUs (32 nodes × 8 GPUs), SHARP can reduce all-reduce 
+                operation time from 2-3 milliseconds to 400-600 microseconds. For a training job performing 
+                all-reduce operations every few iterations, this translates to 15-25% reduction in total training 
+                time, saving days or weeks for large-scale training jobs.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>SHARP Guide | Network Accelerator for Collective Operations</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

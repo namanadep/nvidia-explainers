@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PXE Boot: Network-Based System Provisioning for AI Clusters</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #F57C00;
+    --secondary-color: #FF9800;
+    --accent-color: #FFB74D;
+    --bg-color: #FFF3E0;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #FFCC80;
+    --shadow: 0 2px 8px rgba(245, 124, 0, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #F57C00, #FF9800);
+    color: white;
+    position: relative;
+}
+header::before {
+    content: '';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: flicker 2s ease-in-out infinite;
+}
+@keyframes flicker {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: 0.2; }
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.phoenix-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFF3E0, #FFCC80);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #FFCC80;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+</style>
+</head>
+<body>
+    <header>
+        <h1>26. PXE Boot: Network-Based System Provisioning</h1>
+        <p class="subtitle">Automated Operating System Deployment for AI Cluster Nodes</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#boot-process" class="nav-link">Boot Process</a>
+        <a href="#pxe-server" class="nav-link">PXE Server</a>
+        <a href="#provisioning" class="nav-link">Provisioning</a>
+        <a href="#benefits" class="nav-link">Benefits</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>PXE Boot Overview</h2>
+            <p>
+                PXE (Preboot Execution Environment) boot enables network-based system provisioning, allowing 
+                bare-metal servers to boot and install operating systems over the network without requiring 
+                local installation media. This capability is essential for large-scale AI cluster deployments, 
+                where manual installation of operating systems on hundreds or thousands of nodes would be 
+                impractical. PXE boot automates the provisioning process, enabling rapid deployment and 
+                consistent configuration across all cluster nodes.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Bare Metal<br/>Ashes] --> B[Empty Hardware<br/>No OS]
+                    B --> C[Waiting<br/>For Life]
+                    C --> D[Needs Spark<br/>Network Boot]
+                    
+                    style A fill:#F57C00
+                    style B fill:#FF9800
+                    style C fill:#FFB74D
+                    style D fill:#FFCC80
+            </div>
+
+            <div class="example-box">
+                <strong>Bare Metal Provisioning:</strong>
+                Bare metal servers arrive without operating systems installed, requiring provisioning before 
+                they can participate in cluster operations. PXE boot enables automated provisioning over the 
+                network, transforming unconfigured hardware into fully functional cluster nodes. This capability 
+                is essential for scaling AI clusters, as manual installation would be impractical for large 
+                deployments.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((PXE Boot))
+                    Boot Process
+                      DHCP Configuration
+                      TFTP File Transfer
+                      Kernel Loading
+                      System Initialization
+                    PXE Server
+                      Boot Image Storage
+                      Network Configuration
+                      Boot File Management
+                    Benefits
+                      Automated Provisioning
+                      Scalable Deployment
+                      Consistent Configuration
+                    Use Cases
+                      Cluster Deployment
+                      OS Installation
+                      Network Boot
+            </div>
+        </section>
+
+        <section id="boot-process" class="section">
+            <h2>PXE Boot Process</h2>
+            <p>
+                The PXE boot process enables network-based system initialization. When a server boots with 
+                PXE enabled, it requests network configuration and boot files from a PXE server, downloads 
+                the necessary files, and loads the operating system kernel to begin the installation or boot 
+                process. This entire sequence occurs automatically without local media or manual intervention.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+                <div class="phoenix-card" style="border-left: 5px solid #F57C00;">
+                    <h3 style="color: #F57C00; margin-bottom: 15px;">PXE Request</h3>
+                    <p><strong>Step:</strong> Network boot request</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Server firmware requests boot image from PXE server over network.
+                    </p>
+                </div>
+
+                <div class="phoenix-card" style="border-left: 5px solid #FF9800;">
+                    <h3 style="color: #FF9800; margin-bottom: 15px;">DHCP Configuration</h3>
+                    <p><strong>Step:</strong> Network setup</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        DHCP provides network settings and boot server location.
+                    </p>
+                </div>
+
+                <div class="phoenix-card" style="border-left: 5px solid #FFB74D;">
+                    <h3 style="color: #FFB74D; margin-bottom: 15px;">TFTP & Kernel Load</h3>
+                    <p><strong>Step:</strong> File transfer and boot</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        TFTP downloads boot files and kernel, then loads into memory.
+                    </p>
+                </div>
+
+                <div class="phoenix-card" style="border-left: 5px solid #FFCC80;">
+                    <h3 style="color: #FFCC80; margin-bottom: 15px;">System Initialization</h3>
+                    <p><strong>Step:</strong> OS boot</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Operating system boots and becomes fully operational.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Bare Metal Server] --> B[PXE Boot Request]
+                    B --> C[DHCP Server<br/>Network Config]
+                    C --> D[PXE Server<br/>Boot Image Location]
+                    D --> E[TFTP Server<br/>Download Files]
+                    E --> F[Load Kernel<br/>Into Memory]
+                    F --> G[Initialize OS<br/>System Operational]
+                    
+                    style A fill:#F57C00
+                    style G fill:#FFB74D
+            </div>
+
+            <div class="phoenix-card">
+                <h3>Boot Sequence</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>PXE Request:</strong> Server firmware requests boot image from PXE server over network</li>
+                    <li><strong>DHCP:</strong> Dynamic Host Configuration Protocol provides network settings and boot server location</li>
+                    <li><strong>TFTP:</strong> Trivial File Transfer Protocol downloads boot files and kernel</li>
+                    <li><strong>Kernel Load:</strong> Operating system kernel is loaded into memory</li>
+                    <li><strong>System Initialization:</strong> Operating system boots and becomes operational</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="provisioning" class="section">
+            <h2>Operating System Deployment</h2>
+            <p>
+                Once the boot process completes, the operating system initializes and the server becomes 
+                a functional cluster node. PXE boot can be used for both one-time installation (installing 
+                OS to local disk) and network boot scenarios (booting from network each time). This flexibility 
+                enables various deployment models depending on cluster requirements.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Ashes<br/>Bare Metal] -->|Fire<br/>Network Boot| B[Phoenix<br/>Operating System]
+                    B --> C[Fully Operational<br/>Ready to Serve]
+            </div>
+
+            <div class="mermaid">
+                sequenceDiagram
+                    participant Server as Bare Metal Server
+                    participant DHCP as DHCP Server
+                    participant PXE as PXE Server
+                    participant TFTP as TFTP Server
+                    
+                    Server->>DHCP: PXE Boot Request
+                    DHCP-->>Server: Network Configuration + PXE Server Location
+                    Server->>PXE: Request Boot Image
+                    PXE-->>Server: Boot Image Location
+                    Server->>TFTP: Download Boot Files
+                    TFTP-->>Server: Transfer Boot Files & Kernel
+                    Server->>Server: Load Kernel into Memory
+                    Server->>Server: Initialize Operating System
+                    Note over Server: Server Now Operational
+            </div>
+                    
+                    style A fill:#F57C00
+                    style B fill:#FF9800
+                    style C fill:#FFB74D
+            </div>
+
+            <div class="example-box">
+                <strong>System Provisioning:</strong>
+                PXE boot transforms bare metal hardware into a fully functional system by loading an 
+                operating system over the network. The hardware is initialized, the OS is installed, 
+                and the system becomes operational without local installation media.
+            </div>
+        </section>
+
+        <section id="pxe-server" class="section">
+            <h2>PXE Server</h2>
+            <p>
+                The PXE server provides boot images and configuration needed for network boot. It hosts 
+                operating system images, configuration files, and network services (DHCP, TFTP) required 
+                for provisioning systems over the network.
+            </p>
+
+            <div class="phoenix-card">
+                <h3>What the Nest Provides</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Boot Images:</strong> Operating system images</li>
+                    <li><strong>Configuration:</strong> System settings</li>
+                    <li><strong>Network Services:</strong> DHCP, TFTP</li>
+                    <li><strong>Management:</strong> Centralized control</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="boot-process" class="section">
+            <h2>Boot Process</h2>
+            <p>
+                The PXE boot process loads an operating system over the network, transforming bare metal 
+                hardware into a functional system.
+            </p>
+
+            <div class="mermaid">
+                sequenceDiagram
+                    participant Hardware
+                    participant PXE Client
+                    participant PXE Server
+                    participant OS Image
+                    participant System
+                    
+                    Hardware->>PXE Client: Power On
+                    PXE Client->>PXE Server: Request Boot
+                    PXE Server->>OS Image: Get Image
+                    OS Image->>System: Load OS
+                    System->>System: Operational
+                    
+                    Note over Hardware,System: Network Boot<br/>Complete
+            </div>
+        </section>
+
+        <section id="provisioning" class="section">
+            <h2>System Provisioning</h2>
+            <p>
+                Provisioning completes the boot process by configuring the system with its identity, 
+                capabilities, and role. The system becomes production-ready and ready to serve its 
+                purpose in the data center.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Rebirth<br/>Provisioning] --> B[Identity<br/>MAC Assignment]
+                    B --> C[Capabilities<br/>Image Installation]
+                    C --> D[Purpose<br/>Role Assignment]
+                    D --> E[New Life<br/>Production Ready]
+                    
+                    style A fill:#F57C00
+                    style B fill:#FF9800
+                    style C fill:#FFB74D
+                    style D fill:#FFCC80
+                    style E fill:#FFF3E0
+            </div>
+
+            <div class="example-box">
+                <strong>PXE Boot Benefits:</strong>
+                PXE boot enables network-based system provisioning, bringing nodes from uninitialized 
+                hardware to fully operational systems. Benefits include:
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li><strong>No Local Media:</strong> No need for USB drives or CDs</li>
+                    <li><strong>Centralized:</strong> Manage boot images from one place</li>
+                    <li><strong>Automated:</strong> Can provision hundreds of nodes automatically</li>
+                    <li><strong>Flexible:</strong> Easy to change images and configurations</li>
+                </ul>
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p><strong>PXE Boot: The Phoenix Protocol</strong> - Rising Nodes from the Ashes</p>
+        <p>From ashes to phoenix - nodes reborn through network boot! </p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' }
+);
+            });
+        });
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            let current = '';
+            sections.forEach(s => {
+                if (window.pageYOffset >= s.offsetTop - 100) current = s.getAttribute('id');
+            }
+);
+            navLinks.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href') === `#${current}`) l.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

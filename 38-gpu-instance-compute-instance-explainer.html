@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>38. GPU Instance vs Compute Instance: MIG Building Blocks</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #E91E63;
+    --secondary-color: #F06292;
+    --accent-color: #FF4081;
+    --bg-color: #FFF5F7;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #F8BBD0;
+    --shadow: 0 2px 8px rgba(233, 30, 99, 0.1);
+    --gi-color: #9C27B0;
+    --ci-color: #E91E63;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #E91E63, #F06292);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 3px solid;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card.gi {
+    border-color: var(--gi-color);
+}
+.concept-card.ci {
+    border-color: var(--ci-color);
+}
+.concept-card h3 {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #FFF5F7, #FFE8F0);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #F8BBD0;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>38. GPU Instance vs Compute Instance</h1>
+        <p class="subtitle">Understanding MIG's Building Blocks</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#gpu-instance" class="nav-link">GPU Instance</a>
+        <a href="#compute-instance" class="nav-link">Compute Instance</a>
+        <a href="#relationship" class="nav-link">Relationship</a>
+        <a href="#configuration" class="nav-link">Configuration</a>
+        <a href="#examples" class="nav-link">Examples</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>GI and CI Overview</h2>
+            <p>
+                Multi-Instance GPU (MIG) partitions a physical GPU into multiple isolated GPU instances using 
+                two fundamental building blocks: GPU Instances (GI) and Compute Instances (CI). Understanding 
+                these concepts is essential for configuring MIG partitions correctly. A GPU Instance defines 
+                the memory and memory bandwidth allocation, while Compute Instances define the compute resources 
+                (SM slices) that can be created within a GPU Instance.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Physical GPU<br/>H100 94GB] --> B[GPU Instance 1<br/>47GB Memory]
+                    A --> C[GPU Instance 2<br/>47GB Memory]
+                    
+                    B --> D[Compute Instance 1<br/>14 SMs]
+                    B --> E[Compute Instance 2<br/>14 SMs]
+                    
+                    C --> F[Compute Instance 3<br/>14 SMs]
+                    C --> G[Compute Instance 4<br/>14 SMs]
+                    
+                    style A fill:#E91E63
+                    style B fill:#9C27B0
+                    style C fill:#9C27B0
+                    style D fill:#F06292
+                    style E fill:#F06292
+                    style F fill:#F06292
+                    style G fill:#F06292
+            </div>
+
+            <div class="example-box">
+                <strong>Building Blocks Analogy:</strong>
+                Think of GPU Instance as a building floor that defines the space (memory) available, and 
+                Compute Instance as individual offices (compute units) within that floor. You first create 
+                the floor (GI) with a certain amount of space, then you can create multiple offices (CIs) 
+                within that floor, each with its own compute resources.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((MIG Building Blocks))
+                    GPU Instance
+                      Memory Allocation
+                      Memory Bandwidth
+                      Memory Container
+                      Created First
+                    Compute Instance
+                      SM Slices
+                      Compute Resources
+                      Created Within GI
+                      Multiple CIs per GI
+                    Relationship
+                      GI Defines Memory
+                      CI Defines Compute
+                      Hierarchical Structure
+                    Configuration
+                      Create GI First
+                      Then Create CIs
+                      Resource Allocation
+            </div>
+        </section>
+
+        <section id="gpu-instance" class="section">
+            <h2>GPU Instance (GI)</h2>
+            <p>
+                A GPU Instance (GI) is a partition of the physical GPU that defines memory capacity and 
+                memory bandwidth allocation. It represents the first level of partitioning in MIG, creating 
+                isolated memory spaces. Multiple Compute Instances can be created within a single GPU Instance, 
+                sharing the memory and bandwidth allocated to that GI.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Physical GPU<br/>H100 94GB] --> B[Create GPU Instance 1<br/>47GB Memory]
+                    A --> C[Create GPU Instance 2<br/>47GB Memory]
+                    
+                    B --> D[Create Compute Instance 1<br/>14 SMs]
+                    B --> E[Create Compute Instance 2<br/>14 SMs]
+                    
+                    C --> F[Create Compute Instance 3<br/>14 SMs]
+                    C --> G[Create Compute Instance 4<br/>14 SMs]
+                    
+                    D --> H[Isolated Workloads<br/>Independent Execution]
+                    E --> H
+                    F --> H
+                    G --> H
+                    
+                    style A fill:#E91E63
+                    style B fill:#9C27B0
+                    style C fill:#9C27B0
+                    style H fill:#F06292
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[GPU Instance Characteristics] --> B[Memory Allocation<br/>Defines Capacity]
+                    A --> C[Memory Bandwidth<br/>Defines Speed]
+                    A --> D[Isolation<br/>Hardware-Level]
+                    A --> E[Container<br/>Multiple CIs]
+                    A --> F[Independent<br/>Separate Operation]
+                    
+                    B --> G[Complete GI<br/>Memory Foundation]
+                    C --> G
+                    D --> G
+                    E --> G
+                    F --> G
+                    
+                    style A fill:#E91E63
+                    style G fill:#F06292
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[H100 94GB] --> B[1g.94gb<br/>Full GPU]
+                    A --> C[2g.47gb<br/>Half GPU]
+                    A --> D[3g.31gb<br/>Third GPU]
+                    A --> E[4g.24gb<br/>Quarter GPU]
+                    A --> F[7g.12gb<br/>Seventh GPU]
+                    
+                    style A fill:#E91E63
+                    style B fill:#F06292
+                    style C fill:#FF4081
+                    style D fill:#F8BBD0
+                    style E fill:#FFF5F7
+                    style F fill:#E1BEE7
+                </div>
+
+            <div class="concept-card gi">
+                <h3>Creating GPU Instances</h3>
+                <p>GPU Instances are created using nvidia-smi:</p>
+                <div style="background: #263238; color: #F8BBD0; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: 'Courier New', monospace;">
+nvidia-smi mig -cgi &lt;profile-id&gt; -C<br>
+# Example: Create a 2g.47gb GPU Instance<br>
+nvidia-smi mig -cgi 19,19 -C
+                </div>
+                <p>The profile ID determines the memory size and bandwidth allocation.</p>
+            </div>
+        </section>
+
+        <section id="compute-instance" class="section">
+            <h2>Compute Instance (CI)</h2>
+            <p>
+                A Compute Instance (CI) is a partition within a GPU Instance that defines compute resource 
+                allocation (Streaming Multiprocessors or SMs). Multiple Compute Instances can exist within 
+                a single GPU Instance, sharing the memory and bandwidth of that GI but having independent 
+                compute resources.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Compute Instance Characteristics] --> B[Compute Allocation<br/>SM Slices]
+                    A --> C[Shared Memory<br/>Within GI]
+                    A --> D[Isolation<br/>Hardware-Level]
+                    A --> E[Independent Execution<br/>Separate Workloads]
+                    A --> F[Nested<br/>Within GI]
+                    
+                    B --> G[Complete CI<br/>Compute Resources]
+                    C --> G
+                    D --> G
+                    E --> G
+                    F --> G
+                    
+                    style A fill:#E91E63
+                    style G fill:#F06292
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[Compute Instance Sizes] --> B[1c.1g.94gb<br/>1 SM, Full GPU]
+                    A --> C[2c.2g.47gb<br/>2 SMs, Half GPU]
+                    A --> D[3c.3g.31gb<br/>3 SMs, Third GPU]
+                    A --> E[4c.4g.24gb<br/>4 SMs, Quarter GPU]
+                    A --> F[7c.7g.12gb<br/>7 SMs, Seventh GPU]
+                    
+                    style A fill:#E91E63
+                    style B fill:#F06292
+                    style C fill:#FF4081
+                    style D fill:#F8BBD0
+                    style E fill:#FFF5F7
+                    style F fill:#E1BEE7
+                </div>
+
+            <div class="concept-card ci">
+                <h3>Creating Compute Instances</h3>
+                <p>Compute Instances are created within a GPU Instance:</p>
+                <div style="background: #263238; color: #F8BBD0; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: 'Courier New', monospace;">
+# First create GPU Instance<br>
+nvidia-smi mig -cgi 19,19 -C<br>
+<br>
+# Then create Compute Instance within the GI<br>
+nvidia-smi mig -cci &lt;ci-profile-id&gt; -gi &lt;gi-id&gt; -C<br>
+# Example: Create CI in GI 0<br>
+nvidia-smi mig -cci 0,1 -gi 0 -C
+                </div>
+            </div>
+        </section>
+
+        <section id="relationship" class="section">
+            <h2>GI and CI Relationship</h2>
+            <p>
+                GPU Instances and Compute Instances work together hierarchically. A GPU Instance provides 
+                the memory foundation, and Compute Instances provide the compute resources within that 
+                memory space. Multiple CIs can share a single GI's memory and bandwidth.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Physical GPU] --> B[GPU Instance 1<br/>Memory: 47GB]
+                    A --> C[GPU Instance 2<br/>Memory: 47GB]
+                    
+                    B --> D[Compute Instance 1<br/>SMs: 14]
+                    B --> E[Compute Instance 2<br/>SMs: 14]
+                    
+                    C --> F[Compute Instance 3<br/>SMs: 14]
+                    C --> G[Compute Instance 4<br/>SMs: 14]
+                    
+                    D -.->|Shares Memory| E
+                    F -.->|Shares Memory| G
+                    
+                    style A fill:#E91E63
+                    style B fill:#9C27B0
+                    style C fill:#9C27B0
+                    style D fill:#F06292
+                    style E fill:#F06292
+                    style F fill:#F06292
+                    style G fill:#F06292
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>GPU Instance (GI)</th>
+                        <th>Compute Instance (CI)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Primary Function</strong></td>
+                        <td>Memory and bandwidth allocation</td>
+                        <td>Compute resource allocation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Resources Defined</strong></td>
+                        <td>Memory capacity, memory bandwidth</td>
+                        <td>SM slices (compute units)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hierarchy</strong></td>
+                        <td>Top level (created first)</td>
+                        <td>Nested level (created within GI)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Multiple Instances</strong></td>
+                        <td>Multiple GIs per GPU</td>
+                        <td>Multiple CIs per GI</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Isolation</strong></td>
+                        <td>Memory isolation</td>
+                        <td>Compute isolation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sharing</strong></td>
+                        <td>Memory not shared between GIs</td>
+                        <td>Memory shared between CIs in same GI</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="example-box">
+                <strong>Key Insight:</strong>
+                You must create a GPU Instance before creating Compute Instances. The GI defines the memory 
+                "container," and CIs define the compute "engines" within that container. Multiple CIs can 
+                share a GI's memory, but each CI has its own compute resources (SMs).
+            </div>
+        </section>
+
+        <section id="configuration" class="section">
+            <h2>Configuration Examples</h2>
+            <p>
+                Understanding how GI and CI work together helps configure MIG partitions for different use 
+                cases. Here are practical configuration examples.
+            </p>
+
+            <div class="concept-card">
+                <h3>Example 1: Single GPU Instance, Single Compute Instance</h3>
+                <p>Simplest configuration - one GI with one CI:</p>
+                <div style="background: #263238; color: #F8BBD0; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: 'Courier New', monospace;">
+# Create GPU Instance (2g.47gb profile)<br>
+nvidia-smi mig -cgi 19,19 -C<br>
+# Creates GI with ID 0, 47GB memory<br>
+<br>
+# Create Compute Instance in GI 0<br>
+nvidia-smi mig -cci 0,1 -gi 0 -C<br>
+# Creates CI with ID 0, 14 SMs
+                </div>
+                <p><strong>Result:</strong> One MIG instance with 47GB memory and 14 SMs</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>Example 2: Single GPU Instance, Multiple Compute Instances</h3>
+                <p>One GI with multiple CIs sharing memory:</p>
+                <div style="background: #263238; color: #F8BBD0; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: 'Courier New', monospace;">
+# Create GPU Instance (1g.94gb profile)<br>
+nvidia-smi mig -cgi 0,0 -C<br>
+# Creates GI with ID 0, 94GB memory<br>
+<br>
+# Create first Compute Instance<br>
+nvidia-smi mig -cci 0,1 -gi 0 -C<br>
+# Creates CI 0, 14 SMs<br>
+<br>
+# Create second Compute Instance<br>
+nvidia-smi mig -cci 1,1 -gi 0 -C<br>
+# Creates CI 1, 14 SMs (shares memory with CI 0)
+                </div>
+                <p><strong>Result:</strong> Two CIs sharing 94GB memory, each with 14 SMs</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>Example 3: Multiple GPU Instances, Multiple Compute Instances</h3>
+                <p>Complex configuration with multiple GIs and CIs:</p>
+                <div style="background: #263238; color: #F8BBD0; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: 'Courier New', monospace;">
+# Create first GPU Instance<br>
+nvidia-smi mig -cgi 19,19 -C  # GI 0, 47GB<br>
+nvidia-smi mig -cci 0,1 -gi 0 -C  # CI 0 in GI 0<br>
+<br>
+# Create second GPU Instance<br>
+nvidia-smi mig -cgi 19,19 -C  # GI 1, 47GB<br>
+nvidia-smi mig -cci 0,1 -gi 1 -C  # CI 0 in GI 1
+                </div>
+                <p><strong>Result:</strong> Two independent MIG instances, each with 47GB memory and 14 SMs</p>
+            </div>
+        </section>
+
+        <section id="examples" class="section">
+            <h2>Practical Use Cases</h2>
+            <p>
+                Different GI and CI configurations suit different workload requirements. Understanding these 
+                patterns helps optimize resource allocation.
+            </p>
+
+            <div class="concept-card">
+                <h3>Use Case 1: Memory-Intensive Workloads</h3>
+                <p><strong>Configuration:</strong> Large GI, single CI</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GI:</strong> 1g.94gb (full GPU memory)</li>
+                    <li><strong>CI:</strong> 1c.1g.94gb (all SMs)</li>
+                    <li><strong>Use Case:</strong> Large model inference, memory-bound workloads</li>
+                    <li><strong>Benefit:</strong> Maximum memory capacity</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Use Case 2: Multiple Small Workloads</h3>
+                <p><strong>Configuration:</strong> Single GI, multiple CIs</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GI:</strong> 1g.94gb (shared memory)</li>
+                    <li><strong>CIs:</strong> Multiple 1c instances</li>
+                    <li><strong>Use Case:</strong> Multiple small inference workloads</li>
+                    <li><strong>Benefit:</strong> Efficient memory sharing</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Use Case 3: Balanced Isolation</h3>
+                <p><strong>Configuration:</strong> Multiple GIs, single CI each</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GIs:</strong> Multiple 2g.47gb instances</li>
+                    <li><strong>CIs:</strong> One CI per GI</li>
+                    <li><strong>Use Case:</strong> Production workloads requiring isolation</li>
+                    <li><strong>Benefit:</strong> Complete memory and compute isolation</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Best Practices:</strong>
+                Start with simple configurations (one GI, one CI) and scale based on workload requirements. 
+                Use multiple CIs within a GI when workloads can share memory. Use multiple GIs when workloads 
+                require memory isolation. Always verify MIG configuration with <code>nvidia-smi mig -lgip</code> 
+                and <code>nvidia-smi mig -lcip</code> commands.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>GPU Instance vs Compute Instance Guide | MIG Building Blocks</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

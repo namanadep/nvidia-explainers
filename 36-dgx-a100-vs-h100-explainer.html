@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>36. DGX A100 vs DGX H100: Evolution of AI Infrastructure</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #0066CC;
+    --secondary-color: #0080FF;
+    --accent-color: #3399FF;
+    --bg-color: #E6F2FF;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #B3D9FF;
+    --shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+    --a100-color: #4CAF50;
+    --h100-color: #FF6B35;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0066CC, #0080FF);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+.system-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 3px solid;
+    box-shadow: var(--shadow);
+}
+.system-card.a100 {
+    border-color: var(--a100-color);
+}
+.system-card.h100 {
+    border-color: var(--h100-color);
+}
+.system-card h3 {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E6F2FF, #CCE5FF);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #B3D9FF;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    .comparison-grid { grid-template-columns: 1fr; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>36. DGX A100 vs DGX H100</h1>
+        <p class="subtitle">Evolution of AI Infrastructure Platforms</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#dgx-a100" class="nav-link">DGX A100</a>
+        <a href="#dgx-h100" class="nav-link">DGX H100</a>
+        <a href="#comparison" class="nav-link">Comparison</a>
+        <a href="#use-cases" class="nav-link">Use Cases</a>
+        <a href="#migration" class="nav-link">Migration</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>DGX System Evolution Overview</h2>
+            <p>
+                DGX systems represent NVIDIA's integrated AI infrastructure platforms, combining compute, networking, 
+                storage, and software into optimized solutions. The evolution from DGX A100 to DGX H100 represents 
+                significant advances in GPU performance, memory capacity, interconnect bandwidth, and overall system 
+                capabilities. Understanding the differences helps organizations choose the right platform for their 
+                AI workloads and plan infrastructure upgrades.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[DGX Evolution] --> B[DGX A100<br/>Ampere Architecture]
+                    A --> C[DGX H100<br/>Hopper Architecture]
+                    
+                    B --> B1[A100 GPU<br/>80GB Memory]
+                    B --> B2[NVLink 3.0<br/>600 GB/s]
+                    
+                    C --> C1[H100 GPU<br/>94GB Memory]
+                    C --> C2[NVLink 4.0<br/>900 GB/s]
+                    
+                    style A fill:#0066CC
+                    style B fill:#4CAF50
+                    style C fill:#FF6B35
+            </div>
+
+            <div class="example-box">
+                <strong>Evolution Story:</strong>
+                The transition from DGX A100 to DGX H100 represents a generational leap in AI infrastructure, 
+                similar to how new generations of processors bring significant performance improvements. Each 
+                generation builds upon previous innovations while introducing new capabilities that enable 
+                larger models, faster training, and more efficient inference.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((DGX Systems))
+                    DGX A100
+                      A100 GPU
+                      80GB Memory
+                      NVLink 3.0
+                      Ampere Architecture
+                    DGX H100
+                      H100 GPU
+                      94GB Memory
+                      NVLink 4.0
+                      Hopper Architecture
+                    Comparison
+                      Performance
+                      Memory Capacity
+                      Interconnect Speed
+                      Use Cases
+                    Migration
+                      Hybrid Approach
+                      Workload Optimization
+                      Gradual Transition
+            </div>
+        </section>
+
+        <section id="dgx-a100" class="section">
+            <h2>DGX A100 System</h2>
+            <p>
+                DGX A100, introduced in 2020, was built on NVIDIA's Ampere architecture and represented a 
+                significant advancement in AI infrastructure. It combines 8 A100 GPUs with high-speed networking 
+                and optimized software to deliver exceptional performance for AI training and inference workloads.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[DGX A100 System] --> B[8x A100 GPUs<br/>80GB Each]
+                    A --> C[NVLink 3.0<br/>600 GB/s]
+                    A --> D[6x NVSwitch<br/>Interconnect]
+                    A --> E[InfiniBand HDR<br/>200 Gb/s]
+                    A --> F[1 TB System Memory<br/>DDR4]
+                    
+                    B --> G[640 GB Total<br/>GPU Memory]
+                    C --> H[High Bandwidth<br/>GPU Communication]
+                    D --> H
+                    E --> I[Network Connectivity<br/>Cluster Integration]
+                    
+                    style A fill:#4CAF50
+                    style G fill:#66BB6A
+                    style H fill:#81C784
+            </div>
+
+            <div class="system-card a100">
+                <h3>DGX A100 Specifications</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GPUs:</strong> 8x NVIDIA A100 80GB</li>
+                    <li><strong>Total GPU Memory:</strong> 640 GB</li>
+                    <li><strong>GPU Interconnect:</strong> NVLink 3.0 (600 GB/s per GPU)</li>
+                    <li><strong>NVSwitch:</strong> 6x NVSwitch chips</li>
+                    <li><strong>CPU:</strong> Dual AMD EPYC processors</li>
+                    <li><strong>System Memory:</strong> 1 TB DDR4</li>
+                    <li><strong>Storage:</strong> 15 TB NVMe SSD</li>
+                    <li><strong>Networking:</strong> Dual-port InfiniBand HDR (200 Gb/s each)</li>
+                    <li><strong>Power:</strong> 6.5 kW system power</li>
+                </ul>
+            </div>
+
+            <div class="system-card a100">
+                <h3>DGX A100 Performance</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>FP32 Performance:</strong> 156 TFLOPS</li>
+                    <li><strong>FP64 Performance:</strong> 78 TFLOPS</li>
+                    <li><strong>Tensor Performance:</strong> 5 PetaFLOPS (FP16)</li>
+                    <li><strong>AI Training:</strong> Excellent for models up to ~175B parameters</li>
+                    <li><strong>Inference:</strong> High throughput for production workloads</li>
+                </ul>
+            </div>
+
+            <div class="system-card a100">
+                <h3>DGX A100 Use Cases</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Large Model Training:</strong> Training transformer models, vision transformers</li>
+                    <li><strong>HPC Workloads:</strong> Scientific computing, simulations</li>
+                    <li><strong>Production Inference:</strong> High-throughput inference services</li>
+                    <li><strong>Research:</strong> AI research and development</li>
+                    <li><strong>Cost-Effective:</strong> Excellent price-to-performance ratio</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="dgx-h100" class="section">
+            <h2>DGX H100 System</h2>
+            <p>
+                DGX H100, introduced in 2022, is built on NVIDIA's Hopper architecture and represents the next 
+                generation of AI infrastructure. It delivers significantly improved performance, larger memory 
+                capacity, and enhanced capabilities for training the largest AI models.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[DGX H100 System] --> B[8x H100 GPUs<br/>94GB Each]
+                    A --> C[NVLink 4.0<br/>900 GB/s]
+                    A --> D[4x NVSwitch<br/>Interconnect]
+                    A --> E[InfiniBand NDR<br/>400 Gb/s]
+                    A --> F[2 TB System Memory<br/>DDR5]
+                    
+                    B --> G[752 GB Total<br/>GPU Memory]
+                    C --> H[High Bandwidth<br/>GPU Communication]
+                    D --> H
+                    E --> I[Network Connectivity<br/>Cluster Integration]
+                    
+                    style A fill:#FF6B35
+                    style G fill:#FF8C5A
+                    style H fill:#FFB085
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[DGX H100 Performance] --> B[FP32<br/>320 TFLOPS]
+                    A --> C[FP64<br/>160 TFLOPS]
+                    A --> D[Tensor<br/>32 PFLOPS FP8]
+                    A --> E[AI Training<br/>500B+ Parameters]
+                    A --> F[Inference<br/>Transformer Engine]
+                    
+                    style A fill:#FF6B35
+                    style B fill:#FF8C5A
+                    style C fill:#FFB085
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[DGX H100 Use Cases] --> B[Massive Training<br/>500B+ Parameters]
+                    A --> C[Transformer Engine<br/>Optimized Architecture]
+                    A --> D[High-Performance Inference<br/>Production Scale]
+                    A --> E[Cutting-Edge Research<br/>Latest AI]
+                    A --> F[Future-Proof<br/>Next-Gen Workloads]
+                    
+                    B --> G[Complete Solution<br/>Advanced AI Infrastructure]
+                    C --> G
+                    D --> G
+                    E --> G
+                    F --> G
+                    
+                    style A fill:#FF6B35
+                    style G fill:#FF8C5A
+                </div>
+        </section>
+
+        <section id="comparison" class="section">
+            <h2>Detailed Comparison</h2>
+            <p>
+                The following table provides a comprehensive comparison of key specifications and capabilities 
+                between DGX A100 and DGX H100 systems.
+            </p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Specification</th>
+                        <th>DGX A100</th>
+                        <th>DGX H100</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>GPU Architecture</strong></td>
+                        <td>Ampere (A100)</td>
+                        <td>Hopper (H100)</td>
+                        <td>Next generation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GPU Memory per GPU</strong></td>
+                        <td>80 GB HBM2e</td>
+                        <td>94 GB HBM3</td>
+                        <td>+17.5%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total GPU Memory</strong></td>
+                        <td>640 GB</td>
+                        <td>752 GB</td>
+                        <td>+17.5%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NVLink Generation</strong></td>
+                        <td>NVLink 3.0</td>
+                        <td>NVLink 4.0</td>
+                        <td>New generation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GPU Interconnect Bandwidth</strong></td>
+                        <td>600 GB/s per GPU</td>
+                        <td>900 GB/s per GPU</td>
+                        <td>+50%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FP32 Performance</strong></td>
+                        <td>156 TFLOPS</td>
+                        <td>320 TFLOPS</td>
+                        <td>+105%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tensor Performance (FP16)</strong></td>
+                        <td>5 PFLOPS</td>
+                        <td>16 PFLOPS</td>
+                        <td>+220%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transformer Engine</strong></td>
+                        <td>No</td>
+                        <td>Yes</td>
+                        <td>New feature</td>
+                    </tr>
+                    <tr>
+                        <td><strong>System Memory</strong></td>
+                        <td>1 TB DDR4</td>
+                        <td>2 TB DDR5</td>
+                        <td>+100%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage</strong></td>
+                        <td>15 TB NVMe</td>
+                        <td>30 TB NVMe</td>
+                        <td>+100%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>InfiniBand</strong></td>
+                        <td>HDR (200 Gb/s)</td>
+                        <td>NDR (400 Gb/s)</td>
+                        <td>+100%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>System Power</strong></td>
+                        <td>6.5 kW</td>
+                        <td>10.2 kW</td>
+                        <td>+57%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="example-box">
+                <strong>Performance Improvements:</strong>
+                DGX H100 delivers approximately 2-3x performance improvement for AI training workloads compared 
+                to DGX A100. The combination of larger memory, faster interconnects, and Transformer Engine 
+                optimization makes H100 particularly effective for large language model training, where it can 
+                achieve 3-4x faster training times compared to A100.
+            </div>
+        </section>
+
+        <section id="use-cases" class="section">
+            <h2>Use Case Recommendations</h2>
+            <p>
+                Choosing between DGX A100 and DGX H100 depends on specific workload requirements, budget 
+                considerations, and performance needs.
+            </p>
+
+            <div class="system-card a100">
+                <h3>Choose DGX A100 When:</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Cost Optimization:</strong> Budget constraints require cost-effective solution</li>
+                    <li><strong>Moderate Model Sizes:</strong> Training models up to 175B parameters</li>
+                    <li><strong>Established Workloads:</strong> Well-understood workloads with proven A100 performance</li>
+                    <li><strong>Inference Focus:</strong> Primary use case is production inference</li>
+                    <li><strong>HPC Applications:</strong> Scientific computing and simulations</li>
+                    <li><strong>Gradual Migration:</strong> Planning gradual upgrade path</li>
+                </ul>
+            </div>
+
+            <div class="system-card h100">
+                <h3>Choose DGX H100 When:</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Maximum Performance:</strong> Need highest training performance available</li>
+                    <li><strong>Large Models:</strong> Training models 500B+ parameters</li>
+                    <li><strong>Transformer Workloads:</strong> Heavy use of transformer architectures</li>
+                    <li><strong>Time-to-Market:</strong> Need fastest training times</li>
+                    <li><strong>Future-Proofing:</strong> Planning for next-generation AI workloads</li>
+                    <li><strong>Research Leadership:</strong> Cutting-edge AI research and development</li>
+                    <li><strong>Scale Requirements:</strong> Building large-scale training infrastructure</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="migration" class="section">
+            <h2>Migration Considerations</h2>
+            <p>
+                Migrating from DGX A100 to DGX H100 requires consideration of software compatibility, workload 
+                optimization, and infrastructure requirements.
+            </p>
+
+            <div class="system-card">
+                <h3>Software Compatibility</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>CUDA Compatibility:</strong> H100 requires CUDA 11.8+</li>
+                    <li><strong>Framework Support:</strong> PyTorch, TensorFlow support H100</li>
+                    <li><strong>Container Images:</strong> Updated NGC containers available</li>
+                    <li><strong>Driver Requirements:</strong> NVIDIA driver 520.61.05+</li>
+                </ul>
+            </div>
+
+            <div class="system-card">
+                <h3>Workload Optimization</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Transformer Engine:</strong> Enable for transformer workloads</li>
+                    <li><strong>Mixed Precision:</strong> Leverage FP8 and FP16 capabilities</li>
+                    <li><strong>Memory Optimization:</strong> Utilize larger memory for larger batch sizes</li>
+                    <li><strong>Communication Patterns:</strong> Optimize for NVLink 4.0 bandwidth</li>
+                </ul>
+            </div>
+
+            <div class="system-card">
+                <h3>Infrastructure Requirements</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Power:</strong> Higher power requirements (10.2 kW vs 6.5 kW)</li>
+                    <li><strong>Cooling:</strong> Enhanced cooling capacity needed</li>
+                    <li><strong>Networking:</strong> NDR InfiniBand for optimal performance</li>
+                    <li><strong>Rack Space:</strong> Similar physical footprint</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Migration Path:</strong>
+                Many organizations adopt a hybrid approach, using DGX A100 for established workloads and DGX H100 
+                for new, performance-critical projects. This allows gradual migration while maximizing return on 
+                investment. Workloads can be optimized for H100's Transformer Engine and new capabilities over time, 
+                while maintaining production stability on A100 systems.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>DGX A100 vs H100 Comparison | Evolution of AI Infrastructure</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

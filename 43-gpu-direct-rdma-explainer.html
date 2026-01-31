@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>43. GPU Direct RDMA: Direct GPU-to-GPU Communication</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #9C27B0;
+    --secondary-color: #BA68C8;
+    --accent-color: #CE93D8;
+    --bg-color: #F3E5F5;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #E1BEE7;
+    --shadow: 0 2px 8px rgba(156, 39, 176, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #9C27B0, #BA68C8);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #E1BEE7;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>43. GPU Direct RDMA: Direct Connection</h1>
+        <p class="subtitle">GPU-to-GPU Direct Communication via RDMA</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#technology" class="nav-link">Technology</a>
+        <a href="#benefits" class="nav-link">Benefits</a>
+        <a href="#vs-traditional" class="nav-link">vs Traditional</a>
+        <a href="#use-cases" class="nav-link">Use Cases</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>GPU Direct RDMA Overview</h2>
+            <p>
+                GPU Direct RDMA (GDR) is a technology that enables direct data transfer between GPUs across 
+                different nodes using RDMA-capable network adapters, bypassing the CPU and system memory entirely. 
+                This enables GPUs to communicate directly with each other over the network, dramatically reducing 
+                latency and CPU overhead compared to traditional GPU communication methods. GDR is essential for 
+                high-performance distributed GPU workloads where fast inter-node GPU communication is critical.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Traditional GPU Communication] --> B[GPU 1]
+                    B --> C[System Memory]
+                    C --> D[CPU]
+                    D --> E[Network Stack]
+                    E --> F[Network]
+                    F --> G[CPU]
+                    G --> H[System Memory]
+                    H --> I[GPU 2]
+                    
+                    J[GPU Direct RDMA] --> K[GPU 1]
+                    K --> L[RDMA Network]
+                    L --> M[GPU 2<br/>Direct Path]
+                    
+                    style A fill:#FF6B6B
+                    style J fill:#9C27B0
+                    style D fill:#FF6B6B
+                    style G fill:#FF6B6B
+                    style L fill:#9C27B0
+            </div>
+
+            <div class="example-box">
+                <strong>Direct Connection Analogy:</strong>
+                GPU Direct RDMA is like having a direct phone line between two offices, bypassing all switchboards 
+                and operators. Traditional GPU communication requires going through the CPU (operator), system memory 
+                (message board), and network stack (routing). GDR creates a direct connection between GPUs, enabling 
+                them to communicate as if they were on the same machine.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((GPU Direct RDMA))
+                    Technology
+                      Direct GPU Communication
+                      Bypass CPU
+                      Bypass System Memory
+                      RDMA Network Adapters
+                    Benefits
+                      Reduced Latency
+                      Lower CPU Overhead
+                      Higher Bandwidth
+                      Efficient Communication
+                    vs Traditional
+                      No CPU Involvement
+                      No Memory Copies
+                      Direct Path
+                      Better Performance
+                    Use Cases
+                      Multi-Node GPU Systems
+                      Distributed Training
+                      High-Performance AI
+            </div>
+        </section>
+
+        <section id="technology" class="section">
+            <h2>GDR Technology</h2>
+            <p>
+                GPU Direct RDMA leverages RDMA-capable network adapters (InfiniBand or RoCE) that can directly 
+                access GPU memory. This requires coordination between GPU drivers, network drivers, and RDMA libraries 
+                to enable direct GPU memory access by network hardware.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[GPU Direct RDMA] --> B[GPU Memory<br/>Pinning]
+                    A --> C[RDMA Adapter<br/>InfiniBand/RoCE]
+                    A --> D[GDR Driver<br/>Coordination]
+                    A --> E[NCCL Integration<br/>Collective Ops]
+                    
+                    B --> F[Direct GPU<br/>Communication]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#9C27B0
+                    style F fill:#BA68C8
+            </div>
+
+            <div class="concept-card">
+                <h3>GDR Components</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GPU Memory Pinning:</strong> GPU memory pages pinned for RDMA access</li>
+                    <li><strong>RDMA Network Adapter:</strong> InfiniBand or RoCE adapter with GDR support</li>
+                    <li><strong>GDR Driver:</strong> Driver enabling direct GPU memory access</li>
+                    <li><strong>NCCL Integration:</strong> NCCL uses GDR for efficient collective operations</li>
+                    <li><strong>CUDA Integration:</strong> CUDA runtime supports GDR operations</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>How GDR Works</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Memory Registration:</strong> GPU memory registered with RDMA adapter</li>
+                    <li><strong>Address Translation:</strong> GPU virtual addresses mapped to physical addresses</li>
+                    <li><strong>RDMA Queue Setup:</strong> RDMA queues configured for GPU memory access</li>
+                    <li><strong>Direct Transfer:</strong> Network adapter reads/writes directly to GPU memory</li>
+                    <li><strong>Completion Notification:</strong> GPU notified when transfer completes</li>
+                </ol>
+            </div>
+
+            <div class="concept-card">
+                <h3>Supported Hardware</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>GPUs:</strong> NVIDIA GPUs with CUDA support</li>
+                    <li><strong>Network Adapters:</strong> InfiniBand HCA or RoCE-capable Ethernet adapters</li>
+                    <li><strong>Requirements:</strong> PCIe Gen3+ for sufficient bandwidth</li>
+                    <li><strong>Driver Support:</strong> NVIDIA driver and RDMA driver coordination</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="benefits" class="section">
+            <h2>GDR Benefits</h2>
+            <p>
+                GPU Direct RDMA provides significant performance improvements for distributed GPU workloads, 
+                particularly those requiring frequent inter-node GPU communication.
+            </p>
+
+            <div class="concept-card">
+                <h3>Reduced Latency</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Direct Path:</strong> No CPU or system memory involvement</li>
+                    <li><strong>Lower Latency:</strong> 2-3x lower latency than traditional methods</li>
+                    <li><strong>Example:</strong> Traditional: 10-15 μs, GDR: 3-5 μs</li>
+                    <li><strong>Impact:</strong> Faster collective operations in distributed training</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>CPU Offload</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>No CPU Involvement:</strong> CPU completely bypassed</li>
+                    <li><strong>CPU Available:</strong> CPU freed for other tasks</li>
+                    <li><strong>Better Utilization:</strong> More CPU cycles for computation</li>
+                    <li><strong>Impact:</strong> Critical for CPU-bound workloads</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Higher Bandwidth</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Direct Access:</strong> Network adapter accesses GPU memory directly</li>
+                    <li><strong>No Bottlenecks:</strong> No CPU or system memory bottlenecks</li>
+                    <li><strong>Full Utilization:</strong> Can achieve near line-rate bandwidth</li>
+                    <li><strong>Example:</strong> Can saturate 200 Gb/s InfiniBand links</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Reduced Memory Copies</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Zero-Copy:</strong> Data transferred directly from GPU to GPU</li>
+                    <li><strong>No Intermediate Buffers:</strong> No system memory copies</li>
+                    <li><strong>Lower Memory Bandwidth:</strong> System memory bandwidth not consumed</li>
+                    <li><strong>Impact:</strong> More memory bandwidth available for other operations</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="vs-traditional" class="section">
+            <h2>GDR vs Traditional GPU Communication</h2>
+            <p>
+                Comparing GPU Direct RDMA with traditional GPU communication methods highlights the significant 
+                advantages GDR provides for distributed GPU workloads.
+            </p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Characteristic</th>
+                        <th>Traditional Method</th>
+                        <th>GPU Direct RDMA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Data Path</strong></td>
+                        <td>GPU → System Memory → CPU → Network</td>
+                        <td>GPU → Network (Direct)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CPU Involvement</strong></td>
+                        <td>Required for all transfers</td>
+                        <td>Not required</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory Copies</strong></td>
+                        <td>2-3 copies</td>
+                        <td>0 copies</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Latency</strong></td>
+                        <td>10-15 μs</td>
+                        <td>3-5 μs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CPU Usage</strong></td>
+                        <td>High (30-50%)</td>
+                        <td>Minimal (<5%)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bandwidth Efficiency</strong></td>
+                        <td>60-70%</td>
+                        <td>90%+</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scalability</strong></td>
+                        <td>Limited by CPU</td>
+                        <td>Scales with network</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="mermaid">
+                graph LR
+                    A[Traditional Path] --> B[GPU Memory]
+                    B --> C[System Memory Copy]
+                    C --> D[CPU Processing]
+                    D --> E[Network Stack]
+                    E --> F[Network]
+                    
+                    G[GDR Path] --> H[GPU Memory]
+                    H --> I[Network<br/>Direct]
+                    
+                    style A fill:#FF6B6B
+                    style G fill:#9C27B0
+                    style D fill:#FF6B6B
+            </div>
+
+            <div class="example-box">
+                <strong>Performance Impact:</strong>
+                In distributed training with 8 GPUs per node, GDR can reduce all-reduce operation time from 
+                500-800 microseconds to 150-300 microseconds. For a training job with frequent synchronization, 
+                this translates to 20-30% reduction in communication overhead, effectively increasing training 
+                throughput by 15-25%.
+            </div>
+        </section>
+
+        <section id="use-cases" class="section">
+            <h2>GDR Use Cases</h2>
+            <p>
+                GPU Direct RDMA is essential for workloads requiring efficient inter-node GPU communication, 
+                particularly distributed training and HPC applications.
+            </p>
+
+            <div class="concept-card">
+                <h3>Distributed AI Training</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Gradient Synchronization:</strong> Fast all-reduce operations across nodes</li>
+                    <li><strong>Model Parameter Updates:</strong> Efficient parameter synchronization</li>
+                    <li><strong>Large Model Training:</strong> Models distributed across multiple nodes</li>
+                    <li><strong>Impact:</strong> Reduces training time significantly</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Multi-Node Inference</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Model Parallelism:</strong> Large models split across nodes</li>
+                    <li><strong>Pipeline Parallelism:</strong> Pipeline stages on different nodes</li>
+                    <li><strong>Data Exchange:</strong> Fast intermediate data transfer</li>
+                    <li><strong>Impact:</strong> Enables larger models in production</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>HPC Applications</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Domain Decomposition:</strong> Efficient boundary data exchange</li>
+                    <li><strong>Collective Operations:</strong> Fast reduction and broadcast</li>
+                    <li><strong>Memory Aggregation:</strong> Unified memory access patterns</li>
+                    <li><strong>Impact:</strong> Enables scalable scientific computing</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>NCCL Integration</h3>
+                <p>NCCL automatically uses GDR when available:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Automatic Detection:</strong> NCCL detects GDR capability</li>
+                    <li><strong>Optimized Paths:</strong> Uses GDR for optimal performance</li>
+                    <li><strong>Fallback Support:</strong> Falls back to traditional methods if GDR unavailable</li>
+                    <li><strong>Transparent:</strong> Applications benefit without code changes</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Real-World Example:</strong>
+                In a distributed training scenario training a large language model across 64 GPUs (8 nodes × 8 GPUs), 
+                GDR enables efficient gradient synchronization. Without GDR, each all-reduce operation takes 800-1000 
+                microseconds. With GDR, this reduces to 200-300 microseconds, allowing more frequent synchronization 
+                and faster convergence, reducing total training time by 20-30%.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>GPU Direct RDMA Guide | Direct GPU-to-GPU Communication</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

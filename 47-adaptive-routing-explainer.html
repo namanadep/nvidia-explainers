@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>47. Adaptive Routing: Smart Pathfinder for InfiniBand</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #0288D1;
+    --secondary-color: #03A9F4;
+    --accent-color: #4FC3F7;
+    --bg-color: #E1F5FE;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #81D4FA;
+    --shadow: 0 2px 8px rgba(2, 136, 209, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0288D1, #03A9F4);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.concept-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.concept-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #81D4FA;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>47. Adaptive Routing: Smart Pathfinder</h1>
+        <p class="subtitle">Dynamic Routing for Optimal Network Performance</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#mechanism" class="nav-link">Mechanism</a>
+        <a href="#load-balancing" class="nav-link">Load Balancing</a>
+        <a href="#congestion" class="nav-link">Congestion Avoidance</a>
+        <a href="#benefits" class="nav-link">Benefits</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>Adaptive Routing Overview</h2>
+            <p>
+                Adaptive Routing is an InfiniBand technology that enables dynamic path selection based on real-time 
+                network conditions. Unlike static routing that uses predetermined paths, adaptive routing continuously 
+                monitors network state and selects optimal paths to avoid congestion, balance load, and optimize 
+                performance. This intelligent pathfinding capability is essential for maintaining high performance in 
+                large-scale networks where traffic patterns are dynamic and congestion can occur unpredictably.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Static Routing] --> B[Fixed Path]
+                    B --> C{Congestion?}
+                    C -->|Yes| D[Performance Degrades]
+                    C -->|No| E[Works Fine]
+                    
+                    F[Adaptive Routing] --> G[Monitor Network]
+                    G --> H[Detect Congestion]
+                    H --> I[Select Alternate Path]
+                    I --> J[Maintain Performance]
+                    
+                    style A fill:#FF6B6B
+                    style F fill:#0288D1
+                    style D fill:#FF6B6B
+                    style J fill:#0288D1
+            </div>
+
+            <div class="example-box">
+                <strong>Adaptive Routing Mechanism:</strong>
+                Adaptive routing dynamically adjusts packet paths based on real-time network conditions. Unlike static 
+                routing that uses fixed paths, adaptive routing continuously monitors network congestion and link 
+                utilization, selecting optimal paths in real-time. This enables load balancing across multiple paths, 
+                avoids congested routes, and optimizes performance based on current network state.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((Adaptive Routing))
+                    Mechanism
+                      Dynamic Path Selection
+                      Real-Time Monitoring
+                      Congestion Detection
+                      Load Balancing
+                    Benefits
+                      Optimal Performance
+                      Congestion Avoidance
+                      Better Utilization
+                      Consistent Throughput
+                    vs Static Routing
+                      Fixed Paths
+                      No Adaptation
+                      Congestion Issues
+                    Use Cases
+                      Large-Scale Networks
+                      Dynamic Traffic
+                      High-Performance AI
+            </div>
+        </section>
+
+        <section id="mechanism" class="section">
+            <h2>Adaptive Routing Mechanism</h2>
+            <p>
+                Adaptive routing operates by continuously monitoring network conditions and making dynamic routing 
+                decisions at each switch. This enables packets to take different paths based on current network state, 
+                optimizing performance and avoiding congestion.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Packet Arrives] --> B[Monitor Network<br/>Link Utilization]
+                    B --> C[Evaluate Paths<br/>Multiple Routes]
+                    C --> D{Assess Conditions}
+                    D -->|Path A: Low Load| E[Select Path A]
+                    D -->|Path B: Medium Load| F[Select Path B]
+                    D -->|Path C: High Load| G[Avoid Path C]
+                    
+                    E --> H[Forward Packet]
+                    F --> H
+                    G --> I[Select Alternative]
+                    I --> H
+                    
+                    style A fill:#0288D1
+                    style H fill:#03A9F4
+            </div>
+
+            <div class="concept-card">
+                <h3>Path Selection Process</h3>
+                <ol style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Network Monitoring:</strong> Switches monitor link utilization and congestion</li>
+                    <li><strong>Path Evaluation:</strong> Evaluate multiple available paths</li>
+                    <li><strong>Condition Assessment:</strong> Assess congestion and load on each path</li>
+                    <li><strong>Path Selection:</strong> Select optimal path based on conditions</li>
+                    <li><strong>Dynamic Adjustment:</strong> Continuously adjust as conditions change</li>
+                </ol>
+            </div>
+
+            <div class="concept-card">
+                <h3>Routing Decision Factors</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Link Utilization:</strong> Current load on links</li>
+                    <li><strong>Congestion Indicators:</strong> Buffer occupancy, queue depth</li>
+                    <li><strong>Path Length:</strong> Number of hops to destination</li>
+                    <li><strong>Historical Performance:</strong> Past performance of paths</li>
+                    <li><strong>Load Distribution:</strong> Balance traffic across paths</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Per-Packet Routing</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Dynamic Selection:</strong> Path selected per packet or flow</li>
+                    <li><strong>Real-Time Adaptation:</strong> Adapts to current conditions</li>
+                    <li><strong>Load Balancing:</strong> Distributes traffic across paths</li>
+                    <li><strong>Congestion Avoidance:</strong> Avoids congested paths</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="load-balancing" class="section">
+            <h2>Load Balancing</h2>
+            <p>
+                Adaptive routing enables intelligent load balancing by distributing traffic across multiple available 
+                paths. This prevents any single path from becoming overloaded and optimizes overall network utilization.
+            </p>
+
+            <div class="mermaid">
+                graph LR
+                    A[Source] --> B[Switch 1]
+                    B --> C[Path A<br/>Low Load]
+                    B --> D[Path B<br/>Medium Load]
+                    B --> E[Path C<br/>High Load]
+                    
+                    C --> F[Destination]
+                    D --> F
+                    E -.->|Avoid| F
+                    
+                    style A fill:#0288D1
+                    style B fill:#03A9F4
+                    style C fill:#4FC3F7
+                    style D fill:#81D4FA
+                    style E fill:#FF6B6B
+            </div>
+
+            <div class="concept-card">
+                <h3>Load Distribution</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Multiple Paths:</strong> Utilize multiple paths simultaneously</li>
+                    <li><strong>Equal Distribution:</strong> Balance load across paths</li>
+                    <li><strong>Dynamic Adjustment:</strong> Adjust distribution based on load</li>
+                    <li><strong>Optimal Utilization:</strong> Maximize network utilization</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Path Diversity</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Multiple Routes:</strong> Maintain multiple routes to destinations</li>
+                    <li><strong>Path Selection:</strong> Select least-loaded paths</li>
+                    <li><strong>Redundancy:</strong> Provide path redundancy</li>
+                    <li><strong>Resilience:</strong> Improve network resilience</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Benefits of Load Balancing</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Higher Throughput:</strong> Better overall network throughput</li>
+                    <li><strong>Reduced Congestion:</strong> Prevents path overload</li>
+                    <li><strong>Better Utilization:</strong> Utilizes all available paths</li>
+                    <li><strong>Improved Performance:</strong> Better performance for all flows</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="congestion" class="section">
+            <h2>Congestion Avoidance</h2>
+            <p>
+                Adaptive routing proactively avoids congestion by detecting congestion indicators and routing traffic 
+                around congested areas. This prevents performance degradation and maintains optimal network operation.
+            </p>
+
+            <div class="concept-card">
+                <h3>Congestion Detection</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Buffer Occupancy:</strong> Monitor buffer fill levels</li>
+                    <li><strong>Queue Depth:</strong> Track queue lengths</li>
+                    <li><strong>Link Utilization:</strong> Monitor link usage</li>
+                    <li><strong>Latency Increase:</strong> Detect increased latency</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Congestion Avoidance Strategies</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Path Diversion:</strong> Route around congested areas</li>
+                    <li><strong>Load Redistribution:</strong> Redistribute load to less-congested paths</li>
+                    <li><strong>Proactive Routing:</strong> Anticipate and avoid congestion</li>
+                    <li><strong>Dynamic Adjustment:</strong> Continuously adjust routes</li>
+                </ul>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Characteristic</th>
+                        <th>Static Routing</th>
+                        <th>Adaptive Routing</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Path Selection</strong></td>
+                        <td>Fixed, predetermined</td>
+                        <td>Dynamic, based on conditions</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Congestion Handling</strong></td>
+                        <td>Routes through congestion</td>
+                        <td>Routes around congestion</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Load Balancing</strong></td>
+                        <td>Limited or none</td>
+                        <td>Intelligent load balancing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance</strong></td>
+                        <td>Degrades with congestion</td>
+                        <td>Maintains performance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Adaptability</strong></td>
+                        <td>Static, no adaptation</td>
+                        <td>Dynamic, continuous adaptation</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="example-box">
+                <strong>Performance Impact:</strong>
+                In large-scale distributed training, adaptive routing can maintain optimal performance even when 
+                network conditions change. Without adaptive routing, congestion on a single path can degrade 
+                performance for all traffic using that path. Adaptive routing automatically routes around congestion, 
+                maintaining high performance and ensuring consistent training throughput.
+            </div>
+        </section>
+
+        <section id="benefits" class="section">
+            <h2>Benefits of Adaptive Routing</h2>
+            <p>
+                Adaptive routing provides significant advantages for high-performance networks, particularly in 
+                large-scale deployments with dynamic traffic patterns.
+            </p>
+
+            <div class="concept-card">
+                <h3>Performance Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Optimal Paths:</strong> Always uses best available paths</li>
+                    <li><strong>Congestion Avoidance:</strong> Avoids congested routes</li>
+                    <li><strong>Load Balancing:</strong> Distributes load efficiently</li>
+                    <li><strong>Consistent Performance:</strong> Maintains performance under varying conditions</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Scalability Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Large Networks:</strong> Effective for large-scale networks</li>
+                    <li><strong>Dynamic Traffic:</strong> Handles dynamic traffic patterns</li>
+                    <li><strong>Better Utilization:</strong> Utilizes network resources efficiently</li>
+                    <li><strong>Future-Proof:</strong> Adapts to changing network conditions</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Reliability Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Path Redundancy:</strong> Multiple paths available</li>
+                    <li><strong>Fault Tolerance:</strong> Routes around failures</li>
+                    <li><strong>Resilience:</strong> Network remains operational under stress</li>
+                    <li><strong>Stability:</strong> Maintains stable operation</li>
+                </ul>
+            </div>
+
+            <div class="concept-card">
+                <h3>Use Case Benefits</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>AI Training:</strong> Maintains performance for distributed training</li>
+                    <li><strong>HPC Applications:</strong> Optimizes performance for scientific computing</li>
+                    <li><strong>Dynamic Workloads:</strong> Adapts to changing workload patterns</li>
+                    <li><strong>Large Clusters:</strong> Essential for large-scale deployments</li>
+                </ul>
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>Adaptive Routing Guide | Smart Pathfinder for InfiniBand</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

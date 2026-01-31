@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>37. vGPU: Virtual GPU Technology for Time-Sharing</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #00A8E8;
+    --secondary-color: #00C4FF;
+    --accent-color: #4DD0E1;
+    --bg-color: #E0F7FA;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #80DEEA;
+    --shadow: 0 2px 8px rgba(0, 168, 232, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #00A8E8, #00C4FF);
+    color: white;
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.feature-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.feature-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 600;
+}
+.comparison-table tr:hover {
+    background: var(--bg-color);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E0F7FA, #B2EBF2);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+.example-box strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #80DEEA;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>37. vGPU: Virtual GPU Technology</h1>
+        <p class="subtitle">Time-Sharing GPU Resources for Virtualized Environments</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#technology" class="nav-link">Technology</a>
+        <a href="#profiles" class="nav-link">vGPU Profiles</a>
+        <a href="#scheduling" class="nav-link">Scheduling</a>
+        <a href="#use-cases" class="nav-link">Use Cases</a>
+        <a href="#vs-mig" class="nav-link">vs MIG</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="overview" class="section">
+            <h2>vGPU Overview</h2>
+            <p>
+                Virtual GPU (vGPU) technology enables multiple virtual machines or containers to share a physical 
+                GPU by time-slicing GPU resources. Unlike spatial partitioning used in MIG, vGPU uses temporal 
+                partitioning, where each virtual GPU gets exclusive access to the physical GPU for a time slice. 
+                This technology enables GPU resource sharing in virtualized environments, allowing organizations to 
+                maximize GPU utilization and support multi-tenant deployments.
+            </p>
+
+            <div class="mermaid">
+                graph TD
+                    A[Physical GPU] --> B[Time Slicing]
+                    B --> C[vGPU 1<br/>Time Slice 1]
+                    B --> D[vGPU 2<br/>Time Slice 2]
+                    B --> E[vGPU 3<br/>Time Slice 3]
+                    B --> F[vGPU 4<br/>Time Slice 4]
+                    
+                    C --> G[VM 1]
+                    D --> H[VM 2]
+                    E --> I[VM 3]
+                    F --> J[VM 4]
+                    
+                    style A fill:#00A8E8
+                    style B fill:#00C4FF
+                    style C fill:#4DD0E1
+                    style D fill:#4DD0E1
+                    style E fill:#4DD0E1
+                    style F fill:#4DD0E1
+            </div>
+
+            <div class="example-box">
+                <strong>Time-Sharing Concept:</strong>
+                vGPU works like a time-share vacation property, where multiple owners get exclusive access during 
+                their allocated time periods. Similarly, multiple virtual machines get exclusive access to the 
+                physical GPU during their time slices. The GPU scheduler rapidly switches between vGPUs, creating 
+                the illusion of dedicated GPU access for each VM.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((vGPU))
+                    Technology
+                      Time-Slicing
+                      Temporal Partitioning
+                      GPU Scheduler
+                      Virtual Machines
+                    vGPU Profiles
+                      Memory Profiles
+                      Compute Profiles
+                      Profile Types
+                    Scheduling
+                      Time Slice Allocation
+                      Context Switching
+                      Fair Share
+                    Use Cases
+                      Virtualized Environments
+                      Multi-Tenant Systems
+                      Cloud Services
+                    vs MIG
+                      Temporal vs Spatial
+                      VM vs Container
+                      Isolation Levels
+            </div>
+        </section>
+
+        <section id="technology" class="section">
+            <h2>vGPU Technology</h2>
+            <p>
+                vGPU technology creates virtual GPU instances that share the physical GPU through time-slicing. 
+                Each vGPU appears as a complete GPU to the virtual machine, with its own memory, compute resources, 
+                and driver interface. The hypervisor and GPU driver coordinate to schedule time slices and manage 
+                resource allocation.
+            </p>
+
+            <div class="mermaid">
+                sequenceDiagram
+                    participant Scheduler
+                    participant GPU as Physical GPU
+                    participant vGPU1 as vGPU 1
+                    participant vGPU2 as vGPU 2
+                    participant vGPU3 as vGPU 3
+                    
+                    Scheduler->>GPU: Allocate Time Slice 1
+                    GPU->>vGPU1: Exclusive Access
+                    vGPU1->>vGPU1: Execute Workload
+                    Scheduler->>GPU: Switch to Time Slice 2
+                    GPU->>vGPU2: Exclusive Access
+                    vGPU2->>vGPU2: Execute Workload
+                    Scheduler->>GPU: Switch to Time Slice 3
+                    GPU->>vGPU3: Exclusive Access
+                    vGPU3->>vGPU3: Execute Workload
+                    Note over Scheduler,vGPU3: Rapid Time-Slicing<br/>Creates Illusion of<br/>Dedicated Access
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[Temporal Partitioning] --> B[Time Slices<br/>Exclusive Access]
+                    A --> C[Rapid Switching<br/>Quick Transitions]
+                    A --> D[Shared Resources<br/>Same Physical GPU]
+                    A --> E[Isolation<br/>Memory & State]
+                    
+                    B --> F[vGPU Operation<br/>Time-Sharing]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#00A8E8
+                    style F fill:#00C4FF
+                </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[vGPU Components] --> B[Hypervisor<br/>VM Scheduling]
+                    A --> C[GPU Driver<br/>Host Management]
+                    A --> D[vGPU Driver<br/>Guest Interface]
+                    A --> E[Scheduler<br/>Time-Slice Algorithm]
+                    A --> F[Memory Manager<br/>Virtual Memory]
+                    
+                    B --> G[Complete vGPU<br/>Functionality]
+                    C --> G
+                    D --> G
+                    E --> G
+                    F --> G
+                    
+                    style A fill:#00A8E8
+                    style G fill:#00C4FF
+                </div>
+
+            <div class="mermaid">
+                flowchart LR
+                    A[vGPU Platforms] --> B[VMware vSphere<br/>vSGA, vDGA]
+                    A --> C[Citrix Hypervisor<br/>XenServer]
+                    A --> D[Red Hat<br/>RHEV]
+                    A --> E[KVM<br/>Mediated Devices]
+                    A --> F[Hyper-V<br/>GPU-PV]
+                    
+                    style A fill:#00A8E8
+                    style B fill:#00C4FF
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+                    style E fill:#B2EBF2
+                    style F fill:#E0F7FA
+                </div>
+        </section>
+
+        <section id="profiles" class="section">
+            <h2>vGPU Profiles</h2>
+            <p>
+                vGPU profiles define the resource allocation for each virtual GPU instance. Profiles specify memory 
+                size, compute capability, and other characteristics. Different profiles are available for different 
+                GPU models and use cases.
+            </p>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[vGPU Profile Naming] --> B[Format<br/>Type-MemorySize]
+                    A --> C[Profile Types<br/>Q, A, H]
+                    A --> D[Memory Sizes<br/>1GB to 80GB]
+                    A --> E[Examples<br/>A100-40GB, H100-48GB]
+                    
+                    B --> F[Profile Identification<br/>Clear Naming]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#00A8E8
+                    style F fill:#00C4FF
+                </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>vGPU Profile</th>
+                        <th>Memory</th>
+                        <th>Max vGPUs</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>A100-1Q</strong></td>
+                        <td>1 GB</td>
+                        <td>80</td>
+                        <td>Light workloads, testing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A100-2Q</strong></td>
+                        <td>2 GB</td>
+                        <td>40</td>
+                        <td>Small inference workloads</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A100-4Q</strong></td>
+                        <td>4 GB</td>
+                        <td>20</td>
+                        <td>Medium inference</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A100-8Q</strong></td>
+                        <td>8 GB</td>
+                        <td>10</td>
+                        <td>Larger inference</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A100-10Q</strong></td>
+                        <td>10 GB</td>
+                        <td>8</td>
+                        <td>Production inference</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A100-20Q</strong></td>
+                        <td>20 GB</td>
+                        <td>4</td>
+                        <td>Large model inference</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A100-40Q</strong></td>
+                        <td>40 GB</td>
+                        <td>2</td>
+                        <td>Very large workloads</td>
+                    </tr>
+                    <tr>
+                        <td><strong>A100-80Q</strong></td>
+                        <td>80 GB</td>
+                        <td>1</td>
+                        <td>Dedicated GPU (passthrough)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="feature-card">
+                <h3>Homogeneous Profiles</h3>
+                <p>Homogeneous profiles ensure consistent performance:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Same Profile:</strong> All vGPUs use the same profile</li>
+                    <li><strong>Equal Time Slices:</strong> Each vGPU gets equal GPU time</li>
+                    <li><strong>Predictable Performance:</strong> Consistent performance characteristics</li>
+                    <li><strong>Simplified Management:</strong> Easier to manage and monitor</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="scheduling" class="section">
+            <h2>Scheduling Algorithms</h2>
+            <p>
+                vGPU scheduling determines how GPU time is allocated among multiple virtual GPUs. Different 
+                scheduling algorithms provide different performance characteristics and resource guarantees.
+            </p>
+
+            <div class="feature-card">
+                <h3>Best Effort Scheduling</h3>
+                <p>Default scheduling mode with no guarantees:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Equal Time Slices:</strong> Each vGPU gets equal time by default</li>
+                    <li><strong>Dynamic Allocation:</strong> Time can be redistributed based on demand</li>
+                    <li><strong>No Guarantees:</strong> No performance guarantees or SLAs</li>
+                    <li><strong>Use Case:</strong> Development, testing, non-critical workloads</li>
+                    <li><strong>Example:</strong> 4 vGPUs each get 25% of GPU time, but if one is idle, 
+                    others can use more</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>Equal Share Scheduling</h3>
+                <p>Guaranteed equal time allocation:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Fixed Allocation:</strong> Each vGPU gets exactly equal time slices</li>
+                    <li><strong>Guaranteed Performance:</strong> Predictable performance for each VM</li>
+                    <li><strong>No Redistribution:</strong> Time cannot be redistributed</li>
+                    <li><strong>Use Case:</strong> Production workloads requiring predictable performance</li>
+                    <li><strong>Example:</strong> 4 vGPUs each get exactly 25% of GPU time, regardless of load</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>Fixed Share Scheduling</h3>
+                <p>Custom time allocation with guarantees:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Custom Allocation:</strong> Define specific time percentages per vGPU</li>
+                    <li><strong>Performance SLAs:</strong> Guaranteed minimum performance levels</li>
+                    <li><strong>Priority-Based:</strong> Higher priority VMs get more time</li>
+                    <li><strong>Use Case:</strong> Multi-tenant environments with different service levels</li>
+                    <li><strong>Example:</strong> vGPU 1 gets 50%, vGPU 2 gets 30%, vGPU 3 and 4 get 10% each</li>
+                </ul>
+            </div>
+
+            <div class="mermaid">
+                graph LR
+                    A[Scheduler] --> B[Best Effort<br/>Dynamic]
+                    A --> C[Equal Share<br/>Fixed Equal]
+                    A --> D[Fixed Share<br/>Custom]
+                    
+                    B --> B1[Flexible<br/>No Guarantees]
+                    C --> C1[Predictable<br/>Equal Performance]
+                    D --> D1[Guaranteed<br/>Custom Performance]
+                    
+                    style A fill:#00A8E8
+                    style B fill:#00C4FF
+                    style C fill:#4DD0E1
+                    style D fill:#80DEEA
+            </div>
+        </section>
+
+        <section id="use-cases" class="section">
+            <h2>Use Cases</h2>
+            <p>
+                vGPU technology enables various use cases in virtualized environments, from development and 
+                testing to production deployments and cloud services.
+            </p>
+
+            <div class="feature-card">
+                <h3>Virtual Desktop Infrastructure (VDI)</h3>
+                <p>vGPU enables GPU-accelerated virtual desktops:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Graphics Acceleration:</strong> GPU-accelerated graphics for remote desktops</li>
+                    <li><strong>CAD/CAE Applications:</strong> Engineering and design software</li>
+                    <li><strong>Media Processing:</strong> Video editing and content creation</li>
+                    <li><strong>Multi-Tenant:</strong> Multiple users sharing GPU resources</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>AI Development and Testing</h3>
+                <p>vGPU supports AI development workflows:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Development Environments:</strong> GPU access for developers</li>
+                    <li><strong>Model Testing:</strong> Testing models before production deployment</li>
+                    <li><strong>Resource Sharing:</strong> Multiple developers sharing GPU resources</li>
+                    <li><strong>Cost Efficiency:</strong> Better GPU utilization</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>Cloud GPU Services</h3>
+                <p>vGPU enables cloud GPU offerings:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Multi-Tenancy:</strong> Multiple customers sharing physical GPUs</li>
+                    <li><strong>Resource Isolation:</strong> Secure isolation between tenants</li>
+                    <li><strong>Flexible Allocation:</strong> Dynamic vGPU allocation</li>
+                    <li><strong>Cost Optimization:</strong> Maximize GPU utilization</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>Production Inference</h3>
+                <p>vGPU supports production inference workloads:</p>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Model Serving:</strong> Serving multiple models on shared GPUs</li>
+                    <li><strong>Load Balancing:</strong> Distributing inference requests</li>
+                    <li><strong>Resource Efficiency:</strong> Better GPU utilization</li>
+                    <li><strong>Isolation:</strong> Separate models in different VMs</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="vs-mig" class="section">
+            <h2>vGPU vs MIG</h2>
+            <p>
+                vGPU and MIG are both GPU virtualization technologies but use different approaches. Understanding 
+                their differences helps choose the right technology for specific use cases.
+            </p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Characteristic</th>
+                        <th>vGPU</th>
+                        <th>MIG</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Partitioning Type</strong></td>
+                        <td>Temporal (time-slicing)</td>
+                        <td>Spatial (hardware partitioning)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Resource Sharing</strong></td>
+                        <td>Shared over time</td>
+                        <td>Dedicated hardware slices</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Isolation</strong></td>
+                        <td>Software-based</td>
+                        <td>Hardware-based</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance Predictability</strong></td>
+                        <td>Variable (depends on scheduling)</td>
+                        <td>Highly predictable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Use Case</strong></td>
+                        <td>Virtualized environments, VDI</td>
+                        <td>Bare-metal, containers, multi-tenant</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hypervisor Required</strong></td>
+                        <td>Yes</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GPU Models</strong></td>
+                        <td>All NVIDIA GPUs</td>
+                        <td>A100, H100 only</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Maximum Instances</strong></td>
+                        <td>Up to 80+ (depends on profile)</td>
+                        <td>Up to 7 (depends on GPU)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="feature-card">
+                <h3>When to Use vGPU</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Virtualized Environments:</strong> VMs requiring GPU access</li>
+                    <li><strong>VDI Deployments:</strong> GPU-accelerated virtual desktops</li>
+                    <li><strong>Legacy Applications:</strong> Applications requiring full GPU driver</li>
+                    <li><strong>Multi-Tenant Clouds:</strong> Cloud GPU services</li>
+                    <li><strong>Development:</strong> Development and testing environments</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>When to Use MIG</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Bare-Metal Deployments:</strong> No hypervisor overhead</li>
+                    <li><strong>Container Environments:</strong> Kubernetes, Docker</li>
+                    <li><strong>Predictable Performance:</strong> Need guaranteed performance</li>
+                    <li><strong>Production Workloads:</strong> Critical production applications</li>
+                    <li><strong>Smaller Instances:</strong> Need many small GPU instances</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <strong>Choosing the Right Technology:</strong>
+                Use vGPU when you need GPU access in virtualized environments with VMs. Use MIG when you need 
+                hardware-level isolation and predictable performance for containers or bare-metal deployments. 
+                Both technologies can coexist in the same infrastructure, with vGPU for VM workloads and MIG for 
+                container workloads.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p>vGPU Guide | Virtual GPU Technology</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' }
+);
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+            });
+        });
+
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

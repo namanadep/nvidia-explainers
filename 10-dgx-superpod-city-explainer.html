@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DGX SuperPOD: Scalable AI Infrastructure Architecture</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --primary-color: #1E88E5;
+    --secondary-color: #42A5F5;
+    --accent-color: #FFC107;
+    --bg-color: #F5F5F5;
+    --card-bg: #FFFFFF;
+    --text-color: #1A1A1A;
+    --border-color: #E0E0E0;
+    --shadow: 0 2px 8px rgba(30, 136, 229, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+header {
+    text-align: center;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #1E88E5, #42A5F5);
+    color: white;
+    position: relative;
+}
+header::before {
+    content: '';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+.nav-menu {
+    width: 280px;
+    min-width: 280px;
+    background: #80DEEA;
+    border-right: 2px solid var(--border-color);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: block;
+}
+.nav-link:hover, .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+.main-content-wrapper {
+    flex: 1;
+    width: calc(100% - 280px);
+    min-width: 0;
+}
+
+.section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+.city-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+.mermaid { margin: 30px 0; text-align: center; }
+.example-box {
+    background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+    border-left: 5px solid var(--primary-color);
+    padding: 20px 25px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+footer {
+    text-align: center;
+    padding: 40px;
+    background: #E3F2FD;
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+@media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    
+    .nav-menu {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .nav-link {
+        padding: 8px 15px;
+        margin: 4px;
+    }
+    
+    .section { padding: 25px 20px; }
+}
+    .section {
+    padding: 40px;
+    min-height: calc(100vh - 200px);
+    border-bottom: 1px solid var(--border-color);
+    max-width: 100%;
+}
+    
+.author-credit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    display: inline-block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+</style>
+</head>
+<body>
+    <header>
+        <h1>10. DGX SuperPOD: Scalable AI Infrastructure</h1>
+        <p class="subtitle">Architecture for Large-Scale AI Training and HPC Workloads</p>
+        <p class="author-credit">Explained by Naman Adep</p>
+    </header>
+
+    <div class="sidebar-wrapper">
+    <nav class="nav-menu">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#basepod" class="nav-link">BasePOD</a>
+        <a href="#dgx-nodes" class="nav-link">DGX Nodes</a>
+        <a href="#interconnects" class="nav-link">Interconnects</a>
+        <a href="#software" class="nav-link">Software Stack</a>
+        <a href="#scaling" class="nav-link">Scaling</a>
+    </nav>
+    <div class="main-content-wrapper">
+        <main>
+        <section id="blueprint" class="section">
+            <h2>DGX SuperPOD Architecture Overview</h2>
+            <p>
+                DGX SuperPOD is NVIDIA's reference architecture for building large-scale AI training infrastructure. 
+                It provides a complete, integrated solution that combines compute nodes, high-performance networking, 
+                storage systems, and management software. The architecture is designed for scalability, enabling 
+                organizations to start with a BasePOD foundation and expand to SuperPOD scale as requirements grow. 
+                All components are pre-validated and optimized to work together seamlessly.
+            </p>
+
+            <div class="mermaid">
+                graph TB
+                    A[DGX SuperPOD<br/>The City] --> B[BasePOD<br/>Foundation]
+                    A --> C[DGX Nodes<br/>Buildings]
+                    A --> D[NVLink/NVSwitch<br/>Streets]
+                    A --> E[Software Stack<br/>Utilities]
+                    A --> F[Services<br/>City Services]
+                    
+                    style A fill:#1E88E5
+                    style B fill:#42A5F5
+                    style C fill:#FFC107
+                    style D fill:#66BB6A
+                    style E fill:#AB47BC
+                    style F fill:#EF5350
+            </div>
+
+            <div class="example-box">
+                <strong>SuperPOD Architecture:</strong>
+                SuperPOD requires compute infrastructure (DGX nodes), networking (InfiniBand), storage (parallel 
+                filesystems), and management services (BCM, monitoring). All components are integrated and designed 
+                to work together for optimal AI workload performance.
+            </div>
+
+            <div class="mermaid">
+                mindmap
+                  root((DGX SuperPOD))
+                    BasePOD
+                      Power Infrastructure
+                        High-Capacity Distribution
+                        Redundant Power
+                      Cooling Systems
+                        Liquid Cooling
+                        Heat Management
+                      Networking Backbone
+                        InfiniBand Setup
+                        Network Topology
+                      Storage Foundation
+                        Lustre Filesystem
+                        Data Tiering
+                    DGX Nodes
+                      Compute Units
+                        8 GPUs per Node
+                        High-Performance CPUs
+                      Interconnect
+                        NVLink
+                        NVSwitch
+                      Scalability
+                        Add Nodes
+                        Scale Out
+                    Interconnect
+                      NVLink
+                        Intra-Node
+                        GPU-to-GPU
+                      NVSwitch
+                        Inter-Node
+                        All-to-All Communication
+                      InfiniBand
+                        High-Speed Network
+                        Low Latency
+                    Software Stack
+                      Operating System
+                        Linux Distribution
+                        Drivers
+                      Management
+                        BCM
+                        Monitoring Tools
+                      Frameworks
+                        CUDA
+                        cuDNN
+                        AI Frameworks
+                    Scaling
+                      Small Deployment
+                        1-4 Nodes
+                        BasePOD Foundation
+                      Medium Deployment
+                        8-16 Nodes
+                        Expanded Infrastructure
+                      Large Deployment
+                        32+ Nodes
+                        Full SuperPOD
+                      Optimized Deployment
+                        Tuned Configuration
+                        Maximum Efficiency
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[DGX SuperPOD] --> B[BasePOD<br/>Infrastructure]
+                    A --> C[DGX Nodes<br/>Compute]
+                    A --> D[InfiniBand<br/>Network]
+                    A --> E[Lustre<br/>Storage]
+                    A --> F[BCM<br/>Management]
+                    
+                    B --> G[Power & Cooling]
+                    C --> H[GPU Compute]
+                    D --> I[High-Speed Interconnect]
+                    E --> J[Parallel I/O]
+                    F --> K[Orchestration]
+                    
+                    G --> L[Complete AI Infrastructure]
+                    H --> L
+                    I --> L
+                    J --> L
+                    K --> L
+                    
+                    style A fill:#1E88E5
+                    style L fill:#42A5F5
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Function</th>
+                        <th>Example</th>
+                        <th>Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>DGX Nodes</strong></td>
+                        <td>Compute resources</td>
+                        <td>64 nodes × 8 GPUs = 512 GPUs</td>
+                        <td>Massive parallel compute</td>
+                    </tr>
+                    <tr>
+                        <td><strong>InfiniBand</strong></td>
+                        <td>High-speed interconnect</td>
+                        <td>400 Gb/s NDR</td>
+                        <td>Low latency gradient sync</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lustre</strong></td>
+                        <td>Parallel filesystem</td>
+                        <td>10+ TB/s aggregate</td>
+                        <td>Fast data loading</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BCM</strong></td>
+                        <td>Cluster management</td>
+                        <td>Job scheduling, monitoring</td>
+                        <td>Efficient resource use</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="basepod" class="section">
+            <h2>BasePOD: Infrastructure Foundation</h2>
+            <p>
+                BasePOD provides the infrastructure foundation for SuperPOD, including power, cooling, networking, 
+                and storage systems. It establishes the base infrastructure on which compute nodes and workloads operate.
+            </p>
+
+            <div class="mermaid">
+                graph TB
+                    A[BasePOD Infrastructure] --> B[Power Systems<br/>Electrical Distribution]
+                    A --> C[Cooling Systems<br/>Liquid/Air Cooling]
+                    A --> D[Networking<br/>InfiniBand Backbone]
+                    A --> E[Storage<br/>Parallel Filesystems]
+                    
+                    style A fill:#1E88E5
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+                <div class="city-card" style="border-left: 5px solid #1E88E5;">
+                    <h3 style="color: #1E88E5; margin-bottom: 15px;">Power Infrastructure</h3>
+                    <p><strong>Function:</strong> High-capacity electrical distribution</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Provides 50kW+ per rack to support GPU clusters.
+                    </p>
+                </div>
+
+                <div class="city-card" style="border-left: 5px solid #42A5F5;">
+                    <h3 style="color: #42A5F5; margin-bottom: 15px;">Cooling Systems</h3>
+                    <p><strong>Function:</strong> Heat management</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Liquid and air cooling to manage GPU heat generation.
+                    </p>
+                </div>
+
+                <div class="city-card" style="border-left: 5px solid #FFC107;">
+                    <h3 style="color: #FFC107; margin-bottom: 15px;">Networking Backbone</h3>
+                    <p><strong>Function:</strong> High-speed interconnect</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        InfiniBand provides ultra-low latency for distributed training.
+                    </p>
+                </div>
+
+                <div class="city-card" style="border-left: 5px solid #66BB6A;">
+                    <h3 style="color: #66BB6A; margin-bottom: 15px;">Storage Foundation</h3>
+                    <p><strong>Function:</strong> Parallel filesystems</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Lustre provides high-throughput data access for all nodes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[BasePOD] --> B[Power Infrastructure<br/>50kW+ per Rack]
+                    A --> C[Cooling Systems<br/>Liquid & Air]
+                    A --> D[Networking Backbone<br/>InfiniBand]
+                    A --> E[Storage Foundation<br/>Lustre FS]
+                    
+                    B --> F[Complete Infrastructure<br/>Foundation]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    F --> G[DGX Nodes<br/>Can Connect]
+                    
+                    style A fill:#1E88E5
+                    style F fill:#42A5F5
+                    style G fill:#FFC107
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[BasePOD Components] --> B[Power Infrastructure<br/>High-Capacity Distribution]
+                    A --> C[Cooling Systems<br/>Liquid & Air]
+                    A --> D[Networking Backbone<br/>InfiniBand]
+                    A --> E[Storage Foundation<br/>Lustre FS]
+                    
+                    B --> F[Complete Infrastructure<br/>Foundation]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#1E88E5
+                    style F fill:#42A5F5
+                </div>
+        </section>
+
+        <section id="nodes" class="section">
+            <h2>DGX Nodes: Compute Units</h2>
+            <p>
+                DGX nodes are individual compute units in the SuperPOD cluster. Each node contains multiple 
+                GPUs and provides compute resources for AI workloads. Nodes work together as part of the 
+                cluster infrastructure, sharing network, storage, and management systems.
+            </p>
+
+            <div class="mermaid">
+                graph TB
+                    A[DGX SuperPOD Cluster] --> B[Network Infrastructure]
+                    A --> C[Storage Systems]
+                    A --> D[Management Platform]
+                    
+                    A --> E[DGX Node 1<br/>8x GPUs]
+                    A --> F[DGX Node 2<br/>8x GPUs]
+                    A --> G[DGX Node 3<br/>8x GPUs]
+                    A --> H[DGX Node N<br/>8x GPUs]
+                    
+                    E --> I[Workload Execution]
+                    F --> I
+                    G --> I
+                    H --> I
+                    
+                    style A fill:#1E88E5
+                    style E fill:#42A5F5
+                    style I fill:#FFC107
+            </div>
+
+            <div class="city-card">
+                <h3>Node Roles and Workloads</h3>
+                <p>
+                    Each DGX node can host different types of workloads: some nodes run training jobs, 
+                    others handle inference, and others process data. All nodes connect to shared cluster 
+                    infrastructure including high-speed network (InfiniBand), parallel storage (Lustre), 
+                    and management systems (BCM). This shared infrastructure enables efficient resource 
+                    utilization and workload distribution.
+                </p>
+            </div>
+        </section>
+
+        <section id="interconnect" class="section">
+            <h2>Interconnect: NVLink & NVSwitch</h2>
+            <p>
+                NVLink and NVSwitch provide high-speed interconnect for GPU communication within and between 
+                nodes. NVLink connects GPUs within a node, while NVSwitch enables all-to-all communication 
+                between GPUs across nodes, enabling efficient distributed training.
+            </p>
+
+            <div class="mermaid">
+                graph TB
+                    A[Interconnect Architecture] --> B[NVLink<br/>Intra-Node]
+                    A --> C[NVSwitch<br/>Inter-Node]
+                    
+                    B --> D[GPU-to-GPU<br/>Within Node]
+                    C --> E[GPU-to-GPU<br/>Across Nodes]
+                    
+                    D --> F[High Bandwidth<br/>Low Latency]
+                    E --> F
+                    F --> G[Distributed Training<br/>Efficient]
+                    
+                    style A fill:#1E88E5
+                    style B fill:#42A5F5
+                    style C fill:#FFC107
+                    style G fill:#66BB6A
+            </div>
+
+            <div class="mermaid">
+                flowchart TD
+                    A[NVLink<br/>Local GPU Interconnect] --> B[NVSwitch<br/>Node Interconnect]
+                    B --> C[All-to-All<br/>Communication]
+                    C --> D[High Bandwidth<br/>Data Transfer]
+                    
+                    style A fill:#1E88E5
+                    style B fill:#42A5F5
+                    style C fill:#FFC107
+                    style D fill:#66BB6A
+            </div>
+
+            <div class="example-box">
+                <strong>Interconnect Architecture:</strong>
+                NVLink provides high-speed interconnect between GPUs within a node. NVSwitch enables high-speed 
+                interconnect between nodes. Together, they create an all-to-all communication network where any 
+                GPU can communicate with any other GPU at maximum bandwidth and minimum latency.
+            </div>
+        </section>
+
+        <section id="software-stack" class="section">
+            <h2>Software Stack</h2>
+            <p>
+                The software stack provides management, monitoring, and operational services that enable SuperPOD 
+                to function effectively. It includes orchestration, monitoring, storage management, and security 
+                components.
+            </p>
+
+            <div class="mermaid">
+                graph TB
+                    A[Software Stack] --> B[Orchestration<br/>BCM, Kubernetes]
+                    A --> C[Monitoring<br/>System Health]
+                    A --> D[Storage Management<br/>Lustre, NFS]
+                    A --> E[Security<br/>Access Control]
+                    
+                    style A fill:#1E88E5
+            </div>
+
+            <div class="city-card">
+                <h3>Software Components</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li><strong>Orchestration:</strong> Workload scheduling and resource management (BCM, Kubernetes)</li>
+                    <li><strong>Monitoring:</strong> System health monitoring and performance tracking</li>
+                    <li><strong>Storage Management:</strong> Filesystem management and data access (Lustre, NFS)</li>
+                    <li><strong>Security:</strong> Access control, authentication, and security policies</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="scalability" class="section">
+            <h2>Scalability</h2>
+            <p>
+                SuperPOD is designed for scalability, enabling you to start with a small deployment and expand 
+                as workload requirements grow. The architecture supports adding nodes incrementally while 
+                maintaining performance and management capabilities.
+            </p>
+
+            <div class="mermaid">
+                graph TB
+                    A[Scalability] --> B[Small Deployment<br/>Few Nodes]
+                    A --> C[Medium Deployment<br/>More Nodes]
+                    A --> D[Large Deployment<br/>Many Nodes]
+                    A --> E[SuperPOD Scale<br/>Full Cluster]
+                    
+                    B --> F[Incremental Growth]
+                    C --> F
+                    D --> F
+                    E --> F
+                    
+                    style A fill:#1E88E5
+                    style F fill:#42A5F5
+            </div>
+
+            <div class="mermaid">
+                graph LR
+                    A[Small<br/>Few Nodes] -->|Add Nodes| B[Medium<br/>More Nodes]
+                    B -->|Add Nodes| C[Large<br/>Many Nodes]
+                    C -->|Add Nodes| D[SuperPOD Scale<br/>Full Cluster]
+                    
+                    style A fill:#1E88E5
+                    style B fill:#42A5F5
+                    style C fill:#FFC107
+                    style D fill:#66BB6A
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Deployment Size</th>
+                        <th>Nodes</th>
+                        <th>Total GPUs</th>
+                        <th>Network</th>
+                        <th>Storage</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Small Deployment</strong></td>
+                        <td>Few nodes (1-4)</td>
+                        <td>8-32 GPUs</td>
+                        <td>Basic InfiniBand</td>
+                        <td>Local or shared storage</td>
+                        <td>Development, prototyping</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Medium Deployment</strong></td>
+                        <td>More nodes (8-16)</td>
+                        <td>64-128 GPUs</td>
+                        <td>InfiniBand HDR</td>
+                        <td>Lustre parallel FS</td>
+                        <td>Production training, research</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Large Deployment</strong></td>
+                        <td>Many nodes (32+)</td>
+                        <td>256+ GPUs</td>
+                        <td>InfiniBand NDR</td>
+                        <td>Lustre with tiering</td>
+                        <td>Enterprise AI, LLMs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SuperPOD Scale</strong></td>
+                        <td>Full cluster (64+)</td>
+                        <td>512+ GPUs</td>
+                        <td>Optimized topology</td>
+                        <td>Fully optimized storage</td>
+                        <td>Large-scale training</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+                <div class="city-card" style="border-left: 5px solid #1E88E5;">
+                    <h3 style="color: #1E88E5; margin-bottom: 15px;">Small Deployment</h3>
+                    <p><strong>Configuration:</strong></p>
+                    <ul style="margin-top: 10px; padding-left: 20px; line-height: 1.8;">
+                        <li><strong>Nodes:</strong> 1-4</li>
+                        <li><strong>GPUs:</strong> 8-32</li>
+                        <li><strong>Network:</strong> Basic InfiniBand</li>
+                        <li><strong>Storage:</strong> Local or shared</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                        Ideal for development, prototyping, and initial workloads.
+                    </p>
+                </div>
+
+                <div class="city-card" style="border-left: 5px solid #42A5F5;">
+                    <h3 style="color: #42A5F5; margin-bottom: 15px;">Medium Deployment</h3>
+                    <p><strong>Configuration:</strong></p>
+                    <ul style="margin-top: 10px; padding-left: 20px; line-height: 1.8;">
+                        <li><strong>Nodes:</strong> 8-16</li>
+                        <li><strong>GPUs:</strong> 64-128</li>
+                        <li><strong>Network:</strong> InfiniBand HDR</li>
+                        <li><strong>Storage:</strong> Lustre parallel FS</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                        Supports production training and research workloads.
+                    </p>
+                </div>
+
+                <div class="city-card" style="border-left: 5px solid #FFC107;">
+                    <h3 style="color: #FFC107; margin-bottom: 15px;">Large Deployment</h3>
+                    <p><strong>Configuration:</strong></p>
+                    <ul style="margin-top: 10px; padding-left: 20px; line-height: 1.8;">
+                        <li><strong>Nodes:</strong> 32+</li>
+                        <li><strong>GPUs:</strong> 256+</li>
+                        <li><strong>Network:</strong> InfiniBand NDR</li>
+                        <li><strong>Storage:</strong> Lustre with tiering</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                        Handles enterprise AI and large language model training.
+                    </p>
+                </div>
+
+                <div class="city-card" style="border-left: 5px solid #66BB6A;">
+                    <h3 style="color: #66BB6A; margin-bottom: 15px;">SuperPOD Scale</h3>
+                    <p><strong>Configuration:</strong></p>
+                    <ul style="margin-top: 10px; padding-left: 20px; line-height: 1.8;">
+                        <li><strong>Nodes:</strong> 64+</li>
+                        <li><strong>GPUs:</strong> 512+</li>
+                        <li><strong>Network:</strong> Optimized topology</li>
+                        <li><strong>Storage:</strong> Fully optimized</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                        Maximum scale for large-scale distributed training.
+                    </p>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <strong>Scaling Strategy:</strong>
+                Start with a few DGX nodes for initial workloads. As AI workloads grow and require more compute, 
+                add more nodes incrementally. SuperPOD is designed to scale seamlessly - network, storage, and 
+                management infrastructure accommodate growth while maintaining performance and operational efficiency.
+            </div>
+        </section>
+            </main>
+
+            </div>
+</div>
+
+    <footer>
+        <p><strong>DGX SuperPOD: Building AI Cities</strong> - Urban Planning for AI Infrastructure</p>
+        <p>Scalable AI infrastructure - from small deployments to full SuperPOD clusters</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' }
+);
+            });
+        });
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            let current = '';
+            sections.forEach(s => {
+                if (window.pageYOffset >= s.offsetTop - 100) current = s.getAttribute('id');
+            }
+);
+            navLinks.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href') === `#${current}`) l.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
